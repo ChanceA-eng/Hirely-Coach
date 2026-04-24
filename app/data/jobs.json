@@ -1,0 +1,47 @@
+[
+  {
+    "id": "job-nebula-pm",
+    "title": "Senior Product Manager",
+    "company": "Nebula Systems",
+    "location": "Remote, US",
+    "salary": "$165k-$210k",
+    "description": "Lead product roadmap execution for a cross-functional platform team. Partner with engineering leadership, define priorities, and drive measurable outcomes. Requires leadership, stakeholder management, and system architecture awareness.",
+    "tags": ["LEADERSHIP", "TECHNICAL"]
+  },
+  {
+    "id": "job-polaris-staff",
+    "title": "Staff Software Engineer",
+    "company": "Polaris Cloud",
+    "location": "Austin, TX 73301",
+    "salary": "$178k-$235k",
+    "description": "Design distributed systems for mission-critical APIs. Mentor engineers, improve incident response, and own architecture decisions. Requires TypeScript, cloud infrastructure, and operational excellence.",
+    "tags": ["TECHNICAL", "LEADERSHIP", "SECURITY"]
+  },
+  {
+    "id": "job-lattice-principal-ds",
+    "title": "Principal Data Scientist",
+    "company": "Lattice Finance",
+    "location": "New York, NY 10001",
+    "salary": "$182k-$248k",
+    "description": "Lead experimentation strategy and statistical modeling for core fintech products. Collaborate with executives, communicate model tradeoffs, and define analytics standards.",
+    "tags": ["DATA", "BUSINESS", "LEADERSHIP"]
+  },
+  {
+    "id": "job-forge-em",
+    "title": "Engineering Manager",
+    "company": "Forge Robotics",
+    "location": "Seattle, WA 98101",
+    "salary": "$158k-$205k",
+    "description": "Manage a multi-disciplinary team delivering robotics software. Hire and mentor engineers, track KPIs, and align roadmaps with business targets. Requires leadership, budgeting, and communication.",
+    "tags": ["LEADERSHIP", "BUSINESS", "TECHNICAL"]
+  },
+  {
+    "id": "job-blackline-arch",
+    "title": "Security Architect",
+    "company": "Blackline Health",
+    "location": "Remote, US",
+    "salary": "$170k-$226k",
+    "description": "Own enterprise security architecture and compliance strategy. Drive risk assessments, incident readiness, and security patterns across product teams. Requires cloud security and stakeholder influence.",
+    "tags": ["SECURITY", "TECHNICAL", "LEADERSHIP"]
+  }
+]

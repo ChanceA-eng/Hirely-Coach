@@ -1,0 +1,199 @@
+export type InterviewSession = {
+  id: string;
+  createdAt: number;
+  resume: string;
+  jobTitle?: string;
+  job: string;
+  questions: string[];
+  answers: string[];
+  feedback: string;
+  level?: string;
+  starrScore?: number;
+  transcript?: TranscriptEntry[];
+  analysis?: SessionAnalysis;
+};
+
+export type TranscriptEntry = {
+  question: string;
+  answer: string;
+};
+
+export type SessionAnalysis = {
+  starrHighlights: Partial<Record<"Situation" | "Task" | "Action" | "Result" | "Reflection", string>>;
+  strongPoints: string[];
+  weakPoints: string[];
+};
+
+export type GrowthHubSnapshot = {
+  sessionId: string;
+  createdAt: number;
+  starrScore: number;
+  topWeakness: string;
+  jobTitle: string;
+};
+
+export type TrainingModuleId = "logic" | "storytelling" | "delivery";
+
+export type TrainingProgress = {
+  completedModules: TrainingModuleId[];
+};
+
+export const CORE_MODULE_XP: Record<TrainingModuleId, number> = {
+  logic: 700,
+  storytelling: 650,
+  delivery: 650,
+};
+
+export const REQUIRED_CORE_XP = CORE_MODULE_XP.logic + CORE_MODULE_XP.storytelling + CORE_MODULE_XP.delivery;
+export const XP_PER_LEVEL = 2000;
+
+const GUEST_STORAGE_KEY = "hirelyCoachInterviewHistory";
+const GUEST_GROWTHHUB_KEY = "hirelyCoachGrowthHub";
+const GUEST_PENDING_SESSION_KEY = "hirelyCoachPendingGuestSession";
+
+const getHistoryKey = (userId?: string | null) =>
+  userId ? `hirelyCoachInterviewHistory:${userId}` : GUEST_STORAGE_KEY;
+
+const getGrowthHubKey = (userId?: string | null) =>
+  userId ? `hirelyCoachGrowthHub:${userId}` : GUEST_GROWTHHUB_KEY;
+
+function safeParse(value: string | null) {
+  if (!value) return [];
+  try {
+    return JSON.parse(value) as InterviewSession[];
+  } catch {
+    return [];
+  }
+}
+
+export function loadInterviewHistory(userId?: string | null): InterviewSession[] {
+  if (typeof window === "undefined") return [];
+  const raw = window.localStorage.getItem(getHistoryKey(userId));
+  return safeParse(raw);
+}
+
+export function findInterviewSession(sessionId: string, userId?: string | null) {
+  return loadInterviewHistory(userId).find((session) => session.id === sessionId) ?? null;
+}
+
+export function saveInterviewSession(session: InterviewSession, userId?: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    const current = loadInterviewHistory(userId);
+    current.unshift(session);
+    window.localStorage.setItem(getHistoryKey(userId), JSON.stringify(current.slice(0, 20)));
+  } catch {
+    // ignore localStorage failures
+  }
+}
+
+export function clearInterviewHistory(userId?: string | null) {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(getHistoryKey(userId));
+}
+
+export function saveGrowthHubSnapshot(snapshot: GrowthHubSnapshot, userId?: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(getGrowthHubKey(userId), JSON.stringify(snapshot));
+  } catch {
+    // ignore localStorage failures
+  }
+}
+
+export function loadGrowthHubSnapshot(userId?: string | null): GrowthHubSnapshot | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(getGrowthHubKey(userId));
+    if (!raw) return null;
+    return JSON.parse(raw) as GrowthHubSnapshot;
+  } catch {
+    return null;
+  }
+}
+
+export function migrateGuestDataToUser(userId: string) {
+  if (typeof window === "undefined") return;
+
+  const guestHistory = loadInterviewHistory(null);
+  const guestSnapshot = loadGrowthHubSnapshot(null);
+  const pendingGuestRaw = window.sessionStorage.getItem(GUEST_PENDING_SESSION_KEY);
+  const pendingGuestData = pendingGuestRaw
+    ? (JSON.parse(pendingGuestRaw) as { session: InterviewSession; snapshot: GrowthHubSnapshot })
+    : null;
+
+  if (pendingGuestData?.session) {
+    guestHistory.unshift(pendingGuestData.session);
+  }
+
+  if (guestHistory.length > 0) {
+    const existing = loadInterviewHistory(userId);
+    const merged = [...guestHistory, ...existing]
+      .filter(
+        (session, index, arr) => arr.findIndex((s) => s.id === session.id) === index
+      )
+      .slice(0, 20);
+    window.localStorage.setItem(getHistoryKey(userId), JSON.stringify(merged));
+  }
+
+  if (guestSnapshot) {
+    const existingSnapshot = loadGrowthHubSnapshot(userId);
+    if (!existingSnapshot || guestSnapshot.createdAt > existingSnapshot.createdAt) {
+      window.localStorage.setItem(getGrowthHubKey(userId), JSON.stringify(guestSnapshot));
+    }
+  }
+
+  if (pendingGuestData?.snapshot) {
+    const existingSnapshot = loadGrowthHubSnapshot(userId);
+    if (!existingSnapshot || pendingGuestData.snapshot.createdAt > existingSnapshot.createdAt) {
+      window.localStorage.setItem(getGrowthHubKey(userId), JSON.stringify(pendingGuestData.snapshot));
+    }
+  }
+
+  window.localStorage.removeItem(GUEST_STORAGE_KEY);
+  window.localStorage.removeItem(GUEST_GROWTHHUB_KEY);
+  window.sessionStorage.removeItem(GUEST_PENDING_SESSION_KEY);
+}
+
+export function savePendingGuestSession(session: InterviewSession, snapshot: GrowthHubSnapshot) {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(
+    GUEST_PENDING_SESSION_KEY,
+    JSON.stringify({ session, snapshot })
+  );
+}
+
+// ─── Training progress ─────────────────────────────────────────────────────
+const TRAINING_PROGRESS_KEY = "hirelyTrainingProgress";
+const GUEST_TRAINING_KEY = "hirelyTrainingProgress_guest";
+
+export function loadTrainingProgress(userId?: string | null): TrainingProgress {
+  if (typeof window === "undefined") return { completedModules: [] };
+  const key = userId ? `${TRAINING_PROGRESS_KEY}_${userId}` : GUEST_TRAINING_KEY;
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(key) || "{}") as Partial<TrainingProgress> | null;
+    const completedModules = Array.isArray(parsed?.completedModules)
+      ? parsed.completedModules.filter((m): m is TrainingModuleId => m === "logic" || m === "storytelling" || m === "delivery")
+      : [];
+    return { completedModules };
+  } catch { return { completedModules: [] }; }
+}
+
+export function saveTrainingProgress(progress: TrainingProgress, userId?: string | null): void {
+  if (typeof window === "undefined") return;
+  const key = userId ? `${TRAINING_PROGRESS_KEY}_${userId}` : GUEST_TRAINING_KEY;
+  window.localStorage.setItem(key, JSON.stringify(progress));
+}
+
+export function markTrainingModuleCompleted(userId: string | null | undefined, moduleId: TrainingModuleId): void {
+  const progress = loadTrainingProgress(userId);
+  if (!progress.completedModules.includes(moduleId)) {
+    progress.completedModules.push(moduleId);
+    saveTrainingProgress(progress, userId);
+  }
+}
+
+export function hasCompletedAllTrainingModules(progress: TrainingProgress): boolean {
+  const required: TrainingModuleId[] = ["logic", "storytelling", "delivery"];
+  return required.every((moduleId) => progress.completedModules.includes(moduleId));
+}

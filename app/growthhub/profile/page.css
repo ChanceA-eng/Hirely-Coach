@@ -1,0 +1,506 @@
+/* ─── Profile Hub ────────────────────────────────────────────────────────── */
+.ph-root {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 35%),
+    radial-gradient(circle at top right, rgba(99, 102, 241, 0.10), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.06), transparent 30%),
+    linear-gradient(180deg, #020617 0%, #020617 100%);
+  color: #f8fafc;
+  padding: 32px 24px 80px;
+}
+
+.ph-inner {
+  max-width: 840px;
+  margin: 0 auto;
+}
+
+.ph-back {
+  color: #10b981;
+  font-size: 0.82rem;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  display: inline-block;
+  margin-bottom: 24px;
+}
+
+.ph-back:hover {
+  text-decoration: underline;
+}
+
+.ph-header {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 32px 36px;
+  margin-bottom: 24px;
+}
+
+.ph-eyebrow {
+  color: #10b981;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+.ph-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0 0 6px;
+  color: #f8fafc;
+}
+
+.ph-sub {
+  color: #6b7280;
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* ─── Tab bar ────────────────────────────────────────────────────────────── */
+.ph-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 6px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ph-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ph-tab {
+  flex: 1;
+  min-width: 120px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: #6b7280;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.ph-tab:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ph-tab--active {
+  background: #064e3b;
+  color: #fff;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* ─── Panel card ─────────────────────────────────────────────────────────── */
+.ph-panel {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 36px;
+}
+
+.ph-section-label {
+  color: #10b981;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 20px;
+}
+
+/* ─── Form elements ──────────────────────────────────────────────────────── */
+.ph-field {
+  margin-bottom: 20px;
+}
+
+.ph-label {
+  display: block;
+  color: #9ca3af;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.ph-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #f8fafc;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.ph-input:focus {
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.ph-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #f8fafc;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.ph-textarea:focus {
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.ph-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .ph-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Skill chips ────────────────────────────────────────────────────────── */
+.ph-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.ph-chip {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.ph-chip:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+}
+
+.ph-chip-add {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #6b7280;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  font-family: inherit;
+}
+
+.ph-chip-add:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+/* ─── Multi-select pills ─────────────────────────────────────────────────── */
+.ph-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ph-pill {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #9ca3af;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.ph-pill:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #e2e8f0;
+}
+
+.ph-pill--selected {
+  background: #064e3b;
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #fff;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+.ph-btn-primary {
+  background: #064e3b;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: filter 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.ph-btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 8px 24px rgba(6, 78, 59, 0.4);
+}
+
+.ph-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.ph-btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  font-family: inherit;
+}
+
+.ph-btn-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.ph-btn-danger {
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  font-family: inherit;
+}
+
+.ph-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* ─── XP bar ─────────────────────────────────────────────────────────────── */
+.ph-xp-bar-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 6px 0 4px;
+}
+
+.ph-xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #064e3b, #10b981);
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+/* ─── Toggles ────────────────────────────────────────────────────────────── */
+.ph-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ph-toggle-row:last-of-type {
+  border-bottom: none;
+}
+
+.ph-toggle-info {
+  flex: 1;
+}
+
+.ph-toggle-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin: 0 0 2px;
+}
+
+.ph-toggle-desc {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.ph-toggle {
+  width: 44px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.ph-toggle--on {
+  background: #064e3b;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.ph-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.ph-toggle--on .ph-toggle-thumb {
+  transform: translateX(20px);
+}
+
+/* ─── Danger zone ────────────────────────────────────────────────────────── */
+.ph-danger-box {
+  background: rgba(239, 68, 68, 0.03);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.ph-danger-title {
+  color: #fca5a5;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.ph-danger-text {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0 0 16px;
+  line-height: 1.6;
+}
+
+/* ─── Save success ───────────────────────────────────────────────────────── */
+.ph-save-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-left: 14px;
+}
+
+/* ─── Delete modal ───────────────────────────────────────────────────────── */
+.ph-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+
+.ph-modal {
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 36px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.ph-modal-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.ph-modal-body {
+  color: #9ca3af;
+  font-size: 0.88rem;
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+
+.ph-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* ─── Feedback rating ────────────────────────────────────────────────────── */
+.ph-stars {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.ph-star {
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.2);
+  transition: color 0.15s;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.ph-star--active {
+  color: #f59e0b;
+}
+
+.ph-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 24px 0;
+}
