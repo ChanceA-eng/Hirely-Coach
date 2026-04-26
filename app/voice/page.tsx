@@ -7,7 +7,26 @@ import mammoth from "mammoth";
 import { useAuth } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
 import { findInterviewSession } from "../lib/interviewStorage";
+import {
+  clearInterviewDraft,
+  loadInterviewDraft,
+  loadSavedResume,
+  saveInterviewDraft,
+  saveSavedResume,
+} from "../lib/resumeStorage";
 import "../growthhub/page.css";
+
+const PROFILE_KEY = "hirelyProfile";
+const KJ_EXTRACT_KEY = "hirelyKjExtract";
+
+type PdfTextContent = { items: Array<{ str?: string }> };
+type PdfPage = { getTextContent: () => Promise<PdfTextContent> };
+type PdfDocument = { numPages: number; getPage: (index: number) => Promise<PdfPage> };
+type PdfJsLib = {
+  GlobalWorkerOptions: { workerSrc: string };
+  getDocument: (source: { data: ArrayBuffer }) => { promise: Promise<PdfDocument> };
+};
+type PdfJsWindow = Window & typeof globalThis & { pdfjsLib?: PdfJsLib; pdfjs?: PdfJsLib };
 
 function ResumeIcon() {
   return (
@@ -52,6 +71,7 @@ function VoiceInterviewPageInner() {
   const [fileName, setFileName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [job, setJob] = useState("");
+  const [jobLink, setJobLink] = useState("");
   const [error, setError] = useState("");
   const [micStatus, setMicStatus] = useState<"idle" | "granted" | "denied">("idle");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,6 +90,20 @@ function VoiceInterviewPageInner() {
   }, []);
 
   useEffect(() => {
+    const savedResume = loadSavedResume();
+    if (savedResume) {
+      setResume(savedResume.text);
+      setFileName(savedResume.fileName);
+    }
+
+    const draft = loadInterviewDraft();
+    if (draft) {
+      if (draft.resume) setResume(draft.resume);
+      if (draft.jobTitle) setJobTitle(draft.jobTitle);
+      if (draft.job) setJob(draft.job);
+      if (draft.jobLink) setJobLink(draft.jobLink);
+    }
+
     const mode = searchParams.get("mode");
     const sessionId = searchParams.get("sessionId");
 
@@ -79,6 +113,7 @@ function VoiceInterviewPageInner() {
         setResume(session.resume);
         setJobTitle(session.jobTitle || "");
         setJob(session.job);
+        setJobLink(sessionStorage.getItem("interview_job_link") || "");
         setFileName("Restored from previous session");
       }
       return;
@@ -89,8 +124,47 @@ function VoiceInterviewPageInner() {
       setFileName("");
       setJobTitle("");
       setJob("");
+      setJobLink("");
     }
   }, [searchParams, userId]);
+
+  async function syncKjFromResume(resumeText: string) {
+    try {
+      const res = await fetch("/api/kj/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resumeText }),
+      });
+      if (!res.ok) return;
+      const extracted = await res.json() as {
+        knownJobTitle?: string;
+        coreSkills?: string[];
+        city?: string;
+        state?: string;
+        zip?: string;
+      };
+
+      sessionStorage.setItem(KJ_EXTRACT_KEY, JSON.stringify(extracted));
+      localStorage.setItem("hirelyKjData", JSON.stringify(extracted));
+
+      const raw = localStorage.getItem(PROFILE_KEY);
+      const profile = raw ? JSON.parse(raw) as Record<string, unknown> : {};
+      const merged = {
+        ...profile,
+        city: (profile.city as string) || extracted.city || "",
+        state: (profile.state as string) || extracted.state || "",
+        zip: (profile.zip as string) || extracted.zip || "",
+        currentJobTitle:
+          (profile.currentJobTitle as string) || extracted.knownJobTitle || "",
+        preferredRole:
+          (profile.preferredRole as string) || extracted.knownJobTitle || "",
+      };
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(merged));
+      window.dispatchEvent(new StorageEvent("storage", { key: PROFILE_KEY }));
+    } catch {
+      // Non-blocking; interview setup should continue even if extraction fails.
+    }
+  }
 
   const readTextFile = async (file: File) =>
     new Promise<string>((resolve, reject) => {
@@ -101,23 +175,31 @@ function VoiceInterviewPageInner() {
     });
 
   const readPDFFile = async (file: File) => {
-    if (!(window as any).pdfjsLib) {
+    const pdfWindow = window as PdfJsWindow;
+
+    if (!pdfWindow.pdfjsLib) {
       const script = document.createElement("script");
       script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
       document.head.appendChild(script);
       await new Promise((resolve) => { script.onload = resolve; });
-      (window as any).pdfjsLib = (window as any).pdfjsLib || (window as any).pdfjs;
-      (window as any).pdfjsLib.GlobalWorkerOptions.workerSrc =
+      pdfWindow.pdfjsLib = pdfWindow.pdfjsLib || pdfWindow.pdfjs;
+      if (!pdfWindow.pdfjsLib) {
+        throw new Error("pdfjs failed to load");
+      }
+      pdfWindow.pdfjsLib.GlobalWorkerOptions.workerSrc =
         "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
     }
-    const pdfjsLib = (window as any).pdfjsLib;
+    const pdfjsLib = pdfWindow.pdfjsLib;
+    if (!pdfjsLib) {
+      throw new Error("pdfjs unavailable");
+    }
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     let text = "";
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
-      text += textContent.items.map((item: any) => item.str).join(" ") + "\n";
+      text += textContent.items.map((item) => item.str || "").join(" ") + "\n";
     }
     return text;
   };
@@ -151,19 +233,31 @@ function VoiceInterviewPageInner() {
       setResume(text);
       setFileName(file.name);
       setError("");
+      saveSavedResume({ text, fileName: file.name });
+      await syncKjFromResume(text);
     } catch {
       setError("Unable to read the file. Please try a different file.");
     }
   };
 
   const startInterview = () => {
-    if (!resume.trim() || !jobTitle.trim() || !job.trim()) {
-      setError("Please provide your resume, job title, and job description.");
+    const normalizedLink = jobLink.trim();
+    const normalizedJobTitle = jobTitle.trim() || (normalizedLink ? "Role from listing" : "");
+
+    if (!resume.trim() || !normalizedJobTitle || (!job.trim() && !normalizedLink)) {
+      setError("Please provide your resume and either a job description or job link. A job title is only required when no link is provided.");
       return;
     }
-    sessionStorage.setItem("interview_resume", resume);
-    sessionStorage.setItem("interview_jobTitle", jobTitle.trim());
-    sessionStorage.setItem("interview_job", job);
+
+    const normalizedJob = job.trim();
+    const jobPayload = normalizedJob || `Job listing URL: ${normalizedLink}`;
+
+    saveInterviewDraft({
+      resume,
+      jobTitle: normalizedJobTitle,
+      job: jobPayload,
+      jobLink: normalizedLink,
+    });
     router.push("/voice/interview");
   };
 
@@ -172,7 +266,9 @@ function VoiceInterviewPageInner() {
     setFileName("");
     setJobTitle("");
     setJob("");
+    setJobLink("");
     setError("");
+    clearInterviewDraft();
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -229,7 +325,7 @@ function VoiceInterviewPageInner() {
         <section className="gh-body">
           <div className="vi-setup">
             <p className="gh-eyebrow vi-setup-overline">Upload</p>
-            <h2 className="gh-h1 vi-setup-heading">UPLOAD YOUR RESUME &amp; JOB DESCRIPTION</h2>
+            <h2 className="gh-h1 vi-setup-heading">UPLOAD YOUR RESUME &amp; JOB TARGET</h2>
             <p className="lp-section-sub vi-setup-sub">Takes 30 seconds. No account needed.</p>
 
             <div className="vi-cards">
@@ -283,26 +379,34 @@ function VoiceInterviewPageInner() {
                 <span className="vi-card-icon"><JobIcon /></span>
                 <div>
                   <div className="vi-card-label">Job Target</div>
-                  <div className="vi-card-hint">Title + full listing</div>
+                  <div className="vi-card-hint">Title + description or listing URL</div>
                 </div>
                 <button type="button" className="vi-clear-all-btn" onClick={clearAll}>
                   Clear All
                 </button>
-                {jobTitle.trim() && job.trim().length > 40 && <span className="vi-card-badge">✓ Added</span>}
+                {jobTitle.trim() && (job.trim().length > 40 || jobLink.trim().length > 8) && <span className="vi-card-badge">✓ Added</span>}
               </div>
 
               <input
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
-                placeholder="Job Title (required)"
+                placeholder="Job Title (required only if no link is provided)"
                 className="vi-textarea"
               />
 
               <textarea
                 value={job}
                 onChange={(e) => setJob(e.target.value)}
-                placeholder="Paste the job description here"
+                placeholder="Paste the job description here (optional if you provide a link below)"
                 className="vi-textarea vi-textarea--fill"
+              />
+
+              <input
+                value={jobLink}
+                onChange={(e) => setJobLink(e.target.value)}
+                placeholder="Or paste job listing URL (LinkedIn, Indeed, company site)"
+                className="vi-textarea"
+                aria-label="Job listing URL"
               />
             </div>
           </div>
@@ -313,9 +417,9 @@ function VoiceInterviewPageInner() {
             <button
               className="lp-btn-primary lp-btn-lg"
               onClick={startInterview}
-              disabled={!resume.trim() || !jobTitle.trim() || !job.trim()}
+              disabled={!resume.trim() || (!job.trim() && !jobLink.trim()) || (!jobTitle.trim() && !jobLink.trim())}
             >
-              Start Mock Interview
+              Start your interview
             </button>
             <p className="vi-cta-note">
               Requires microphone access · Chrome or Edge recommended
@@ -350,15 +454,16 @@ function VoiceInterviewPageInner() {
             <p className="lp-footer-tagline">AI-powered interview prep that actually challenges you.</p>
           </div>
           <div className="lp-footer-cols">
-            <div>
+            <div className="lp-footer-col lp-footer-col--product">
               <p className="lp-footer-col-label">Product</p>
               <Link href="/voice">Mock Interview</Link>
               <Link href="/#metrics">10 Metrics</Link>
               <Link href="/#how">How It Works</Link>
             </div>
-            <div>
+            <div className="lp-footer-col lp-footer-col--account">
               <p className="lp-footer-col-label">Account</p>
               <Link href="/history">My History</Link>
+              <Link href="/admin/jobs">Admin Panel</Link>
             </div>
           </div>
         </div>

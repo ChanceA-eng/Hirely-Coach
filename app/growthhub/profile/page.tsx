@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser, useClerk } from "@clerk/nextjs";
+import mammoth from "mammoth";
 import { XP_PER_LEVEL } from "../../lib/interviewStorage";
+import KjNudge from "../../components/KjNudge";
+import {
+  clearSavedResume,
+  loadSavedResume,
+  saveSavedResume,
+} from "../../lib/resumeStorage";
 import "./page.css";
 
 // ─── Constants ────────────────────────────────────────────────────────────
@@ -56,6 +62,15 @@ type NotifPrefs = {
   jobAlerts: boolean;
 };
 
+type PdfTextContent = { items: Array<{ str?: string }> };
+type PdfPage = { getTextContent: () => Promise<PdfTextContent> };
+type PdfDocument = { numPages: number; getPage: (index: number) => Promise<PdfPage> };
+type PdfJsLib = {
+  GlobalWorkerOptions: { workerSrc: string };
+  getDocument: (source: { data: ArrayBuffer }) => { promise: Promise<PdfDocument> };
+};
+type PdfJsWindow = Window & typeof globalThis & { pdfjsLib?: PdfJsLib; pdfjs?: PdfJsLib };
+
 type Tab = "identity" | "targeting" | "feedback" | "account";
 
 const TABS: { id: Tab; label: string }[] = [
@@ -103,7 +118,6 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
 
 // ─── Main Component ────────────────────────────────────────────────────────
 export default function ProfileHubPage() {
-  const router = useRouter();
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
 
@@ -116,6 +130,8 @@ export default function ProfileHubPage() {
   const [newSkill, setNewSkill] = useState("");
   const [idSaved, setIdSaved] = useState(false);
   const [idSaving, setIdSaving] = useState(false);
+  const [resumeName, setResumeName] = useState("");
+  const [resumeUploadMsg, setResumeUploadMsg] = useState("");
 
   // Targeting preferences
   const [city, setCity] = useState("");
@@ -144,6 +160,7 @@ export default function ProfileHubPage() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
 
   const skillInputRef = useRef<HTMLInputElement>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
 
   // ── Hydrate ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -151,7 +168,8 @@ export default function ProfileHubPage() {
 
     const profileRaw = localStorage.getItem(PROFILE_KEY);
     const profile: Partial<ProfileData> = profileRaw ? JSON.parse(profileRaw) : {};
-    const kjRaw = sessionStorage.getItem(KJ_EXTRACT_KEY);
+    const kjRaw =
+      sessionStorage.getItem(KJ_EXTRACT_KEY) || localStorage.getItem("hirelyKjData");
     const kj: KjData = kjRaw ? JSON.parse(kjRaw) : {};
     const notifRaw = localStorage.getItem(NOTIF_KEY);
     const savedNotifs: Partial<NotifPrefs> = notifRaw ? JSON.parse(notifRaw) : {};
@@ -166,8 +184,83 @@ export default function ProfileHubPage() {
     setRelocation(profile.relocationPreferences ?? ["Local only"]);
     setNotifs({ ...{ emailDigest: true, sessionReminders: true, weeklyInsights: false, jobAlerts: false }, ...savedNotifs });
     setXp(loadXP());
+    const savedResume = loadSavedResume();
+    setResumeName(savedResume?.fileName ?? "");
     setHydrated(true);
   }, [isLoaded]);
+
+  const readTextFile = async (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
+
+  const readPDFFile = async (file: File) => {
+    const pdfWindow = window as PdfJsWindow;
+
+    if (!pdfWindow.pdfjsLib) {
+      const script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      document.head.appendChild(script);
+      await new Promise((resolve) => { script.onload = resolve; });
+      pdfWindow.pdfjsLib = pdfWindow.pdfjsLib || pdfWindow.pdfjs;
+      if (!pdfWindow.pdfjsLib) {
+        throw new Error("pdfjs failed to load");
+      }
+      pdfWindow.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+    const pdfjsLib = pdfWindow.pdfjsLib;
+    if (!pdfjsLib) {
+      throw new Error("pdfjs unavailable");
+    }
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let text = "";
+    for (let index = 1; index <= pdf.numPages; index += 1) {
+      const page = await pdf.getPage(index);
+      const textContent = await page.getTextContent();
+      text += textContent.items.map((item) => item.str || "").join(" ") + "\n";
+    }
+    return text;
+  };
+
+  async function handleResumeUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      let text = "";
+      if (file.type === "text/plain") {
+        text = await readTextFile(file);
+      } else if (file.type === "application/pdf") {
+        text = await readPDFFile(file);
+      } else if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        text = result.value;
+      } else {
+        setResumeUploadMsg("Unsupported file type. Use PDF, DOCX, or TXT.");
+        return;
+      }
+
+      saveSavedResume({ text, fileName: file.name });
+      setResumeName(file.name);
+      setResumeUploadMsg("Resume updated.");
+    } catch {
+      setResumeUploadMsg("Could not read that file.");
+    }
+  }
+
+  function handleResumeDelete() {
+    clearSavedResume();
+    setResumeName("");
+    setResumeUploadMsg("Saved resume removed.");
+    if (resumeInputRef.current) {
+      resumeInputRef.current.value = "";
+    }
+  }
 
   // ── Save identity ────────────────────────────────────────────────────────
   function saveIdentity() {
@@ -338,7 +431,7 @@ export default function ProfileHubPage() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
             >
-              <p className="ph-section-label">Professional Identity (KJ)</p>
+              <p className="ph-section-label">Professional Identity (KJ<KjNudge />)</p>
 
               <div className="ph-field">
                 <label className="ph-label" htmlFor="ph-job-title">Known Job Title</label>
@@ -383,6 +476,34 @@ export default function ProfileHubPage() {
                 <p style={{ color: "#4b5563", fontSize: "0.76rem", margin: "6px 0 0" }}>
                   Click a skill to remove it. These anchor your Targeting Array matches.
                 </p>
+              </div>
+
+              <div className="ph-field">
+                <label className="ph-label">Saved Resume</label>
+                <input
+                  ref={resumeInputRef}
+                  type="file"
+                  accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                  onChange={handleResumeUpload}
+                  style={{ display: "none" }}
+                />
+                <div className="ph-resume-box">
+                  <div>
+                    <p className="ph-resume-title">{resumeName || "No saved resume"}</p>
+                    <p className="ph-resume-sub">Upload once and reuse it for every mock interview.</p>
+                  </div>
+                  <div className="ph-resume-actions">
+                    <button type="button" className="ph-btn-secondary" onClick={() => resumeInputRef.current?.click()}>
+                      {resumeName ? "Replace Resume" : "Upload Resume"}
+                    </button>
+                    {resumeName && (
+                      <button type="button" className="ph-btn-danger" onClick={handleResumeDelete}>
+                        Delete Resume
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {resumeUploadMsg && <p className="ph-resume-msg">{resumeUploadMsg}</p>}
               </div>
 
               <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>
@@ -640,7 +761,7 @@ export default function ProfileHubPage() {
               <div className="ph-toggle-row">
                 <div className="ph-toggle-info">
                   <p className="ph-toggle-label">Session Reminders</p>
-                  <p className="ph-toggle-desc">Get nudged when you haven't practiced in 3+ days.</p>
+                  <p className="ph-toggle-desc">Get nudged when you haven&apos;t practiced in 3+ days.</p>
                 </div>
                 <Toggle
                   on={notifs.sessionReminders}

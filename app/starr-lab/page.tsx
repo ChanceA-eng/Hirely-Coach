@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { XP_PER_LEVEL, loadInterviewHistory } from "../lib/interviewStorage";
+import CoachTooltip from "../components/CoachTooltip";
 import "./page.css";
 
 const XP_KEY = "hirelyCoachXP";
@@ -53,10 +54,38 @@ function levelFromXP(xp: number) {
 function rankFromLevel(level: number) {
   if (level < 3) return "Novice";
   if (level < 6) return "Apprentice";
-  if (level < 10) return "Professional";
-  if (level < 15) return "Senior";
+  if (level < 10) return "Candidate";
+  if (level < 15) return "Professional";
   return "Executive";
 }
+
+const GAME_META: Record<GameId, { title: string; desc: string; minLevel: number }> = {
+  redline: {
+    title: "Redline Resume Review",
+    desc: "Novice flash-card speed drill for fluff and metric cleanup.",
+    minLevel: 1,
+  },
+  sequence: {
+    title: "STARR Logic Puzzle",
+    desc: "Novice drag/drop cards to build S-T-A-R-R flow with decoy control.",
+    minLevel: 1,
+  },
+  pushback: {
+    title: "Push-Back Counter",
+    desc: "Apprentice pressure rounds with multi-question interviewer follow-ups.",
+    minLevel: 3,
+  },
+  quantifier: {
+    title: "Quantifier Lab",
+    desc: "Apprentice metric forge to strengthen measurable outcomes.",
+    minLevel: 3,
+  },
+  gatekeeper: {
+    title: "Gatekeeper Exam",
+    desc: "Candidate gate exam for level-up eligibility and logic certification.",
+    minLevel: 6,
+  },
+};
 
 function loadXP() {
   if (typeof window === "undefined") return 0;
@@ -552,7 +581,7 @@ function QuantifierGame({ onComplete }: { onComplete: (result: GameCompletion) =
 
   return (
     <div>
-      <p className="game-note">Transform: "I managed a budget." into a measurable Result statement using metric nodes.</p>
+      <p className="game-note">Transform: &quot;I managed a budget.&quot; into a measurable Result statement using metric nodes.</p>
       <div className="quant-grid">
         <label>
           Budget ($k): <strong>{budgetK}</strong>
@@ -709,7 +738,7 @@ function GatekeeperExam({ onComplete }: { onComplete: (passed: boolean, score: n
         <span className="chip">Time: {timeLeft}s</span>
         <span className="chip">Q {index + 1}/{GATEKEEPER_QUESTIONS.length}</span>
       </div>
-      <p className="exam-question">{q.q}</p>
+      <p className="exam-question">{q.q}<CoachTooltip context="quiz" message="Look for keywords like 'impact', 'led', or 'resulted in'. The best STARR answers always reference a measurable outcome." placement="top" /></p>
       <div className="push-options">
         {q.options.map((opt, i) => {
           let cls = "push-opt";
@@ -747,6 +776,7 @@ function StarrLabInner() {
   const [xpFlash, setXpFlash] = useState("");
   const [lastSummary, setLastSummary] = useState("");
   const [activeGame, setActiveGame] = useState<GameId>(initialTabFromQuery(searchParams.get("moduleType")));
+  const [modalGame, setModalGame] = useState<GameId | null>(null);
 
   const latestAnswer = useMemo(() => {
     const sessions = loadInterviewHistory(userId);
@@ -775,6 +805,29 @@ function StarrLabInner() {
 
   const noviceReady = moduleCount >= 2 && playedGames >= 3;
   const apprenticeReady = moduleCount >= 5 && goldGames >= 3 && progress.gatekeeperPassed;
+
+  const gameOrder: GameId[] = ["redline", "sequence", "pushback", "quantifier", "gatekeeper"];
+
+  function lockReason(gameId: GameId): string {
+    const meta = GAME_META[gameId];
+    const requiredXp = (meta.minLevel - 1) * XP_PER_LEVEL;
+
+    if (xp < requiredXp) {
+      return `Earn ${requiredXp - xp} XP to unlock ${meta.title}.`;
+    }
+
+    if (gameId === "gatekeeper" && !hasApprenticeGate(progress)) {
+      return "Earn 2 High-Fidelity badges to unlock Gatekeeper Exam.";
+    }
+
+    return "";
+  }
+
+  function isLocked(gameId: GameId): boolean {
+    return lockReason(gameId).length > 0;
+  }
+
+  const visibleGames = gameOrder;
 
   function writeProgress(next: LabProgress) {
     setProgress(next);
@@ -844,6 +897,14 @@ function StarrLabInner() {
     }
   }
 
+  function renderGame(gameId: GameId) {
+    if (gameId === "redline") return <RedlineGame onComplete={applyGameCompletion} />;
+    if (gameId === "sequence") return <SequenceGame weakAnswer={latestAnswer} onComplete={applyGameCompletion} />;
+    if (gameId === "pushback") return <PushbackGame onComplete={applyGameCompletion} />;
+    if (gameId === "quantifier") return <QuantifierGame onComplete={applyGameCompletion} />;
+    return <GatekeeperExam onComplete={completeGatekeeper} />;
+  }
+
   return (
     <div className="lp-root">
       <main className="sl2-root">
@@ -906,20 +967,52 @@ function StarrLabInner() {
           </div>
         </section>
 
-        <section className="sl2-tabs">
-          <button className={`tab-btn ${activeGame === "redline" ? "active" : ""}`} onClick={() => setActiveGame("redline")}>Redline Resume Review</button>
-          <button className={`tab-btn ${activeGame === "sequence" ? "active" : ""}`} onClick={() => setActiveGame("sequence")}>STARR Logic Puzzle</button>
-          <button className={`tab-btn ${activeGame === "pushback" ? "active" : ""}`} onClick={() => setActiveGame("pushback")}>Push-Back Counter</button>
-          <button className={`tab-btn ${activeGame === "quantifier" ? "active" : ""}`} onClick={() => setActiveGame("quantifier")}>Quantifier Lab</button>
-          <button className={`tab-btn ${activeGame === "gatekeeper" ? "active" : ""}`} onClick={() => setActiveGame("gatekeeper")}>Gatekeeper Exam</button>
+        <section className="sl2-launcher-grid">
+          {visibleGames.map((gameId) => {
+            const meta = GAME_META[gameId];
+            const locked = isLocked(gameId);
+            const reason = lockReason(gameId);
+            const isActive = activeGame === gameId;
+            return (
+              <button
+                key={gameId}
+                className={`sl2-launch-card${isActive ? " active" : ""}${locked ? " locked" : ""}`}
+                onClick={() => {
+                  if (!locked) {
+                    setActiveGame(gameId);
+                    setModalGame(gameId);
+                  }
+                }}
+                aria-disabled={locked}
+                type="button"
+              >
+                <div className="sl2-launch-head">
+                  <strong>{meta.title}</strong>
+                  {locked ? <span className="sl2-lock-chip">LOCKED</span> : <span className="sl2-open-chip">OPEN</span>}
+                </div>
+                <p>{meta.desc}</p>
+                <p className="sl2-launch-level">Tier: {rankFromLevel(meta.minLevel)}</p>
+                {locked ? <p className="sl2-lock-note">{reason}</p> : <p className="sl2-open-note">Click to open this game nudge.</p>}
+              </button>
+            );
+          })}
         </section>
 
         <section className="sl2-game-shell glass-card">
-          {activeGame === "redline" && <RedlineGame onComplete={applyGameCompletion} />}
-          {activeGame === "sequence" && <SequenceGame weakAnswer={latestAnswer} onComplete={applyGameCompletion} />}
-          {activeGame === "pushback" && <PushbackGame onComplete={applyGameCompletion} />}
-          {activeGame === "quantifier" && <QuantifierGame onComplete={applyGameCompletion} />}
-          {activeGame === "gatekeeper" && <GatekeeperExam onComplete={completeGatekeeper} />}
+          <h3>{GAME_META[activeGame].title}</h3>
+          <p>{GAME_META[activeGame].desc}</p>
+          {isLocked(activeGame) ? (
+            <div className="sl2-locked-panel">
+              <p>🔒 {lockReason(activeGame)}</p>
+            </div>
+          ) : (
+            <div className="sl2-selected-actions">
+              <p>Open launches the selected game in a focused practice nudge without triggering the rest of the lab.</p>
+              <button className="sl-btn sl-btn--primary" onClick={() => setModalGame(activeGame)}>
+                Open {GAME_META[activeGame].title}
+              </button>
+            </div>
+          )}
         </section>
 
         <section className="sl2-summary glass-card">
@@ -927,6 +1020,26 @@ function StarrLabInner() {
           <p>{lastSummary || "Complete any game to generate your performance summary and XP event."}</p>
           <p>Logic Combo status: {progress.logicComboPrimed ? "Primed (win STARR Logic Puzzle for 1.5x XP)" : "Not primed"}</p>
         </section>
+
+        {modalGame && (
+          <div className="sl2-modal-overlay" onClick={() => setModalGame(null)} role="presentation">
+            <div className="sl2-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label={GAME_META[modalGame].title}>
+              <div className="sl2-modal-head">
+                <div>
+                  <p className="sl2-modal-label">STARR Lab Practice</p>
+                  <h2>{GAME_META[modalGame].title}</h2>
+                </div>
+                <button className="sl2-modal-close" type="button" onClick={() => setModalGame(null)}>
+                  Close
+                </button>
+              </div>
+              <p className="sl2-modal-sub">{GAME_META[modalGame].desc}</p>
+              <div className="sl2-modal-body glass-card">
+                {renderGame(modalGame)}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

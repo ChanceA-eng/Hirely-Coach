@@ -1,11 +1,14 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { saveInterviewSession } from "../../lib/interviewStorage";
+import CoachTooltip from "../../components/CoachTooltip";
+import { loadInterviewDraft } from "../../lib/resumeStorage";
+import styles from "./page.module.css";
 
 type Status =
+  | "selection"
   | "loading"
   | "generating"
   | "connecting"
@@ -14,10 +17,22 @@ type Status =
   | "finished"
   | "error";
 
+type InterviewLevel = "quick" | "medium" | "intensive";
+type RealtimeEvent = {
+  type?: string;
+  delta?: string;
+  transcript?: string;
+  error?: { message?: string };
+};
+
+function makeSessionTimestamp() {
+  return Date.now();
+}
+
 export default function InterviewPage() {
   const router = useRouter();
 
-  const [status, setStatus] = useState<Status>("loading");
+  const [status, setStatus] = useState<Status>("selection");
   const [answeredCount, setAnsweredCount] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [aiSpeaking, setAiSpeaking] = useState(false);
@@ -33,6 +48,7 @@ export default function InterviewPage() {
   const micStreamRef = useRef<MediaStream | null>(null);
   const resumeRef = useRef("");
   const jobRef = useRef("");
+  const jobLinkRef = useRef("");
   const questionsRef = useRef<string[]>([]);
   const answersRef = useRef<string[]>([]);
   const answerCountRef = useRef(0);
@@ -47,7 +63,7 @@ export default function InterviewPage() {
     if (audioElRef.current) { audioElRef.current.srcObject = null; audioElRef.current.remove(); audioElRef.current = null; }
   };
 
-  const doGenerateFeedback = async () => {
+  const doGenerateFeedback = useCallback(async () => {
     if (feedbackTriggeredRef.current) return;
     feedbackTriggeredRef.current = true;
     cleanup();
@@ -76,7 +92,7 @@ export default function InterviewPage() {
       setStatus("finished");
       saveInterviewSession({
         id: crypto.randomUUID(),
-        createdAt: Date.now(),
+        createdAt: makeSessionTimestamp(),
         resume: resumeRef.current,
         job: jobRef.current,
         questions: questionsRef.current,
@@ -88,12 +104,18 @@ export default function InterviewPage() {
       setFeedback("");
       setStatus("finished");
     }
+  }, []);
+
+  useEffect(() => {
+    doGenerateFeedbackRef.current = doGenerateFeedback;
+  }, [doGenerateFeedback]);
+
+  const handleEndInterview = async () => {
+    await doGenerateFeedbackRef.current();
   };
 
-  doGenerateFeedbackRef.current = doGenerateFeedback;
-
   const handleDataChannelMessage = (raw: string) => {
-    let msg: any;
+    let msg: RealtimeEvent;
     try { msg = JSON.parse(raw); } catch { return; }
     switch (msg.type) {
       case "response.audio.delta":
@@ -256,19 +278,25 @@ export default function InterviewPage() {
       }
 
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
-    } catch (err: any) {
-      setError(err.message || "Failed to connect.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to connect.";
+      setError(message);
       setStatus("error");
     }
   };
 
-  const startGenerate = async (resumeText: string, jobText: string) => {
+  const startGenerate = async (resumeText: string, jobText: string, selectedLevel: InterviewLevel) => {
     setStatus("generating");
     try {
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resume: resumeText, job: jobText }),
+        body: JSON.stringify({
+          resume: resumeText,
+          job: jobText,
+          jobLink: jobLinkRef.current,
+          level: selectedLevel,
+        }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -292,18 +320,25 @@ export default function InterviewPage() {
   };
 
   useEffect(() => {
-    const storedResume = sessionStorage.getItem("interview_resume");
-    const storedJob = sessionStorage.getItem("interview_job");
-    if (!storedResume || !storedJob) {
+    const draft = loadInterviewDraft();
+    const storedResume = draft?.resume || "";
+    const storedJob = draft?.job || "";
+    const storedJobLink = draft?.jobLink || "";
+    if (!storedResume || (!storedJob && !storedJobLink)) {
       router.push("/voice");
       return;
     }
     resumeRef.current = storedResume;
-    jobRef.current = storedJob;
-    startGenerate(storedResume, storedJob);
+    jobRef.current = storedJob || `Job listing URL: ${storedJobLink}`;
+    jobLinkRef.current = storedJobLink;
+    // Stay on selection screen — user picks level before we generate
     return () => { cleanup(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleSelectLevel = async (selectedLevel: InterviewLevel) => {
+    await startGenerate(resumeRef.current, jobRef.current, selectedLevel);
+  };
 
   const getStatusLabel = () => {
     switch (status) {
@@ -329,28 +364,67 @@ export default function InterviewPage() {
 
   return (
     <div className="lp-root">
-      {/* NAV */}
-      <header className="lp-nav">
-        <div className="lp-nav-inner">
-          <Link href="/" className="lp-brand">Hirely Coach</Link>
-          <nav className="lp-nav-links">
-            <Link href="/">Home</Link>
-            <Link href="/history">History</Link>
-            {(status === "interview" || status === "connecting" || status === "generating") && (
-              <button
-                className="lp-btn-ghost"
-                style={{ padding: "8px 18px", fontSize: "0.875rem" }}
-                onClick={() => { cleanup(); router.push("/voice"); }}
-              >
-                End Interview
-              </button>
-            )}
-          </nav>
-        </div>
-      </header>
-
       <main>
         <section className="iv-session">
+          {(status === "interview" || status === "connecting" || status === "generating") && (
+            <div className="iv-end-row">
+              <button className="lp-btn-ghost iv-end-btn" onClick={handleEndInterview}>
+                End Interview
+              </button>
+            </div>
+          )}
+
+          {/* Level Selection */}
+          {status === "selection" && (
+            <div className="iv-selection-grid">
+              <h1 className="lp-h2">Choose Your Interview Level</h1>
+              <div style={{ marginBottom: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => router.push("/growthhub")}
+                  style={{
+                    background: "transparent",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    color: "#9ca3af",
+                    borderRadius: 8,
+                    padding: "8px 16px",
+                    fontSize: "0.82rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  ← Return to GrowthHub
+                </button>
+              </div>
+              <p className={styles.selectionSubtext}>
+                Your session feels like a real recruiter call — no question counter, just a conversation.
+              </p>
+              <div className={styles.levelCards}>
+                {([
+                  { id: "quick",     count: "3",  title: "BASIC",     desc: "Foundational intro & character" },
+                  { id: "medium",    count: "6",  title: "MEDIUM",    desc: "Career history & scenario-based" },
+                  { id: "intensive", count: "9",  title: "INTENSIVE", desc: "Technical, behavioral & culture fit" },
+                ] as const).map((item) => (
+                  <div
+                    key={item.id}
+                    className={`${styles.atomicCard} ${styles[item.id]} glass-card`}
+                    onClick={() => handleSelectLevel(item.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === "Enter" && handleSelectLevel(item.id)}
+                  >
+                    <div className={styles.atomicIconWrapper}>
+                      <div className={`${styles.atomicIcon} ${styles[item.id]}`} />
+                    </div>
+                    <h3 className={styles.atomicTitle}>{item.title}</h3>
+                    <div className={styles.atomicDetails}>
+                      <span style={{ color: "#10b981", fontWeight: 700, fontSize: "0.92rem" }}>{item.count} Questions</span>
+                      <p style={{ color: "#6b7280", fontSize: "0.82rem", marginTop: 4 }}>{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Loading / Generating / Connecting */}
           {(status === "loading" || status === "generating" || status === "connecting") && (
@@ -363,10 +437,26 @@ export default function InterviewPage() {
           {/* Active interview */}
           {status === "interview" && (
             <>
+              <div className={`iv-signal-box glass-card${aiSpeaking ? " iv-signal-box--active" : ""}`}>
+                <p className="iv-signal-label">Emerald Signal Box</p>
+                <div className="iv-signal-orb" aria-hidden="true">
+                  <span className="iv-signal-ring iv-signal-ring--outer" />
+                  <span className="iv-signal-ring iv-signal-ring--inner" />
+                  <span className="iv-signal-core">HC</span>
+                </div>
+                <div className={`iv-signal-wave${aiSpeaking ? " iv-signal-wave--active" : ""}`}>
+                  {Array.from({ length: 18 }).map((_, i) => (
+                    <span key={i} className="iv-signal-bar" style={{ animationDelay: `${i * 0.05}s` }} />
+                  ))}
+                </div>
+                <p className="iv-signal-sub">{aiSpeaking ? "HC is speaking..." : "Listening mode"}</p>
+              </div>
+
               <div className="iv-progress-row">
                 <span className="iv-progress-label">
                   Question {answeredCount + 1} of {totalQuestions}
                 </span>
+                <CoachTooltip context="interview" message="Stay calm and lead with a concrete result. Use the STARR structure: Situation → Task → Action → Result → Reflection." placement="bottom" />
                 <div className="iv-progress-track">
                   <div
                     className="iv-progress-fill"

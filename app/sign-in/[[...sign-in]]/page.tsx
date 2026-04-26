@@ -17,11 +17,16 @@ export default function SignInPage() {
         appearance={{
           variables: {
             colorPrimary: "#10b981",
-            colorBackground: "#020617",
-            colorText: "#f8fafc",
+            colorBackground: "#ffffff",
+            colorText: "#111827",
+            colorTextSecondary: "#4b5563",
           },
           elements: {
-            card: "glass-card",
+            card: {
+              border: "1px solid #e5e7eb",
+              boxShadow: "0 8px 22px rgba(15, 23, 42, 0.08)",
+              background: "#ffffff",
+            },
             headerTitle: "auth-hidden",
             headerSubtitle: "auth-hidden",
             footerActionLink: "auth-link",

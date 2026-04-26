@@ -194,34 +194,45 @@ export default function Home() {
     <div className="lp-root lp-accelerator-theme">
       <main className="gh-main">
         <section className="gh-first-time">
-          <div className="gh-first-orb" aria-hidden="true">
-            <div className="lp-atomic-hero">
-              <div className="lp-atomic-ring lp-atomic-ring--outer" />
-              <div className="lp-atomic-ring lp-atomic-ring--inner" />
-              <div className="lp-atomic-core">HC</div>
+          <div className="gh-first-layout">
+            <div className="gh-terminal-box">
+              <p className="gh-eyebrow">AI Career Coach</p>
+              <h1 className="gh-first-h1" style={{ maxWidth: 700 }}>
+                Your AI interview coach that actually challenges you.
+              </h1>
+              <p className="gh-first-sub">
+                Practice with an AI interviewer that adapts in real-time, challenges weak spots, and scores performance so you walk in interview-ready.
+              </p>
+              <div className="lp-hero-cta-row">
+                <Link href={isSignedIn ? "/voice/interview" : "/voice"} className="global-auth-btn global-auth-btn--strong lp-hero-cta-btn">
+                  Start Practicing Now
+                </Link>
+                <SignedOut>
+                  <SignUpButton mode="modal">
+                    <button className="global-auth-btn lp-hero-cta-btn" type="button">Create free account</button>
+                  </SignUpButton>
+                </SignedOut>
+              </div>
+              <div className="gh-first-badges">
+                <span>No setup friction</span>
+                <span>•</span>
+                <span>10 performance metrics</span>
+                <span>•</span>
+                <span>Role-specific question engine</span>
+              </div>
             </div>
-          </div>
-          <p className="gh-eyebrow">AI Career Coach</p>
-          <h1 className="gh-first-h1">Your AI interview coach that actually challenges you.</h1>
-          <p className="gh-first-sub">
-            Practice with an AI interviewer that adapts in real-time, challenges weak spots, and scores performance so you walk in interview-ready.
-          </p>
-          <div className="lp-hero-cta-row">
-            <Link href={isSignedIn ? "/voice/interview" : "/voice"} className="global-auth-btn global-auth-btn--strong lp-hero-cta-btn">
-              Start Practicing Now
-            </Link>
-            <SignedOut>
-              <SignUpButton mode="modal">
-                <button className="global-auth-btn lp-hero-cta-btn" type="button">Create free account</button>
-              </SignUpButton>
-            </SignedOut>
-          </div>
-          <div className="gh-first-badges">
-            <span>No setup friction</span>
-            <span>•</span>
-            <span>10 performance metrics</span>
-            <span>•</span>
-            <span>Role-specific question engine</span>
+            <aside className="gh-blueprint-panel" aria-hidden="true">
+              <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                <div className="lp-atomic-hero">
+                  <div className="lp-atomic-ring lp-atomic-ring--outer" />
+                  <div className="lp-atomic-ring lp-atomic-ring--inner" />
+                  <div className="lp-atomic-core">HC</div>
+                </div>
+                <p style={{ margin: 0, fontSize: "0.74rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "#10b981", fontWeight: 700 }}>
+                  Live Coach Signal
+                </p>
+              </div>
+            </aside>
           </div>
         </section>
 
@@ -415,15 +426,16 @@ export default function Home() {
             <p className="lp-footer-tagline">AI-powered Coach that actually challenges you.</p>
           </div>
           <div className="lp-footer-cols">
-            <div>
+            <div className="lp-footer-col lp-footer-col--product">
               <p className="lp-footer-col-label">Product</p>
               <Link href="/voice">Mock Interview</Link>
               <a href="#metrics">10 Metrics</a>
               <a href="#how">How It Works</a>
             </div>
-            <div>
+            <div className="lp-footer-col lp-footer-col--account">
               <p className="lp-footer-col-label">Account</p>
               <Link href="/history">My History</Link>
+              <Link href="/admin/jobs">Admin Panel</Link>
             </div>
           </div>
         </div>

@@ -45,7 +45,8 @@ export default function CreateProfilePage() {
   useEffect(() => {
     if (!isLoaded) return;
     const stored = sessionStorage.getItem("interview_jobTitle");
-    const kjRaw = sessionStorage.getItem(KJ_EXTRACT_KEY);
+    const kjRaw =
+      sessionStorage.getItem(KJ_EXTRACT_KEY) || localStorage.getItem("hirelyKjData");
     const parsedKj = kjRaw ? (JSON.parse(kjRaw) as {
       knownJobTitle?: string;
       coreSkills?: string[];

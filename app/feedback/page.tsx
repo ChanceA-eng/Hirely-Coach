@@ -74,13 +74,15 @@ function extractStrongPoints(feedback: string, starrHighlights: Partial<Record<"
   return points.slice(0, 3);
 }
 
-function formatFeedbackHtml(md: string): string {
+function formatFeedbackBlocks(md: string): string[] {
   return md
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\n{2,}/g, "</p><p>")
-    .replace(/\n/g, "<br />");
+    .replace(/\r/g, "")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*\*/g, "")
+    .replace(/^\s*[-*]\s+/gm, "")
+    .split(/\n{2,}/)
+    .map((chunk) => chunk.trim().replace(/\n/g, " "))
+    .filter(Boolean);
 }
 
 function scoreColor(score: number) {
@@ -108,6 +110,8 @@ export default function FeedbackPage() {
       return null;
     }
   }, []);
+
+  const feedbackBlocks = useMemo(() => formatFeedbackBlocks(feedback), [feedback]);
 
   useEffect(() => {
     const run = async () => {
@@ -257,12 +261,11 @@ export default function FeedbackPage() {
           )}
 
           {!loading && !error && (
-            <div
-              className="md-body"
-              dangerouslySetInnerHTML={{
-                __html: `<p>${formatFeedbackHtml(feedback)}</p>`,
-              }}
-            />
+            <div className="md-body">
+              {feedbackBlocks.map((block, idx) => (
+                <p key={idx}>{block}</p>
+              ))}
+            </div>
           )}
 
           {!loading && (

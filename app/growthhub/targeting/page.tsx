@@ -6,6 +6,8 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@clerk/nextjs";
 import { loadInterviewHistory } from "../../lib/interviewStorage";
+import { saveInterviewDraft } from "../../lib/resumeStorage";
+import KjNudge from "../../components/KjNudge";
 import "../page.css";
 import "./page.css";
 
@@ -150,9 +152,12 @@ export default function TargetingArrayPage() {
       ...questions.map((question, index) => `${index + 1}. ${question}`),
     ].join("\n");
 
-    sessionStorage.setItem("interview_resume", resumeText || "Resume not provided yet. Focus on measurable outcomes.");
-    sessionStorage.setItem("interview_jobTitle", job.title);
-    sessionStorage.setItem("interview_job", roleJobDescription);
+    saveInterviewDraft({
+      resume: resumeText || "Resume not provided yet. Focus on measurable outcomes.",
+      jobTitle: job.title,
+      job: roleJobDescription,
+      jobLink: "",
+    });
     sessionStorage.setItem("interview_seedQuestions", JSON.stringify(questions));
     router.push("/voice/interview");
   };
@@ -252,7 +257,7 @@ export default function TargetingArrayPage() {
               <p className="ta-sidebar-caption">Current average match score</p>
               <div className="ta-diagnostic-grid">
                 <div>
-                  <p className="ta-kv-key">Kj Baseline</p>
+                  <p className="ta-kv-key">Kj<KjNudge /> Baseline</p>
                   <p className="ta-kv-val">{activeKj || "Not detected"}</p>
                 </div>
                 <div>

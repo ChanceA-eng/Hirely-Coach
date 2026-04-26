@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import GuestDataMigration from "./components/GuestDataMigration";
-import Header from "./components/Header";
+import AppChrome from "./components/AppChrome";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -89,8 +89,7 @@ export default function RootLayout({
           }}
         >
           <GuestDataMigration />
-          <Header />
-          {children}
+          <AppChrome>{children}</AppChrome>
         </ClerkProvider>
       </body>
     </html>

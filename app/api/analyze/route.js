@@ -12,16 +12,19 @@ const QUESTION_LIMITS = {
 
 export async function POST(req) {
   try {
-    const { resume, job, level } = await req.json();
+    const { resume, job, jobLink, level } = await req.json();
 
-    if (!resume || !job || !level) {
+    const selectedLevel = QUESTION_LIMITS[level] ? level : "medium";
+    const jobInput = (job || "").trim() || (jobLink ? `Job listing URL: ${jobLink}` : "");
+
+    if (!resume || !jobInput) {
       return Response.json(
-        { error: "Resume, job description, and level are required." },
+        { error: "Resume and job description or job link are required." },
         { status: 400 }
       );
     }
 
-    const count = QUESTION_LIMITS[level] || QUESTION_LIMITS.medium;
+    const count = QUESTION_LIMITS[selectedLevel] || QUESTION_LIMITS.medium;
 
     const prompt = `You are an expert interview coach.
 Generate exactly ${count} high-quality mock interview questions tailored to the candidate and role.
@@ -30,7 +33,7 @@ Candidate Resume:
 ${resume}
 
 Target Job Description:
-${job}
+${jobInput}
 
 Rules:
 - Output ONLY the questions

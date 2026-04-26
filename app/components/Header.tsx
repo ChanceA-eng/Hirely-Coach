@@ -235,7 +235,7 @@ export default function Header() {
                   <button className="global-auth-btn" type="button">Login</button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <button className="global-auth-btn global-auth-btn--strong" type="button">Try hirely interview now</button>
+                  <button className="global-auth-btn global-auth-btn--strong" type="button">Try Hirely Coach now</button>
                 </SignUpButton>
               </div>
             )}

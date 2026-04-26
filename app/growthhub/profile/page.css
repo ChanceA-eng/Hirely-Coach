@@ -319,6 +319,50 @@
   border-color: rgba(239, 68, 68, 0.5);
 }
 
+.ph-resume-box {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ph-resume-title {
+  margin: 0 0 4px;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.ph-resume-sub {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+.ph-resume-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ph-resume-msg {
+  margin: 10px 0 0;
+  color: #10b981;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .ph-resume-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* ─── XP bar ─────────────────────────────────────────────────────────────── */
 .ph-xp-bar-track {
   height: 6px;
