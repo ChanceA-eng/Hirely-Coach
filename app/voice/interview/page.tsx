@@ -1,8 +1,13 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveInterviewSession } from "../../lib/interviewStorage";
+import { useAuth } from "@clerk/nextjs";
+import {
+  saveGrowthHubSnapshot,
+  saveInterviewSession,
+  savePendingGuestSession,
+} from "../../lib/interviewStorage";
 import CoachTooltip from "../../components/CoachTooltip";
 import { loadInterviewDraft } from "../../lib/resumeStorage";
 import styles from "./page.module.css";
@@ -25,12 +30,152 @@ type RealtimeEvent = {
   error?: { message?: string };
 };
 
+type VisualState = "ai-speaking" | "user-speaking" | "silence";
+
 function makeSessionTimestamp() {
   return Date.now();
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function extractSection(feedback: string, header: string): string {
+  const start = feedback.indexOf(header);
+  if (start < 0) return "";
+  const rest = feedback.slice(start + header.length);
+  const nextHeader = rest.search(/\n###\s+/);
+  return (nextHeader >= 0 ? rest.slice(0, nextHeader) : rest).trim();
+}
+
+function extractWeakPoints(feedback: string): string[] {
+  const improvement = extractSection(feedback, "### Areas for Improvement");
+  return Array.from(improvement.matchAll(/\*\*([^*]+)\*\*/g))
+    .map((m) => m[1].trim())
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
+function extractStrongPoints(feedback: string): string[] {
+  const raw =
+    extractSection(feedback, "### Strengths") ||
+    extractSection(feedback, "### Strong Points") ||
+    extractSection(feedback, "### What You Did Well");
+  return Array.from(raw.matchAll(/\*\*([^*]+)\*\*/g))
+    .map((m) => m[1].trim())
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
+function formatFeedbackHtml(md: string): string {
+  return md
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\n{2,}/g, "</p><p>")
+    .replace(/\n/g, "<br />");
+}
+
+function calcRms(analyser: AnalyserNode, buffer: Uint8Array<ArrayBuffer>): number {
+  analyser.getByteTimeDomainData(buffer);
+  let sumSquares = 0;
+  for (let i = 0; i < buffer.length; i += 1) {
+    const centered = (buffer[i] - 128) / 128;
+    sumSquares += centered * centered;
+  }
+  return Math.sqrt(sumSquares / buffer.length);
+}
+
+function estimatePitch(analyser: AnalyserNode, buffer: Uint8Array<ArrayBuffer>): number {
+  analyser.getByteTimeDomainData(buffer);
+  let zeroCrossings = 0;
+  let prevAbove = buffer[0] > 128;
+
+  for (let i = 1; i < buffer.length; i += 1) {
+    const above = buffer[i] > 128;
+    if (above !== prevAbove) {
+      zeroCrossings += 1;
+      prevAbove = above;
+    }
+  }
+
+  const freq = (zeroCrossings * analyser.context.sampleRate) / (2 * buffer.length);
+  return clamp((freq - 80) / 260, 0, 1);
+}
+
+function drawUserWave(
+  canvas: HTMLCanvasElement,
+  state: VisualState,
+  level: number,
+  pitch: number,
+  t: number
+) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+
+  if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+  }
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+
+  const centerY = height * 0.52;
+  const isActive = state === "user-speaking";
+  const flatAlpha = state === "silence" ? 0.1 : 0.14;
+  const baseAmp = isActive ? clamp(level * 64 + 6, 8, 52) : 0;
+  const complexity = isActive ? 1.6 + pitch * 2.4 : 1;
+
+  if (!isActive) {
+    ctx.strokeStyle = `rgba(120, 136, 160, ${flatAlpha})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, centerY);
+    ctx.lineTo(width, centerY);
+    ctx.stroke();
+    return;
+  }
+
+  const layers = [
+    { alpha: 0.4, shift: 0, width: 1.6 },
+    { alpha: 0.26, shift: 0.8, width: 1.2 },
+    { alpha: 0.16, shift: 1.5, width: 1 },
+  ];
+
+  for (const layer of layers) {
+    const gradient = ctx.createLinearGradient(0, 0, width, 0);
+    gradient.addColorStop(0, `rgba(148, 163, 184, ${layer.alpha * 0.58})`);
+    gradient.addColorStop(0.45, `rgba(56, 189, 248, ${layer.alpha})`);
+    gradient.addColorStop(1, `rgba(148, 163, 184, ${layer.alpha * 0.5})`);
+
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = layer.width;
+    ctx.beginPath();
+
+    for (let x = 0; x <= width; x += 4) {
+      const progress = x / width;
+      const envelope = Math.sin(progress * Math.PI);
+      const wave =
+        Math.sin((x / 28) * complexity + t * 0.005 + layer.shift) * 0.75 +
+        Math.sin((x / 13) * (complexity * 0.65) - t * 0.003 + layer.shift * 0.5) * 0.4;
+      const y = centerY + wave * baseAmp * envelope;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+}
+
 export default function InterviewPage() {
   const router = useRouter();
+  const { isSignedIn, userId } = useAuth();
 
   const [status, setStatus] = useState<Status>("selection");
   const [answeredCount, setAnsweredCount] = useState(0);
@@ -40,6 +185,9 @@ export default function InterviewPage() {
   const [aiTranscript, setAiTranscript] = useState("");
   const [userTranscript, setUserTranscript] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [savedSessionId, setSavedSessionId] = useState<string | null>(null);
+  const [visualState, setVisualState] = useState<VisualState>("silence");
+  const [sessionStarrScore, setSessionStarrScore] = useState(0);
   const [error, setError] = useState("");
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
@@ -55,12 +203,197 @@ export default function InterviewPage() {
   const aiTranscriptBufferRef = useRef("");
   const feedbackTriggeredRef = useRef(false);
   const doGenerateFeedbackRef = useRef<() => Promise<void>>(async () => {});
+  const selectedLevelRef = useRef<InterviewLevel>("medium");
+
+  const aiAudioContextRef = useRef<AudioContext | null>(null);
+  const micAudioContextRef = useRef<AudioContext | null>(null);
+  const aiSourceNodeRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const micSourceNodeRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const aiAnalyserRef = useRef<AnalyserNode | null>(null);
+  const micAnalyserRef = useRef<AnalyserNode | null>(null);
+  const aiBufferRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const micBufferRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const meshRef = useRef<HTMLDivElement | null>(null);
+  const userWaveCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const visualFrameRef = useRef<number | null>(null);
+
+  const aiSpeakingRef = useRef(false);
+  const userSpeakingRef = useRef(false);
+  const aiLevelRef = useRef(0);
+  const userLevelRef = useRef(0);
+  const userPitchRef = useRef(0);
+  const visualStateRef = useRef<VisualState>("silence");
+
+  useEffect(() => {
+    aiSpeakingRef.current = aiSpeaking;
+  }, [aiSpeaking]);
+
+  useEffect(() => {
+    userSpeakingRef.current = userSpeaking;
+  }, [userSpeaking]);
+
+  const formattedFeedback = useMemo(
+    () => (feedback ? `<p>${formatFeedbackHtml(feedback)}</p>` : ""),
+    [feedback]
+  );
+
+  const feedbackStrongPoints = useMemo(() => extractStrongPoints(feedback), [feedback]);
+  const feedbackWeakPoints = useMemo(() => extractWeakPoints(feedback), [feedback]);
+
+  const ensureVisualState = useCallback((next: VisualState) => {
+    if (visualStateRef.current === next) return;
+    visualStateRef.current = next;
+    setVisualState(next);
+  }, []);
+
+  const setupMicAnalyser = useCallback((stream: MediaStream) => {
+    try {
+      if (!micAudioContextRef.current) {
+        micAudioContextRef.current = new AudioContext();
+      }
+      const ctx = micAudioContextRef.current;
+      if (ctx.state === "suspended") {
+        void ctx.resume();
+      }
+
+      micSourceNodeRef.current?.disconnect();
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.72;
+      source.connect(analyser);
+
+      micSourceNodeRef.current = source;
+      micAnalyserRef.current = analyser;
+      micBufferRef.current = new Uint8Array(analyser.fftSize);
+    } catch {
+      // If analyser setup fails, realtime interview still works.
+    }
+  }, []);
+
+  const setupAiAnalyser = useCallback((stream: MediaStream) => {
+    try {
+      if (!aiAudioContextRef.current) {
+        aiAudioContextRef.current = new AudioContext();
+      }
+      const ctx = aiAudioContextRef.current;
+      if (ctx.state === "suspended") {
+        void ctx.resume();
+      }
+
+      aiSourceNodeRef.current?.disconnect();
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.75;
+      source.connect(analyser);
+
+      aiSourceNodeRef.current = source;
+      aiAnalyserRef.current = analyser;
+      aiBufferRef.current = new Uint8Array(analyser.fftSize);
+    } catch {
+      // If analyser setup fails, fallback to event-based speaking states.
+    }
+  }, []);
+
+  const startVisualizationLoop = useCallback(() => {
+    if (visualFrameRef.current) {
+      cancelAnimationFrame(visualFrameRef.current);
+      visualFrameRef.current = null;
+    }
+
+    const tick = (time: number) => {
+      const aiAnalyser = aiAnalyserRef.current;
+      const micAnalyser = micAnalyserRef.current;
+      const aiBuffer = aiBufferRef.current;
+      const micBuffer = micBufferRef.current;
+
+      const aiInstant = aiAnalyser && aiBuffer ? calcRms(aiAnalyser, aiBuffer) : 0;
+      const userInstant = micAnalyser && micBuffer ? calcRms(micAnalyser, micBuffer) : 0;
+      const pitchInstant = micAnalyser && micBuffer ? estimatePitch(micAnalyser, micBuffer) : 0;
+
+      aiLevelRef.current = aiLevelRef.current * 0.82 + aiInstant * 0.18;
+      userLevelRef.current = userLevelRef.current * 0.78 + userInstant * 0.22;
+      userPitchRef.current = userPitchRef.current * 0.72 + pitchInstant * 0.28;
+
+      const userActive = userSpeakingRef.current || userLevelRef.current > 0.045;
+      const aiActive = aiSpeakingRef.current || aiLevelRef.current > 0.042;
+
+      const nextState: VisualState = userActive
+        ? "user-speaking"
+        : aiActive
+        ? "ai-speaking"
+        : "silence";
+
+      ensureVisualState(nextState);
+
+      if (meshRef.current) {
+        meshRef.current.style.setProperty("--mesh-energy", `${clamp(aiLevelRef.current * 3.2, 0, 1).toFixed(3)}`);
+        meshRef.current.style.setProperty("--mesh-spike", `${clamp(aiLevelRef.current * 56, 0, 22).toFixed(2)}px`);
+        meshRef.current.style.setProperty("--mesh-spin", `${(8 + aiLevelRef.current * 15).toFixed(2)}s`);
+      }
+
+      if (userWaveCanvasRef.current) {
+        drawUserWave(
+          userWaveCanvasRef.current,
+          nextState,
+          clamp(userLevelRef.current * 2.4, 0, 1),
+          userPitchRef.current,
+          time
+        );
+      }
+
+      visualFrameRef.current = requestAnimationFrame(tick);
+    };
+
+    visualFrameRef.current = requestAnimationFrame(tick);
+  }, [ensureVisualState]);
 
   const cleanup = () => {
+    if (visualFrameRef.current) {
+      cancelAnimationFrame(visualFrameRef.current);
+      visualFrameRef.current = null;
+    }
+
+    if (aiSourceNodeRef.current) {
+      try {
+        aiSourceNodeRef.current.disconnect();
+      } catch {
+        // ignore disconnect failures
+      }
+      aiSourceNodeRef.current = null;
+    }
+    if (micSourceNodeRef.current) {
+      try {
+        micSourceNodeRef.current.disconnect();
+      } catch {
+        // ignore disconnect failures
+      }
+      micSourceNodeRef.current = null;
+    }
+    if (aiAudioContextRef.current) {
+      void aiAudioContextRef.current.close();
+      aiAudioContextRef.current = null;
+    }
+    if (micAudioContextRef.current) {
+      void micAudioContextRef.current.close();
+      micAudioContextRef.current = null;
+    }
+
+    aiAnalyserRef.current = null;
+    micAnalyserRef.current = null;
+    aiBufferRef.current = null;
+    micBufferRef.current = null;
+    aiLevelRef.current = 0;
+    userLevelRef.current = 0;
+    userPitchRef.current = 0;
+
     if (dcRef.current) { try { dcRef.current.close(); } catch { /* ignore */ } dcRef.current = null; }
     if (pcRef.current) { try { pcRef.current.close(); } catch { /* ignore */ } pcRef.current = null; }
     if (micStreamRef.current) { micStreamRef.current.getTracks().forEach((t) => t.stop()); micStreamRef.current = null; }
     if (audioElRef.current) { audioElRef.current.srcObject = null; audioElRef.current.remove(); audioElRef.current = null; }
+
+    ensureVisualState("silence");
   };
 
   const doGenerateFeedback = useCallback(async () => {
@@ -87,24 +420,66 @@ export default function InterviewPage() {
         setStatus("finished");
         return;
       }
+
       const generatedFeedback = data.feedback || "AI feedback is not available.";
-      setFeedback(generatedFeedback);
-      setStatus("finished");
-      saveInterviewSession({
-        id: crypto.randomUUID(),
-        createdAt: makeSessionTimestamp(),
+      const createdAt = makeSessionTimestamp();
+      const sessionId = crypto.randomUUID();
+      const scoreMatch = generatedFeedback.match(/STARR Score:\s*(\d+)\/100/);
+      const starrScore = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
+      const weakPoints = extractWeakPoints(generatedFeedback);
+      const topWeakness = weakPoints[0] || "";
+      const jobTitle =
+        jobRef.current.trim().split("\n")[0]?.trim().slice(0, 80) ||
+        "Interview Session";
+
+      const session = {
+        id: sessionId,
+        createdAt,
         resume: resumeRef.current,
+        jobTitle,
         job: jobRef.current,
         questions: questionsRef.current,
         answers: answersRef.current,
         feedback: generatedFeedback,
-      });
+        level: selectedLevelRef.current,
+        starrScore,
+        transcript: questionsRef.current.map((question, index) => ({
+          question,
+          answer: answersRef.current[index] || "(no response)",
+        })),
+        analysis: {
+          starrHighlights: {},
+          weakPoints,
+          strongPoints: [],
+        },
+      };
+
+      const snapshot = {
+        sessionId,
+        createdAt,
+        starrScore,
+        topWeakness,
+        jobTitle,
+      };
+
+      saveInterviewSession(session, userId);
+      saveGrowthHubSnapshot(snapshot, userId);
+      // Always mark onboarding done so GrowthHub is accessible after the interview.
+      try { window.localStorage.setItem("hirelyProfileDone", "1"); } catch { /* ignore */ }
+      if (!isSignedIn) {
+        savePendingGuestSession(session, snapshot);
+      }
+
+      setSavedSessionId(sessionId);
+      setSessionStarrScore(starrScore);
+      setFeedback(generatedFeedback);
+      setStatus("finished");
     } catch {
       setError("Unable to generate feedback.");
       setFeedback("");
       setStatus("finished");
     }
-  }, []);
+  }, [isSignedIn, userId]);
 
   useEffect(() => {
     doGenerateFeedbackRef.current = doGenerateFeedback;
@@ -205,11 +580,13 @@ export default function InterviewPage() {
 
       pc.ontrack = (event) => {
         audioEl.srcObject = event.streams[0];
+        setupAiAnalyser(event.streams[0]);
       };
 
       // mic input
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       micStreamRef.current = stream;
+      setupMicAnalyser(stream);
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
       // 2. Data channel
@@ -228,6 +605,7 @@ export default function InterviewPage() {
       // 3. Open event
       dc.addEventListener("open", () => {
         setStatus("interview");
+        startVisualizationLoop();
 
         const firstQuestion = questions[0];
 
@@ -337,6 +715,7 @@ export default function InterviewPage() {
   }, []);
 
   const handleSelectLevel = async (selectedLevel: InterviewLevel) => {
+    selectedLevelRef.current = selectedLevel;
     await startGenerate(resumeRef.current, jobRef.current, selectedLevel);
   };
 
@@ -437,26 +816,47 @@ export default function InterviewPage() {
           {/* Active interview */}
           {status === "interview" && (
             <>
-              <div className={`iv-signal-box glass-card${aiSpeaking ? " iv-signal-box--active" : ""}`}>
-                <p className="iv-signal-label">Emerald Signal Box</p>
-                <div className="iv-signal-orb" aria-hidden="true">
-                  <span className="iv-signal-ring iv-signal-ring--outer" />
-                  <span className="iv-signal-ring iv-signal-ring--inner" />
-                  <span className="iv-signal-core">HC</span>
+              <div className={`iv-dual-pulse glass-card iv-dual-pulse--${visualState}`}>
+                <div className="iv-coach-panel">
+                  <p className="iv-signal-label">Hirely Coach</p>
+                  <div className="iv-coach-mesh-wrap" aria-hidden="true">
+                    <div ref={meshRef} className="iv-coach-mesh">
+                      <span className="iv-coach-glow" />
+                      <span className="iv-coach-fluid" />
+                      <span className="iv-coach-fluid iv-coach-fluid--alt" />
+                      <span className="iv-coach-core">HC</span>
+                    </div>
+                  </div>
+                  <p className="iv-signal-sub">
+                    {visualState === "ai-speaking"
+                      ? "Coach output active"
+                      : visualState === "user-speaking"
+                      ? "Coach resting while you speak"
+                      : "Coach resting pulse"}
+                  </p>
                 </div>
-                <div className={`iv-signal-wave${aiSpeaking ? " iv-signal-wave--active" : ""}`}>
-                  {Array.from({ length: 18 }).map((_, i) => (
-                    <span key={i} className="iv-signal-bar" style={{ animationDelay: `${i * 0.05}s` }} />
-                  ))}
+
+                <div className="iv-user-wave-panel">
+                  <p className="iv-signal-label">Active Listener</p>
+                  <canvas
+                    ref={userWaveCanvasRef}
+                    className="iv-user-wave-canvas"
+                    aria-label="User microphone waveform"
+                  />
+                  <p className="iv-signal-sub">
+                    {visualState === "user-speaking"
+                      ? "Mic input detected"
+                      : visualState === "ai-speaking"
+                      ? "Flattened while coach speaks"
+                      : "Listening line idle"}
+                  </p>
                 </div>
-                <p className="iv-signal-sub">{aiSpeaking ? "HC is speaking..." : "Listening mode"}</p>
               </div>
 
               <div className="iv-progress-row">
                 <span className="iv-progress-label">
                   Question {answeredCount + 1} of {totalQuestions}
                 </span>
-                <CoachTooltip context="interview" message="Stay calm and lead with a concrete result. Use the STARR structure: Situation → Task → Action → Result → Reflection." placement="bottom" />
                 <div className="iv-progress-track">
                   <div
                     className="iv-progress-fill"
@@ -468,7 +868,6 @@ export default function InterviewPage() {
                 </span>
               </div>
 
-              {/* AI Speaking */}
               <div className={`iv-voice-card glass-card${aiSpeaking ? " iv-voice-card--ai-active" : ""}`}>
                 <div className="iv-voice-header">
                   <div className="iv-avatar iv-avatar--ai">AI</div>
@@ -481,19 +880,17 @@ export default function InterviewPage() {
                   <div className={`iv-live-dot${aiSpeaking ? " iv-live-dot--on" : ""}`} />
                 </div>
 
-                {/* AI waveform */}
-                <div className={`iv-waveform iv-waveform--ai${aiSpeaking ? " iv-waveform--active" : ""}`}>
-                  {Array.from({ length: 28 }).map((_, i) => (
-                    <div key={i} className="iv-wave-bar" style={{ animationDelay: `${(i * 0.06) % 0.8}s` }} />
-                  ))}
-                </div>
-
                 {aiTranscript && aiSpeaking && (
-                  <p className="iv-transcript iv-transcript--ai">{aiTranscript}</p>
+                  <CoachTooltip
+                    context="interview"
+                    message="Stay calm and structure your answer: Situation → Task → Action → Result. Lead with a measurable outcome."
+                    placement="bottom"
+                  >
+                    <p className="iv-transcript iv-transcript--ai">{aiTranscript}</p>
+                  </CoachTooltip>
                 )}
               </div>
 
-              {/* User Speaking */}
               <div className={`iv-voice-card glass-card${userSpeaking ? " iv-voice-card--user-active" : ""}`}>
                 <div className="iv-voice-header">
                   <div className="iv-avatar iv-avatar--user">You</div>
@@ -504,13 +901,6 @@ export default function InterviewPage() {
                     </div>
                   </div>
                   {userSpeaking && <div className="iv-live-dot iv-live-dot--user iv-live-dot--on" />}
-                </div>
-
-                {/* User waveform */}
-                <div className={`iv-waveform iv-waveform--user${userSpeaking ? " iv-waveform--active" : ""}`}>
-                  {Array.from({ length: 28 }).map((_, i) => (
-                    <div key={i} className="iv-wave-bar" style={{ animationDelay: `${(i * 0.07) % 0.9}s` }} />
-                  ))}
                 </div>
 
                 {userTranscript && !userSpeaking && (
@@ -531,17 +921,79 @@ export default function InterviewPage() {
           {/* Finished with feedback */}
           {status === "finished" && feedback && (
             <div className="iv-feedback glass-card">
-              <div className="iv-feedback-header">
-                <span className="lp-eyebrow">Interview Complete</span>
-                <h2 className="lp-h2" style={{ marginBottom: 0 }}>Your Performance Feedback</h2>
+              <div className="iv-fb2-header">
+                <div>
+                  <span className="lp-eyebrow">Interview Complete</span>
+                  <h2 className="lp-h2" style={{ marginBottom: 0 }}>Your Performance Report</h2>
+                  {savedSessionId && (
+                    <p className="iv-fb2-saved">Session saved to your archive ✓</p>
+                  )}
+                </div>
+                {sessionStarrScore > 0 && (
+                  <div className="iv-fb2-score">
+                    <span
+                      className="iv-fb2-score-num"
+                      style={{
+                        color:
+                          sessionStarrScore >= 75
+                            ? "#10b981"
+                            : sessionStarrScore >= 50
+                            ? "#3b82f6"
+                            : "#f59e0b",
+                      }}
+                    >
+                      {sessionStarrScore}
+                    </span>
+                    <span className="iv-fb2-score-label">/100 STARR</span>
+                  </div>
+                )}
               </div>
-              <div className="iv-feedback-body">{feedback}</div>
+
+              {(feedbackStrongPoints.length > 0 || feedbackWeakPoints.length > 0) && (
+                <div className="iv-fb2-highlights">
+                  {feedbackStrongPoints.length > 0 && (
+                    <div>
+                      <p className="hist-highlight-label hist-highlight-label--strong">Strengths</p>
+                      <div className="hist-highlight-list">
+                        {feedbackStrongPoints.map((p) => (
+                          <span key={p} className="hist-highlight-pill hist-highlight-pill--strong">{p}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {feedbackWeakPoints.length > 0 && (
+                    <div>
+                      <p className="hist-highlight-label hist-highlight-label--weak">Areas to Improve</p>
+                      <div className="hist-highlight-list">
+                        {feedbackWeakPoints.map((p) => (
+                          <span key={p} className="hist-highlight-pill hist-highlight-pill--weak">{p}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="hist-feedback-body">
+                <div
+                  className="md-body"
+                  dangerouslySetInnerHTML={{ __html: formattedFeedback }}
+                />
+              </div>
+
               <div className="iv-feedback-actions">
-                <button className="lp-btn-primary" onClick={() => router.push("/history")}>
-                  View History
+                <button
+                  className="lp-btn-ghost"
+                  onClick={() =>
+                    savedSessionId
+                      ? router.push(`/voice?mode=retry&sessionId=${savedSessionId}`)
+                      : router.push("/voice")
+                  }
+                >
+                  ↺ Retry Interview
                 </button>
-                <button className="lp-btn-ghost" onClick={() => router.push("/voice")}>
-                  Start New Interview
+                <button className="lp-btn-primary" onClick={() => router.push("/growthhub")}>
+                  Go to GrowthHub →
                 </button>
               </div>
             </div>

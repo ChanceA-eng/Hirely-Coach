@@ -8,6 +8,7 @@ import { useAuth } from "@clerk/nextjs";
 import {
   loadGrowthHubSnapshot,
   loadInterviewHistory,
+  migrateGuestDataToUser,
   XP_PER_LEVEL,
   type GrowthHubSnapshot,
 } from "../lib/interviewStorage";
@@ -359,6 +360,8 @@ export default function GrowthHubPage() {
       return;
     }
 
+    // Migrate any guest interview data that was completed before sign-in.
+    if (userId) { migrateGuestDataToUser(userId); }
     const snap = loadGrowthHubSnapshot(userId);
     const hist = loadInterviewHistory(userId);
     const storedXp = loadXP();

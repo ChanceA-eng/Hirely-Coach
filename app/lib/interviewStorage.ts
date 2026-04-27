@@ -118,9 +118,17 @@ export function migrateGuestDataToUser(userId: string) {
   const guestHistory = loadInterviewHistory(null);
   const guestSnapshot = loadGrowthHubSnapshot(null);
   const pendingGuestRaw = window.sessionStorage.getItem(GUEST_PENDING_SESSION_KEY);
-  const pendingGuestData = pendingGuestRaw
-    ? (JSON.parse(pendingGuestRaw) as { session: InterviewSession; snapshot: GrowthHubSnapshot })
-    : null;
+  let pendingGuestData: { session: InterviewSession; snapshot: GrowthHubSnapshot } | null = null;
+  if (pendingGuestRaw) {
+    try {
+      pendingGuestData = JSON.parse(pendingGuestRaw) as {
+        session: InterviewSession;
+        snapshot: GrowthHubSnapshot;
+      };
+    } catch {
+      pendingGuestData = null;
+    }
+  }
 
   if (pendingGuestData?.session) {
     guestHistory.unshift(pendingGuestData.session);

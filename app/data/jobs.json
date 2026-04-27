@@ -6,7 +6,10 @@
     "location": "Remote, US",
     "salary": "$165k-$210k",
     "description": "Lead product roadmap execution for a cross-functional platform team. Partner with engineering leadership, define priorities, and drive measurable outcomes. Requires leadership, stakeholder management, and system architecture awareness.",
-    "tags": ["LEADERSHIP", "TECHNICAL"]
+    "tags": [
+      "LEADERSHIP",
+      "TECHNICAL"
+    ]
   },
   {
     "id": "job-polaris-staff",
@@ -15,7 +18,11 @@
     "location": "Austin, TX 73301",
     "salary": "$178k-$235k",
     "description": "Design distributed systems for mission-critical APIs. Mentor engineers, improve incident response, and own architecture decisions. Requires TypeScript, cloud infrastructure, and operational excellence.",
-    "tags": ["TECHNICAL", "LEADERSHIP", "SECURITY"]
+    "tags": [
+      "TECHNICAL",
+      "LEADERSHIP",
+      "SECURITY"
+    ]
   },
   {
     "id": "job-lattice-principal-ds",
@@ -24,7 +31,11 @@
     "location": "New York, NY 10001",
     "salary": "$182k-$248k",
     "description": "Lead experimentation strategy and statistical modeling for core fintech products. Collaborate with executives, communicate model tradeoffs, and define analytics standards.",
-    "tags": ["DATA", "BUSINESS", "LEADERSHIP"]
+    "tags": [
+      "DATA",
+      "BUSINESS",
+      "LEADERSHIP"
+    ]
   },
   {
     "id": "job-forge-em",
@@ -33,7 +44,11 @@
     "location": "Seattle, WA 98101",
     "salary": "$158k-$205k",
     "description": "Manage a multi-disciplinary team delivering robotics software. Hire and mentor engineers, track KPIs, and align roadmaps with business targets. Requires leadership, budgeting, and communication.",
-    "tags": ["LEADERSHIP", "BUSINESS", "TECHNICAL"]
+    "tags": [
+      "LEADERSHIP",
+      "BUSINESS",
+      "TECHNICAL"
+    ]
   },
   {
     "id": "job-blackline-arch",
@@ -42,6 +57,1498 @@
     "location": "Remote, US",
     "salary": "$170k-$226k",
     "description": "Own enterprise security architecture and compliance strategy. Drive risk assessments, incident readiness, and security patterns across product teams. Requires cloud security and stakeholder influence.",
-    "tags": ["SECURITY", "TECHNICAL", "LEADERSHIP"]
+    "tags": [
+      "SECURITY",
+      "TECHNICAL",
+      "LEADERSHIP"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-0",
+    "title": "Caregiver",
+    "company": "Home Pro Agency LLC",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Bathing, dressing, grooming, companionship, and mobility assistance. $17-$25/hr.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Home Pro Agency LLC.",
+      "How do you handle ambiguity in a Caregiver role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-1",
+    "title": "Caregiver / Home Health Aide",
+    "company": "Advacare Homecare",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Part-time non-medical home care including bathing, dressing, grooming, and meal prep. $20-$22/hr. Requires CPR/First Aid and fingerprint clearance.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Advacare Homecare.",
+      "How do you handle ambiguity in a Caregiver / Home Health Aide role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-2",
+    "title": "Caregiver / Home Health Aide",
+    "company": "All Ways Caring HomeCare",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Part-time; meal prep, housekeeping, companionship, personal hygiene care, and transportation. $15.45-$16.00/hr. No prior experience needed.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at All Ways Caring HomeCare.",
+      "How do you handle ambiguity in a Caregiver / Home Health Aide role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-3",
+    "title": "Caregiver Developmental Disabilities / Home Health Aide",
+    "company": "All Ways Caring HomeCare",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; caring for individuals with developmental disabilities and minors. DD and minors experience preferred. $15.45-$16.00/hr.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at All Ways Caring HomeCare.",
+      "How do you handle ambiguity in a Caregiver Developmental Disabilities / Home Health Aide role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-4",
+    "title": "Certified Caregiver",
+    "company": "The Forum at Tucson",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Part-time; observe and report on residents' health status in assisted living community.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at The Forum at Tucson.",
+      "How do you handle ambiguity in a Certified Caregiver role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-5",
+    "title": "Certified Caregiver",
+    "company": "Via Elegante Assisted Living",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Perform health assessments including temperature, pulse, blood pressure, weight, and blood glucose monitoring.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Via Elegante Assisted Living.",
+      "How do you handle ambiguity in a Certified Caregiver role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-6",
+    "title": "Compassionate Weekend Caregivers",
+    "company": "Catalina In-Home Services",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Weekend shifts at $19/hr with guaranteed hours and weekly pay. 1 year professional caregiver experience required.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Catalina In-Home Services.",
+      "How do you handle ambiguity in a Compassionate Weekend Caregivers role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-7",
+    "title": "Entry Level Caregiver",
+    "company": "Adultcare Assistance Homecare",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Assist with physical therapy exercises and medication reminders. From $18/hr. $750 referral bonus. Located near Sabino Canyon.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Adultcare Assistance Homecare.",
+      "How do you handle ambiguity in a Entry Level Caregiver role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-8",
+    "title": "HHA, Home Health Aide",
+    "company": "BAYADA Home Health Care",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Per diem; $16.75-$30.00/hr. Flexible 1-12 hour shifts covering Tucson, Oro Valley, Marana, and Green Valley areas.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at BAYADA Home Health Care.",
+      "How do you handle ambiguity in a HHA, Home Health Aide role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-9",
+    "title": "Home Care Aide Assessor",
+    "company": "Care Planning Institute, Inc",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Per diem at $40/hr. Conduct in-home assessments of clients to evaluate care needs and develop care plans.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Care Planning Institute, Inc.",
+      "How do you handle ambiguity in a Home Care Aide Assessor role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-10",
+    "title": "Home Health Caregiver",
+    "company": "Sevita",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Direct support for individuals with disabilities in residential settings; personal care, housekeeping, medication administration, and transportation.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Sevita.",
+      "How do you handle ambiguity in a Home Health Caregiver role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-11",
+    "title": "Home Health Caregiver",
+    "company": "Suma Te Lleva (Mentor Community Services/Sevita)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Part-time community-based services for individuals with intellectual and developmental disabilities.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Suma Te Lleva (Mentor Community Services/Sevita).",
+      "How do you handle ambiguity in a Home Health Caregiver role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-12",
+    "title": "In Home Caregiver",
+    "company": "BrightStar Care Tucson",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "12-hour shifts starting from $15/hr. 1+ year experience required. Providing personal care and companionship in clients' homes.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at BrightStar Care Tucson.",
+      "How do you handle ambiguity in a In Home Caregiver role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-13",
+    "title": "In Home Caregiver",
+    "company": "Home Care Assistance of Tucson",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Companionship and medication reminders for seniors. Starting from $17/hr.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Home Care Assistance of Tucson.",
+      "How do you handle ambiguity in a In Home Caregiver role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-14",
+    "title": "In Home Caregiver",
+    "company": "Senior HomeCare of Tucson",
+    "location": "Oro Valley, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Meal prep, personal care, and medication reminders for seniors. $16-$18/hr.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Senior HomeCare of Tucson.",
+      "How do you handle ambiguity in a In Home Caregiver role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-15",
+    "title": "Administrative & Hiring Specialist",
+    "company": "PimaCare at Home",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$17.29-$21.62/hr; 37.5 hrs/week Mon-Fri. Administrative and clerical support including special projects for home care agency.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at PimaCare at Home.",
+      "How do you handle ambiguity in a Administrative & Hiring Specialist role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-16",
+    "title": "Administrative Assistant",
+    "company": "City of Tucson",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; $19.97-$29.95/hr. Data entry, filing, scheduling, and arranging conferences for General Services Department.",
+    "tags": [
+      "Data Analysis",
+      "SQL",
+      "Python"
+    ],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with Data Analysis and SQL experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at City of Tucson.",
+      "How do you handle ambiguity in a Administrative Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-17",
+    "title": "Administrative Assistant",
+    "company": "Kelly Services",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; $16.72/hr. 2-year contract with state government agency. Switchboard operations, scheduling exams, and front desk duties.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Kelly Services.",
+      "How do you handle ambiguity in a Administrative Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-18",
+    "title": "Administrative Assistant",
+    "company": "Lobel Financial",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; scheduling, data entry, correspondence, invoices, and travel coordination for multiple departments.",
+    "tags": [
+      "Data Analysis",
+      "SQL",
+      "Python"
+    ],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with Data Analysis and SQL experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Lobel Financial.",
+      "How do you handle ambiguity in a Administrative Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-19",
+    "title": "Administrative Assistant",
+    "company": "NextMed",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time Mon-Fri 8-5. Data entry, SharePoint, Salesforce, tradeshow coordination, and license renewals. 3-5 years experience required.",
+    "tags": [
+      "Data Analysis",
+      "SQL",
+      "Python"
+    ],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with Data Analysis and SQL experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at NextMed.",
+      "How do you handle ambiguity in a Administrative Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-20",
+    "title": "Administrative Assistant",
+    "company": "Robert Half",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Long-term contract; inbound calls, data entry, receptionist duties. Microsoft Excel proficiency required.",
+    "tags": [
+      "Data Analysis",
+      "SQL",
+      "Python"
+    ],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with Data Analysis and SQL experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Robert Half.",
+      "How do you handle ambiguity in a Administrative Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-21",
+    "title": "Administrative Assistant",
+    "company": "Theatre Of Hearts",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; scheduling, data entry, customer support, document management, and travel coordination.",
+    "tags": [
+      "Data Analysis",
+      "SQL",
+      "Python"
+    ],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with Data Analysis and SQL experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Theatre Of Hearts.",
+      "How do you handle ambiguity in a Administrative Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-22",
+    "title": "Administrative Assistant",
+    "company": "Tucson Bird Alliance",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Part-time 20 hrs/week at $25/hr. Scheduling, purchasing, correspondence, and records management for nonprofit organization.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Tucson Bird Alliance.",
+      "How do you handle ambiguity in a Administrative Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-23",
+    "title": "Administrative Assistant",
+    "company": "Tucson Unified School District",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$18.24-$21.17/hr. Community Schools support providing confidential secretarial and office support services.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Tucson Unified School District.",
+      "How do you handle ambiguity in a Administrative Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-24",
+    "title": "Administrative Assistant",
+    "company": "University of Arizona (UAIR)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; calendar coordination, travel arrangements, procurement, and P-card administration. Hybrid eligible.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at University of Arizona (UAIR).",
+      "How do you handle ambiguity in a Administrative Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-25",
+    "title": "Administrative Assistant-Campus Operations",
+    "company": "Arizona College of Nursing",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; support Campus President and Dean of Nursing with scheduling, meeting minutes, payroll records, and exam proctoring.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Arizona College of Nursing.",
+      "How do you handle ambiguity in a Administrative Assistant-Campus Operations role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-26",
+    "title": "Administrative Specialist II - Real Property Services",
+    "company": "Pima County",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$48,422-$65,395/yr. Professional administrative classification supporting real property services division.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Pima County.",
+      "How do you handle ambiguity in a Administrative Specialist II - Real Property Services role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-27",
+    "title": "Administrative Support Assistant II",
+    "company": "University of Arizona (Steward Observatory)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$18.15-$22.69/hr. Office and administrative practices supporting the Steward Observatory department.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at University of Arizona (Steward Observatory).",
+      "How do you handle ambiguity in a Administrative Support Assistant II role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-28",
+    "title": "Clinical Coordinator Administrative Assistant",
+    "company": "Pima County",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$21.12-$22.97/hr. Scheduling evaluations, case tracking, and database entries for court mental health proceedings.",
+    "tags": [
+      "Data Analysis",
+      "SQL",
+      "Python"
+    ],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with Data Analysis and SQL experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Pima County.",
+      "How do you handle ambiguity in a Clinical Coordinator Administrative Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-29",
+    "title": "Office Coordinator",
+    "company": "Mister Car Wash",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time at headquarters. 3-5 years admin support experience required. HQ-level administrative coordination and support.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Mister Car Wash.",
+      "How do you handle ambiguity in a Office Coordinator role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-30",
+    "title": "At Your Service Center Associate",
+    "company": "Macy's (Tucson Mall)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$15.45-$19.51/hr part-time. Customer service and store operations support at Tucson Mall location.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Macy's (Tucson Mall).",
+      "How do you handle ambiguity in a At Your Service Center Associate role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-31",
+    "title": "Cashier",
+    "company": "Church's Chicken",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$15.45-$15.50/hr. Managing transactions, balancing register, and providing fast food customer service.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Church's Chicken.",
+      "How do you handle ambiguity in a Cashier role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-32",
+    "title": "Cashier",
+    "company": "Fry's Food Stores (Kroger)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; POS system operation, customer experience, and food retail service in grocery store setting.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Fry's Food Stores (Kroger).",
+      "How do you handle ambiguity in a Cashier role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-33",
+    "title": "Cashier - Tucson Mall",
+    "company": "JCPenney",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Part-time; checkout standards, customer service, and Omnichannel support at department store.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at JCPenney.",
+      "How do you handle ambiguity in a Cashier - Tucson Mall role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-34",
+    "title": "Cashier - Reid Park Zoo",
+    "company": "Craft Culinary Concepts",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; front-line contact for food service operations at Reid Park Zoo.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Craft Culinary Concepts.",
+      "How do you handle ambiguity in a Cashier - Reid Park Zoo role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-35",
+    "title": "Counter Help/Cashier/Server",
+    "company": "Coffee X Change Bistro",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$15.15/hr. Cafe and quick service restaurant duties including order taking and food preparation.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Coffee X Change Bistro.",
+      "How do you handle ambiguity in a Counter Help/Cashier/Server role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-36",
+    "title": "Crew Member",
+    "company": "Dunkin' (Cactus Coffee Two, LLC)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time in Flowing Wells area. Guest satisfaction, service speed, and product quality in quick service restaurant.",
+    "tags": [
+      "Product Management",
+      "Roadmap",
+      "Stakeholders"
+    ],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with Product Management and Roadmap experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Dunkin' (Cactus Coffee Two, LLC).",
+      "How do you handle ambiguity in a Crew Member role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-37",
+    "title": "FOH Bakery Attendant",
+    "company": "Dedicated Gluten Free Bakery and Coffee Shop",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$15-$17/hr part-time. Front-of-house duties at specialty gluten-free bakery and coffee shop.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Dedicated Gluten Free Bakery and Coffee Shop.",
+      "How do you handle ambiguity in a FOH Bakery Attendant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-38",
+    "title": "Food Service Manager",
+    "company": "La Frontera Center",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; manages multi-site food service program in behavioral health setting. 3+ years experience and ServSafe certification required.",
+    "tags": [
+      "Leadership",
+      "Team Management",
+      "Strategy"
+    ],
+    "category": "Leadership",
+    "alignmentReason": "Strong fit for candidates with Leadership and Team Management experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at La Frontera Center.",
+      "How do you handle ambiguity in a Food Service Manager role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-39",
+    "title": "Food Service Supervisor",
+    "company": "TKC Holdings/Trinity Services Group",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time at $17/hr. Supervises food service operations in correctional facility. $250 rookie bonus.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at TKC Holdings/Trinity Services Group.",
+      "How do you handle ambiguity in a Food Service Supervisor role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-40",
+    "title": "Food Service Team Leader",
+    "company": "Target",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$21-$23/hr. Food & Beverage department leadership covering freshness standards, food safety, and guest service.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Target.",
+      "How do you handle ambiguity in a Food Service Team Leader role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-41",
+    "title": "Retail Associate",
+    "company": "Ross Stores",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; customer greeting, register operations, and store maintenance in discount retail setting.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Ross Stores.",
+      "How do you handle ambiguity in a Retail Associate role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-42",
+    "title": "Retail Cashier",
+    "company": "Paul's Ace Hardware",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; customer service in hardware retail. Benefits include PTO, medical/dental, and 401K.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Paul's Ace Hardware.",
+      "How do you handle ambiguity in a Retail Cashier role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-43",
+    "title": "Retail Part Time Store Associate",
+    "company": "Office Depot",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Part-time; customer engagement, tech/print services, and merchandising in office supply retail.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Office Depot.",
+      "How do you handle ambiguity in a Retail Part Time Store Associate role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-44",
+    "title": "Store Crew",
+    "company": "7-Eleven",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; convenience store retail operations including stocking, customer service, and register duties.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at 7-Eleven.",
+      "How do you handle ambiguity in a Store Crew role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-45",
+    "title": "Call Center Customer Service Associate",
+    "company": "Afni",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; $17.50/hr (incl. $0.50 on-site differential). Wireless customer service handling inbound calls.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Afni.",
+      "How do you handle ambiguity in a Call Center Customer Service Associate role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-46",
+    "title": "Call Center Representative",
+    "company": "TechOp Solutions International",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time remote (must reside in Tucson). Answer and track calls, database research, and government systems. 3+ years call center experience required.",
+    "tags": [
+      "Data Analysis",
+      "SQL",
+      "Python"
+    ],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with Data Analysis and SQL experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at TechOp Solutions International.",
+      "How do you handle ambiguity in a Call Center Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-47",
+    "title": "Customer Service",
+    "company": "Achieve",
+    "location": "Tucson, AZ (Remote)",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "From $16/hr. 1 year CSR experience required. High volume inbound call handling.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Achieve.",
+      "How do you handle ambiguity in a Customer Service role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-48",
+    "title": "Customer Service Representative",
+    "company": "City of Tucson (Dept of Transportation)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$16.50-$24.75/hr. Handling calls, service requests, and SeeClickFix/311 system for city transportation department.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at City of Tucson (Dept of Transportation).",
+      "How do you handle ambiguity in a Customer Service Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-49",
+    "title": "Customer Service Representative",
+    "company": "Community Choice Financial (Speedy Cash)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; $18.25/hr. Check cashing, money transfers, and customer payment processing.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Community Choice Financial (Speedy Cash).",
+      "How do you handle ambiguity in a Customer Service Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-50",
+    "title": "Customer Service Representative",
+    "company": "GEICO",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; $19.06-$23.82/hr. Insurance customer service with $1,000 completion incentive.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at GEICO.",
+      "How do you handle ambiguity in a Customer Service Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-51",
+    "title": "Customer Service Representative",
+    "company": "Sun Tran",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; providing route and schedule info by phone. 3 years CSR experience required. 6am-7pm shifts. Bilingual preferred.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Sun Tran.",
+      "How do you handle ambiguity in a Customer Service Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-52",
+    "title": "Customer Service Representative - Call Center",
+    "company": "Truly Nolen",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; inbound calls, scheduling, and data entry. 4 weeks training provided. Bilingual preferred.",
+    "tags": [
+      "Data Analysis",
+      "SQL",
+      "Python"
+    ],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with Data Analysis and SQL experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Truly Nolen.",
+      "How do you handle ambiguity in a Customer Service Representative - Call Center role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-53",
+    "title": "Customer Service Representative 1",
+    "company": "State of Arizona (ADOT/MVD)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$18.08/hr. Motor vehicle licensing, titling, testing, and permits at MVD office.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at State of Arizona (ADOT/MVD).",
+      "How do you handle ambiguity in a Customer Service Representative 1 role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-54",
+    "title": "Customer Service Representative 2",
+    "company": "AZ Dept of Administration (Game and Fish)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$18.70/hr. Hunting, fishing, and boating licensing. Front-facing public support role.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at AZ Dept of Administration (Game and Fish).",
+      "How do you handle ambiguity in a Customer Service Representative 2 role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-55",
+    "title": "Customer Service Representative 3",
+    "company": "State of Arizona (ADOT/MVD)",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$18.08/hr. Processing credentials, title work, and driver licenses. 2 years CSR experience preferred.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at State of Arizona (ADOT/MVD).",
+      "How do you handle ambiguity in a Customer Service Representative 3 role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-56",
+    "title": "Customer Support Representative",
+    "company": "Alorica",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; $17/hr + $1,000 new hire bonus. Paid training and tuition reimbursement available.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Alorica.",
+      "How do you handle ambiguity in a Customer Support Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-57",
+    "title": "Patient Service Representative",
+    "company": "Afni",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; $17/hr. Medical services phone support requiring empathy and strong communication skills.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Afni.",
+      "How do you handle ambiguity in a Patient Service Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-58",
+    "title": "Tucson: Customer Service Rep",
+    "company": "Domino's Franchise",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; customer service, order taking, and brand representation at franchise pizza location.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Domino's Franchise.",
+      "How do you handle ambiguity in a Tucson: Customer Service Rep role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-59",
+    "title": "Tucson: Customer Service Rep",
+    "company": "Domino's Pizza",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Part-time; taking orders, customer interaction, and food preparation at pizza restaurant.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Domino's Pizza.",
+      "How do you handle ambiguity in a Tucson: Customer Service Rep role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-60",
+    "title": "Account Executive - Inside Sales Appointment Setter",
+    "company": "Allied Elite Financial",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time retirement planning sales. Calling potential clients for Financial Professionals. 2+ years sales exp. Uncapped bonuses.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Allied Elite Financial.",
+      "How do you handle ambiguity in a Account Executive - Inside Sales Appointment Setter role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-61",
+    "title": "Associate Sales Representative - Craniomaxillofacial",
+    "company": "Stryker",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time medical device sales. Bachelor's degree required. 1+ years B2B experience preferred. 90% field time.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Stryker.",
+      "How do you handle ambiguity in a Associate Sales Representative - Craniomaxillofacial role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-62",
+    "title": "Associate Sales Representative/Sales Representative - Primary Care",
+    "company": "Shionogi Inc.",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Primary care pharmaceutical sales; promoting products to healthcare providers in assigned territory.",
+    "tags": [
+      "Product Management",
+      "Roadmap",
+      "Stakeholders"
+    ],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with Product Management and Roadmap experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Shionogi Inc..",
+      "How do you handle ambiguity in a Associate Sales Representative/Sales Representative - Primary Care role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-63",
+    "title": "Customer Development Representative",
+    "company": "UniFirst",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$44K-$70K/yr. B2B sales of uniform and facility services to local businesses.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at UniFirst.",
+      "How do you handle ambiguity in a Customer Development Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-64",
+    "title": "Digital Inside Sales Representative - Major Accounts",
+    "company": "ADP",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; selling payroll and HR technology solutions to major business accounts.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at ADP.",
+      "How do you handle ambiguity in a Digital Inside Sales Representative - Major Accounts role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-65",
+    "title": "Inside Sales",
+    "company": "Sun Valley Interior Supply, Inc.",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Building materials sales including drywall, insulation, and metal studs. Counter and phone order processing.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Sun Valley Interior Supply, Inc..",
+      "How do you handle ambiguity in a Inside Sales role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-66",
+    "title": "Inside Sales Representative",
+    "company": "GEICO",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; $20.35-$23.33/hr. Insurance sales with no cold calls. Hybrid after training. Up to $60K incentive.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at GEICO.",
+      "How do you handle ambiguity in a Inside Sales Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-67",
+    "title": "Medical Sales Representative",
+    "company": "Ortho Molecular Products",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Nutritional solutions sales to healthcare practitioners. OTE $90-$120K. Bachelor's degree + 2 years B2B experience required.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Ortho Molecular Products.",
+      "How do you handle ambiguity in a Medical Sales Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-68",
+    "title": "Retail Merchandising Sales Representative",
+    "company": "UNFI",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; ordering, stocking, resets, and merchandising at retail locations. 95% travel within local area.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at UNFI.",
+      "How do you handle ambiguity in a Retail Merchandising Sales Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-69",
+    "title": "Sales Executive",
+    "company": "Clinisys",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Healthcare/clinical diagnostics software sales. Net-new business development. Bachelor's degree required.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Clinisys.",
+      "How do you handle ambiguity in a Sales Executive role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-70",
+    "title": "Sales Executive",
+    "company": "Paychex",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "HR, payroll, and benefits solutions B2B sales. $55K-$145K compensation range. 3 years B2B experience required.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Paychex.",
+      "How do you handle ambiguity in a Sales Executive role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-71",
+    "title": "Sales Manager, Air Conditioning",
+    "company": "D&H Air Conditioning and Heating",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$85K-$120K/yr. HVAC industry sales management overseeing team and customer accounts.",
+    "tags": [
+      "Leadership",
+      "Team Management",
+      "Strategy"
+    ],
+    "category": "Leadership",
+    "alignmentReason": "Strong fit for candidates with Leadership and Team Management experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at D&H Air Conditioning and Heating.",
+      "How do you handle ambiguity in a Sales Manager, Air Conditioning role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-72",
+    "title": "Sales Rep - Pharmaceutical (Entry/Specialty)",
+    "company": "Immune Biopharma",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$90K-$118K/yr. Pharmaceutical territory sales covering assigned healthcare providers and accounts.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Immune Biopharma.",
+      "How do you handle ambiguity in a Sales Rep - Pharmaceutical (Entry/Specialty) role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-73",
+    "title": "Traveling Sales Representative",
+    "company": "Prime Pest and Lawn",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$40K-$150K/yr. Door-to-door sales of pest control and lawn services to residential customers.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Prime Pest and Lawn.",
+      "How do you handle ambiguity in a Traveling Sales Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-74",
+    "title": "Trauma & Extremities Sales Representative",
+    "company": "Smith+Nephew",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Orthopedic device sales; 4+ years medical device sales experience required. 24/7 call rotation.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Smith+Nephew.",
+      "How do you handle ambiguity in a Trauma & Extremities Sales Representative role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-75",
+    "title": "Acute Care Nurse Practitioner (NP) - Adult/Geriatric",
+    "company": "AMN Healthcare",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$113K-$140K/yr. Inpatient geriatric care with relocation assistance available.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at AMN Healthcare.",
+      "How do you handle ambiguity in a Acute Care Nurse Practitioner (NP) - Adult/Geriatric role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-76",
+    "title": "Family or Internal Medicine Nurse Practitioner",
+    "company": "El Rio Community Health Center",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$100K-$146K/yr. 14 clinic locations. Loan repayment, tuition reimbursement, AI scribes, and Epic EMR.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at El Rio Community Health Center.",
+      "How do you handle ambiguity in a Family or Internal Medicine Nurse Practitioner role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-77",
+    "title": "Front Office Medical Assistant",
+    "company": "CMF",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$18-$20/hr Mon-Fri. Front desk and clinical support duties. Benefits include 401K and health/dental insurance.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at CMF.",
+      "How do you handle ambiguity in a Front Office Medical Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-78",
+    "title": "Licensed Practical Nurse",
+    "company": "Various Employers",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Average $33.62/hr across 72 openings in Tucson area. Clinical nursing duties under RN/physician supervision.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Various Employers.",
+      "How do you handle ambiguity in a Licensed Practical Nurse role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-79",
+    "title": "Medical Assistant",
+    "company": "GameDay Men's Health Tucson",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$19-$20/hr full-time. Phlebotomy, injections, vitals, EMR documentation. 4-day work week Tue-Fri, no weekends.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at GameDay Men's Health Tucson.",
+      "How do you handle ambiguity in a Medical Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-80",
+    "title": "Medical Assistant - Gastroenterology",
+    "company": "Tucson Gastroenterology Specialists PC",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$17-$21/hr. Clinical support in gastroenterology practice. Benefits include 401K and health insurance.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Tucson Gastroenterology Specialists PC.",
+      "How do you handle ambiguity in a Medical Assistant - Gastroenterology role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-81",
+    "title": "Nurse Practitioner/Physician Assistant",
+    "company": "MY DR NOW",
+    "location": "Oro Valley, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$170K-$200K/yr full-time. Advanced practice provider role in urgent/primary care setting.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at MY DR NOW.",
+      "How do you handle ambiguity in a Nurse Practitioner/Physician Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-82",
+    "title": "Physical Therapy Assistant",
+    "company": "Tucson Medical Center",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; delivers prescribed physical therapy treatments under PT supervision. Associate's degree and PTA certification required.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Tucson Medical Center.",
+      "How do you handle ambiguity in a Physical Therapy Assistant role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-83",
+    "title": "Registered Nurse",
+    "company": "DAVITA",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; dialysis and end-stage renal disease care at Rita Ranch location. Benefits include parental leave and 401K matching.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at DAVITA.",
+      "How do you handle ambiguity in a Registered Nurse role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-84",
+    "title": "Registered Nurse",
+    "company": "Tucson Medical Center",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$10K sign-on bonus with 2 years experience. Patient care coordination using nursing process. AZ RN license and BLS required.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Tucson Medical Center.",
+      "How do you handle ambiguity in a Registered Nurse role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-85",
+    "title": "Registered Nurse - PACU",
+    "company": "Tucson Medical Center",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; 3 twelve-hour shifts. $10K sign-on. PACU, Critical Care, or ED experience required. Adult and Pediatric care.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Tucson Medical Center.",
+      "How do you handle ambiguity in a Registered Nurse - PACU role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-86",
+    "title": "Registered Nurse - Pre Op",
+    "company": "Tucson Medical Center",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Full-time; 4 ten-hour days. Pre-operative nursing care in Main OR (14 rooms). 3-5 years clinical experience preferred. On-call required.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Tucson Medical Center.",
+      "How do you handle ambiguity in a Registered Nurse - Pre Op role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-87",
+    "title": "Registered Nurse Nurse Navigator",
+    "company": "Tucson Medical Center",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "Oncology care coordination; serves as liaison between physicians, hospital staff, and patients through treatment journey.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Tucson Medical Center.",
+      "How do you handle ambiguity in a Registered Nurse Nurse Navigator role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-88",
+    "title": "Registered Nurse RN NICU",
+    "company": "Banner Health",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$35.43-$59.05/hr. Night shift in Neonatal Intensive Care Unit providing specialized newborn care.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at Banner Health.",
+      "How do you handle ambiguity in a Registered Nurse RN NICU role?"
+    ]
+  },
+  {
+    "id": "xlsx-1777275032137-89",
+    "title": "Registered Nurses (RNs) - Full Time Nights",
+    "company": "NaphCare, Inc.",
+    "location": "Tucson, AZ",
+    "salaryMin": 0,
+    "salaryMax": 0,
+    "description": "$45.47/hr+. Nursing care in correctional healthcare setting. Full-time night shift position.",
+    "tags": [],
+    "category": "General",
+    "alignmentReason": "Strong fit for candidates with  experience.",
+    "scaryQuestions": [
+      "Tell me about a time you led a high-stakes project at NaphCare, Inc..",
+      "How do you handle ambiguity in a Registered Nurses (RNs) - Full Time Nights role?"
+    ]
   }
 ]
