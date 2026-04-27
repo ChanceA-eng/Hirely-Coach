@@ -8,6 +8,7 @@ import {
   saveInterviewSession,
   savePendingGuestSession,
 } from "../lib/interviewStorage";
+import { syncInterviewProgress } from "../lib/interviewProgress";
 
 type Payload = {
   resume: string;
@@ -195,6 +196,10 @@ export default function FeedbackPage() {
 
         if (!isSignedIn) {
           savePendingGuestSession(session, snapshot);
+        } else {
+          syncInterviewProgress(snapshot).catch(() => {
+            // Non-blocking: local save already completed.
+          });
         }
 
         window.sessionStorage.removeItem("hirelyCoachFeedbackPayload");

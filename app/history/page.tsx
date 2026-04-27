@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
@@ -9,6 +9,7 @@ import {
   loadInterviewHistory,
   type InterviewSession,
 } from "../lib/interviewStorage";
+import { loadImpactEntries, type ImpactEntry } from "../lib/impactLog";
 
 // ─── Markdown renderer ────────────────────────────────────────────────────────
 function formatFeedbackHtml(md: string): string {
@@ -48,6 +49,51 @@ function scoreColor(score: number) {
   if (score >= 75) return "#10b981";
   if (score >= 50) return "#3b82f6";
   return "#f59e0b";
+}
+
+type ArchiveLens = "sessions" | "ledger";
+type LedgerRange = "90d" | "6m" | "1y";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function weekStart(date: Date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - d.getDay());
+  return d;
+}
+
+function weekKey(date: Date) {
+  return weekStart(date).toISOString().slice(0, 10);
+}
+
+function rangeStart(range: LedgerRange) {
+  const now = Date.now();
+  if (range === "90d") return now - 90 * DAY_MS;
+  if (range === "6m") return now - 183 * DAY_MS;
+  return now - 365 * DAY_MS;
+}
+
+function buildWeekSlots(range: LedgerRange) {
+  const start = weekStart(new Date(rangeStart(range)));
+  const end = weekStart(new Date());
+  const slots: Date[] = [];
+  const cursor = new Date(start);
+
+  while (cursor <= end) {
+    slots.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 7);
+  }
+
+  return slots;
+}
+
+function formatLedgerDate(timestamp: number) {
+  return new Date(timestamp).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 // ─── Session card ─────────────────────────────────────────────────────────────
@@ -183,12 +229,71 @@ export default function HistoryPage() {
   const router = useRouter();
   const { userId } = useAuth();
   const [history, setHistory] = useState<InterviewSession[]>([]);
+  const [impactEntries, setImpactEntries] = useState<ImpactEntry[]>([]);
+  const [lens, setLens] = useState<ArchiveLens>("sessions");
+  const [ledgerRange, setLedgerRange] = useState<LedgerRange>("90d");
+  const [selectedWeekKey, setSelectedWeekKey] = useState<string | null>(null);
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setHistory(loadInterviewHistory(userId));
+    setImpactEntries(loadImpactEntries(userId));
     setHydrated(true);
   }, [userId]);
+
+  const filteredImpactEntries = useMemo(() => {
+    const start = rangeStart(ledgerRange);
+    return impactEntries
+      .filter((entry) => entry.createdAt >= start)
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }, [impactEntries, ledgerRange]);
+
+  const groupedByWeek = useMemo(() => {
+    const groups = new Map<string, ImpactEntry[]>();
+    for (const entry of filteredImpactEntries) {
+      const key = weekKey(new Date(entry.createdAt));
+      const bucket = groups.get(key) || [];
+      bucket.push(entry);
+      groups.set(key, bucket);
+    }
+    return groups;
+  }, [filteredImpactEntries]);
+
+  const weekSlots = useMemo(() => buildWeekSlots(ledgerRange), [ledgerRange]);
+
+  useEffect(() => {
+    if (lens !== "ledger") return;
+
+    const availableWeekKeys = weekSlots
+      .map((slot) => weekKey(slot))
+      .filter((key) => (groupedByWeek.get(key)?.length || 0) > 0);
+
+    if (availableWeekKeys.length === 0) {
+      setSelectedWeekKey(null);
+      setSelectedEntryId(null);
+      return;
+    }
+
+    const latestWeek = availableWeekKeys[availableWeekKeys.length - 1];
+    setSelectedWeekKey((prev) => (prev && availableWeekKeys.includes(prev) ? prev : latestWeek));
+  }, [lens, weekSlots, groupedByWeek]);
+
+  const selectedWeekEntries = selectedWeekKey ? groupedByWeek.get(selectedWeekKey) || [] : [];
+
+  useEffect(() => {
+    if (selectedWeekEntries.length === 0) {
+      setSelectedEntryId(null);
+      return;
+    }
+
+    const exists = selectedWeekEntries.some((entry) => entry.id === selectedEntryId);
+    if (!exists) {
+      setSelectedEntryId(selectedWeekEntries[0].id);
+    }
+  }, [selectedWeekEntries, selectedEntryId]);
+
+  const selectedEntry = selectedWeekEntries.find((entry) => entry.id === selectedEntryId) || null;
 
   const handleClear = () => {
     if (!window.confirm("Delete all interview history from this browser?")) return;
@@ -209,62 +314,198 @@ export default function HistoryPage() {
         <div className="anim-fade-up" style={{ marginBottom: 40 }}>
           <p className="gh-page-eyebrow">Session archive</p>
           <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-            <h1 className="gh-page-h1" style={{ marginBottom: 0 }}>Interview History</h1>
-            {history.length > 0 && (
-              <span className="stat-pill stat-pill--green">{history.length} session{history.length !== 1 ? "s" : ""}</span>
+            <h1 className="gh-page-h1" style={{ marginBottom: 0 }}>
+              {lens === "sessions" ? "Interview History" : "Professional Ledger"}
+            </h1>
+            {lens === "sessions" && history.length > 0 && (
+              <span className="stat-pill stat-pill--green">
+                {history.length} session{history.length !== 1 ? "s" : ""}
+              </span>
+            )}
+            {lens === "ledger" && filteredImpactEntries.length > 0 && (
+              <span className="stat-pill stat-pill--amber">
+                {filteredImpactEntries.length} win{filteredImpactEntries.length !== 1 ? "s" : ""}
+              </span>
             )}
           </div>
           <p className="gh-page-sub" style={{ marginTop: 10 }}>
-            Your past mock interviews are stored locally in this browser.
-            Revisit answers, AI feedback, and STARR scores at any time.
+            {lens === "sessions"
+              ? "Your past mock interviews are stored locally in this browser. Revisit answers, AI feedback, and STARR scores at any time."
+              : "This is your Professional Ledger. Review your history of wins to see your growth over the last year."}
           </p>
         </div>
 
-        {/* ── Action bar ── */}
-        <div
-          className="glass-card anim-fade-up anim-fade-up--d1"
-          style={{ padding: "16px 24px", display: "flex", gap: 12, alignItems: "center", marginBottom: 28, flexWrap: "wrap" }}
-        >
+        <div className="archive-lens-toggle anim-fade-up anim-fade-up--d1" style={{ marginBottom: 18 }}>
           <button
-            className="lp-btn-primary"
             type="button"
-            onClick={() => router.push("/voice?mode=new")}
+            className={`archive-lens-btn ${lens === "sessions" ? "is-active" : ""}`}
+            onClick={() => setLens("sessions")}
           >
-            New Interview
+            Interview Sessions
           </button>
           <button
-            className="lp-btn-ghost"
             type="button"
-            onClick={() => router.push("/growthhub")}
+            className={`archive-lens-btn ${lens === "ledger" ? "is-active" : ""}`}
+            onClick={() => setLens("ledger")}
           >
-            GrowthHub
-          </button>
-          <button
-            className="lp-btn-ghost"
-            type="button"
-            onClick={handleClear}
-            disabled={!history.length}
-            style={{ marginLeft: "auto", borderColor: "rgba(239,68,68,0.3)", color: "#f87171" }}
-          >
-            Clear history
+            Impact Ledger
           </button>
         </div>
 
-        {/* ── Session list ── */}
-        {!hydrated ? null : history.length === 0 ? (
-          <div className="empty-state anim-fade-up anim-fade-up--d2">
-            No interviews yet. Run your first mock interview to start tracking progress.
+        {/* ── Action bar ── */}
+        {lens === "sessions" ? (
+          <div
+            className="glass-card anim-fade-up anim-fade-up--d1"
+            style={{
+              padding: "16px 24px",
+              display: "flex",
+              gap: 12,
+              alignItems: "center",
+              marginBottom: 28,
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              className="lp-btn-primary"
+              type="button"
+              onClick={() => router.push("/voice?mode=new")}
+            >
+              New Interview
+            </button>
+            <button
+              className="lp-btn-ghost"
+              type="button"
+              onClick={() => router.push("/growthhub")}
+            >
+              GrowthHub
+            </button>
+            <button
+              className="lp-btn-ghost"
+              type="button"
+              onClick={handleClear}
+              disabled={!history.length}
+              style={{ marginLeft: "auto", borderColor: "rgba(239,68,68,0.3)", color: "#f87171" }}
+            >
+              Clear history
+            </button>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {history.map((session, i) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                delay={0.08 + i * 0.06}
-              />
-            ))}
+          <div className="glass-card anim-fade-up anim-fade-up--d1 archive-ledger-topbar">
+            <div className="archive-range-toggle">
+              <button
+                type="button"
+                className={`archive-range-btn ${ledgerRange === "90d" ? "is-active" : ""}`}
+                onClick={() => setLedgerRange("90d")}
+              >
+                Last 90 Days
+              </button>
+              <button
+                type="button"
+                className={`archive-range-btn ${ledgerRange === "6m" ? "is-active" : ""}`}
+                onClick={() => setLedgerRange("6m")}
+              >
+                6 Months
+              </button>
+              <button
+                type="button"
+                className={`archive-range-btn ${ledgerRange === "1y" ? "is-active" : ""}`}
+                onClick={() => setLedgerRange("1y")}
+              >
+                1 Year
+              </button>
+            </div>
+            <button className="lp-btn-ghost" type="button" onClick={() => router.push("/growthhub")}>
+              GrowthHub
+            </button>
           </div>
+        )}
+
+        {/* ── Session list ── */}
+        {!hydrated ? null : lens === "sessions" ? (
+          history.length === 0 ? (
+            <div className="empty-state anim-fade-up anim-fade-up--d2">
+              No interviews yet. Run your first mock interview to start tracking progress.
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {history.map((session, i) => (
+                <SessionCard key={session.id} session={session} delay={0.08 + i * 0.06} />
+              ))}
+            </div>
+          )
+        ) : (
+          <section className="archive-ledger-wrap anim-fade-up anim-fade-up--d2">
+            {filteredImpactEntries.length === 0 ? (
+              <div className="empty-state">No ledger wins found in this date range yet.</div>
+            ) : (
+              <>
+                <div className="archive-week-grid" role="list" aria-label="Impact wins by week">
+                  {weekSlots.map((slot) => {
+                    const key = weekKey(slot);
+                    const count = groupedByWeek.get(key)?.length || 0;
+                    const isActive = selectedWeekKey === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        role="listitem"
+                        className={`archive-week-tile ${isActive ? "is-active" : ""} ${count > 0 ? "has-data" : ""}`}
+                        onClick={() => setSelectedWeekKey(key)}
+                      >
+                        <span>{slot.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
+                        <strong>{count}</strong>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="archive-ledger-detail">
+                  <div className="archive-ledger-list">
+                    <p className="archive-ledger-list-title">
+                      {selectedWeekKey
+                        ? `Week of ${new Date(selectedWeekKey).toLocaleDateString(undefined, {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}`
+                        : "Select a week"}
+                    </p>
+                    {selectedWeekEntries.length === 0 ? (
+                      <p className="archive-ledger-empty">No wins recorded for this week.</p>
+                    ) : (
+                      selectedWeekEntries.map((entry) => (
+                        <button
+                          key={entry.id}
+                          type="button"
+                          className={`archive-ledger-entry ${selectedEntryId === entry.id ? "is-active" : ""}`}
+                          onClick={() => setSelectedEntryId(entry.id)}
+                        >
+                          <span>{formatLedgerDate(entry.createdAt)}</span>
+                          <strong>{entry.action.slice(0, 64)}</strong>
+                        </button>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="archive-ledger-view">
+                    {!selectedEntry ? (
+                      <p className="archive-ledger-empty">Select a win to see full details.</p>
+                    ) : (
+                      <>
+                        <p className="archive-ledger-date">{formatLedgerDate(selectedEntry.createdAt)}</p>
+                        <p className="archive-ledger-label">Action</p>
+                        <p className="archive-ledger-copy">{selectedEntry.action}</p>
+                        <p className="archive-ledger-label">Proof</p>
+                        <p className="archive-ledger-copy">{selectedEntry.proof}</p>
+                        <p className="archive-ledger-label">Result</p>
+                        <p className="archive-ledger-copy">{selectedEntry.result}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </section>
         )}
 
       </main>

@@ -738,9 +738,7 @@ function GatekeeperExam({ onComplete }: { onComplete: (passed: boolean, score: n
         <span className="chip">Time: {timeLeft}s</span>
         <span className="chip">Q {index + 1}/{GATEKEEPER_QUESTIONS.length}</span>
       </div>
-      <CoachTooltip context="quiz" message="Look for keywords like 'impact', 'led', or 'resulted in'. The best STARR answers always reference a measurable outcome." placement="top">
-        <p className="exam-question">{q.q}</p>
-      </CoachTooltip>
+      <p className="exam-question">{q.q}<CoachTooltip context="quiz" message="Look for keywords like 'impact', 'led', or 'resulted in'. The best STARR answers always reference a measurable outcome." placement="top" /></p>
       <div className="push-options">
         {q.options.map((opt, i) => {
           let cls = "push-opt";

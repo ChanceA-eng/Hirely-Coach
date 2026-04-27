@@ -12,6 +12,18 @@ import {
   XP_PER_LEVEL,
   type GrowthHubSnapshot,
 } from "../lib/interviewStorage";
+import {
+  EMPTY_INTERVIEW_PROGRESS,
+  loadAccountInterviewProgress,
+  snapshotFromProgress,
+  type AccountInterviewProgress,
+} from "../lib/interviewProgress";
+import {
+  loadImpactEntries,
+  migrateGuestImpactEntriesToUser,
+  saveImpactEntry,
+  type ImpactEntry,
+} from "../lib/impactLog";
 import "./page.css";
 
 // ─── XP helpers (mirrors training page) ───────────────────────────────────
@@ -246,8 +258,14 @@ function ArchiveIcon() {
 function NudgeIcon() {
   return (
     <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <path d="M9 12H39V30H25L18 36V30H9V12Z" />
-      <path d="M26 16L20 25H25L22 32L31 21H26L29 16H26Z" />
+      <path d="M12 8H29L37 16V40H12V8Z" />
+      <path d="M29 8V16H37" />
+      <path d="M18 23H28" />
+      <path d="M18 29H27" />
+      <path d="M18 35H24" />
+      <path d="M31 24C33.5 24 35.5 22 35.5 19.5" />
+      <path d="M31 28C35.7 28 39.5 24.2 39.5 19.5" />
+      <circle cx="31" cy="19.5" r="1.4" />
     </svg>
   );
 }
@@ -348,9 +366,15 @@ export default function GrowthHubPage() {
   const router = useRouter();
   const [snapshot, setSnapshot] = useState<GrowthHubSnapshot | null>(null);
   const [history, setHistory] = useState<ReturnType<typeof loadInterviewHistory>>([]);
+  const [impactEntries, setImpactEntries] = useState<ImpactEntry[]>([]);
+  const [impactAction, setImpactAction] = useState("");
+  const [impactProof, setImpactProof] = useState("");
+  const [impactResult, setImpactResult] = useState("");
+  const [impactMessage, setImpactMessage] = useState("");
   const [xp, setXp] = useState(0);
   const [hydrated, setHydrated] = useState(false);
   const [focusModal, setFocusModal] = useState<FocusModalData | null>(null);
+  const [accountProgress, setAccountProgress] = useState<AccountInterviewProgress>(EMPTY_INTERVIEW_PROGRESS);
 
   useEffect(() => {
     // ── Onboarding gate: hard redirect if profile not confirmed ──
@@ -362,22 +386,68 @@ export default function GrowthHubPage() {
 
     // Migrate any guest interview data that was completed before sign-in.
     if (userId) { migrateGuestDataToUser(userId); }
-    const snap = loadGrowthHubSnapshot(userId);
+    if (userId) { migrateGuestImpactEntriesToUser(userId); }
+    const localSnap = loadGrowthHubSnapshot(userId);
     const hist = loadInterviewHistory(userId);
+    const impacts = loadImpactEntries(userId);
     const storedXp = loadXP();
 
-    setSnapshot(snap);
+    if (userId) {
+      loadAccountInterviewProgress()
+        .then((progress) => {
+          setAccountProgress(progress);
+          const fallbackSnap = localSnap ?? snapshotFromProgress(progress);
+          setSnapshot(fallbackSnap);
+        })
+        .catch(() => {
+          setAccountProgress(EMPTY_INTERVIEW_PROGRESS);
+          setSnapshot(localSnap);
+        })
+        .finally(() => {
+          setHistory(hist);
+          setImpactEntries(impacts);
+          setXp(storedXp);
+          setHydrated(true);
+        });
+      return;
+    }
+
+    setAccountProgress(EMPTY_INTERVIEW_PROGRESS);
+    setSnapshot(localSnap);
     setHistory(hist);
+    setImpactEntries(impacts);
     setXp(storedXp);
     setHydrated(true);
   }, [userId, router]);
+
+  const saveImpactLogEntry = () => {
+    const savedEntry = saveImpactEntry(
+      {
+        action: impactAction,
+        proof: impactProof,
+        result: impactResult,
+      },
+      userId
+    );
+
+    if (!savedEntry) {
+      setImpactMessage("Complete all three fields to save the win.");
+      return;
+    }
+
+    setImpactEntries(loadImpactEntries(userId));
+    setImpactAction("");
+    setImpactProof("");
+    setImpactResult("");
+    setImpactMessage("Impact saved. Resume Optimizer can use it now.");
+  };
 
   const score = snapshot ? readiness(snapshot.starrScore) : 0;
   const module = snapshot?.topWeakness
     ? weaknessToModule(snapshot.topWeakness)
     : null;
 
-  const isReturningUser = history.length > 0 && snapshot !== null;
+  const isReturningUser = Boolean(snapshot) || history.length > 0 || accountProgress.hasCompletedInterview;
 
   return (
     <div className="lp-root">
@@ -513,6 +583,14 @@ export default function GrowthHubPage() {
                        variant="archive"
                       delay={0.5}
                     />
+                    <ActionCard
+                       href="/upload"
+                       icon={<NudgeIcon />}
+                        title="Resume Optimizer"
+                        desc="Scan your resume, get prioritized fixes, and re-scan for score gains."
+                       variant="training"
+                      delay={0.6}
+                    />
                   </div>
 
                   {/* STARR breakdown strip */}
@@ -625,6 +703,60 @@ export default function GrowthHubPage() {
                     <StatRow label="Simulations" value={history.length.toString()} />
                     <StatRow label="Global Rank" value={xpTitle(xpLevel(xp))} />
                     <StatRow label="Total XP" value={`${xp} XP`} />
+                  </div>
+
+                  <div className="gh-sidebar-card glass-card gh-impact-box">
+                    <p className="gh-stats-title">Impact Log</p>
+                    <p className="gh-sidebar-body">
+                      Think about your week. What's one thing you're proud of? Tell us what you did, the numbers involved, and the final result. We'll store this in your Archive to help you prove your value later.
+                    </p>
+                    <div className="gh-impact-form">
+                      <label className="gh-impact-label" htmlFor="gh-impact-action">The Action</label>
+                      <textarea
+                        id="gh-impact-action"
+                        className="gh-impact-input"
+                        value={impactAction}
+                        onChange={(event) => setImpactAction(event.target.value)}
+                        placeholder="What did you complete or lead this week?"
+                      />
+                      <label className="gh-impact-label" htmlFor="gh-impact-proof">The Proof</label>
+                      <textarea
+                        id="gh-impact-proof"
+                        className="gh-impact-input"
+                        value={impactProof}
+                        onChange={(event) => setImpactProof(event.target.value)}
+                        placeholder="How many people helped? Time or money saved? Metrics?"
+                      />
+                      <label className="gh-impact-label" htmlFor="gh-impact-result">The Result</label>
+                      <textarea
+                        id="gh-impact-result"
+                        className="gh-impact-input"
+                        value={impactResult}
+                        onChange={(event) => setImpactResult(event.target.value)}
+                        placeholder="What was the final positive outcome?"
+                      />
+                      <button className="gh-impact-save" onClick={saveImpactLogEntry}>
+                        Save to Impact Log
+                      </button>
+                      {impactMessage && <p className="gh-impact-message">{impactMessage}</p>}
+                    </div>
+
+                    <div className="gh-impact-preview">
+                      <p className="gh-impact-preview-label">Recent Wins</p>
+                      {impactEntries.length === 0 ? (
+                        <p className="gh-sidebar-body gh-sidebar-body--spaced">
+                          No wins logged yet.
+                        </p>
+                      ) : (
+                        impactEntries.slice(0, 2).map((entry) => (
+                          <div key={entry.id} className="gh-impact-entry">
+                            <p className="gh-impact-entry-title">{entry.action}</p>
+                            <p className="gh-impact-entry-text">{entry.proof}</p>
+                            <p className="gh-impact-entry-text">{entry.result}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </motion.aside>
               </div>

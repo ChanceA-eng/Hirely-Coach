@@ -32,6 +32,11 @@ export type GrowthHubSnapshot = {
   jobTitle: string;
 };
 
+export type GuestMigrationResult = {
+  movedHistoryCount: number;
+  latestSnapshot: GrowthHubSnapshot | null;
+};
+
 export type TrainingModuleId = "logic" | "storytelling" | "delivery";
 
 export type TrainingProgress = {
@@ -112,8 +117,10 @@ export function loadGrowthHubSnapshot(userId?: string | null): GrowthHubSnapshot
   }
 }
 
-export function migrateGuestDataToUser(userId: string) {
-  if (typeof window === "undefined") return;
+export function migrateGuestDataToUser(userId: string): GuestMigrationResult {
+  if (typeof window === "undefined") {
+    return { movedHistoryCount: 0, latestSnapshot: null };
+  }
 
   const guestHistory = loadInterviewHistory(null);
   const guestSnapshot = loadGrowthHubSnapshot(null);
@@ -134,6 +141,8 @@ export function migrateGuestDataToUser(userId: string) {
     guestHistory.unshift(pendingGuestData.session);
   }
 
+  let latestSnapshot = guestSnapshot ?? pendingGuestData?.snapshot ?? null;
+
   if (guestHistory.length > 0) {
     const existing = loadInterviewHistory(userId);
     const merged = [...guestHistory, ...existing]
@@ -148,6 +157,7 @@ export function migrateGuestDataToUser(userId: string) {
     const existingSnapshot = loadGrowthHubSnapshot(userId);
     if (!existingSnapshot || guestSnapshot.createdAt > existingSnapshot.createdAt) {
       window.localStorage.setItem(getGrowthHubKey(userId), JSON.stringify(guestSnapshot));
+      latestSnapshot = guestSnapshot;
     }
   }
 
@@ -155,12 +165,18 @@ export function migrateGuestDataToUser(userId: string) {
     const existingSnapshot = loadGrowthHubSnapshot(userId);
     if (!existingSnapshot || pendingGuestData.snapshot.createdAt > existingSnapshot.createdAt) {
       window.localStorage.setItem(getGrowthHubKey(userId), JSON.stringify(pendingGuestData.snapshot));
+      latestSnapshot = pendingGuestData.snapshot;
     }
   }
 
   window.localStorage.removeItem(GUEST_STORAGE_KEY);
   window.localStorage.removeItem(GUEST_GROWTHHUB_KEY);
   window.sessionStorage.removeItem(GUEST_PENDING_SESSION_KEY);
+
+  return {
+    movedHistoryCount: guestHistory.length,
+    latestSnapshot,
+  };
 }
 
 export function savePendingGuestSession(session: InterviewSession, snapshot: GrowthHubSnapshot) {

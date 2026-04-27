@@ -19,8 +19,6 @@ type ParsedJob = {
 
 type DbStats = { total: number } | null;
 
-const ACCEPTED_EXTENSIONS = ".csv,.tsv,.tst,.txt,.rtf,.json,.xml,.xls,.xlsx,.doc,.docx,.pdf";
-
 const TAG_MAP: Record<string, string[]> = {
   product: ["Product Management", "Roadmap", "Stakeholders"],
   engineer: ["Engineering", "System Design", "Code Review"],
@@ -54,207 +52,57 @@ function inferCategory(title: string): string {
   return "General";
 }
 
-function makeJob(
-  prefix: string, index: number,
-  title: string, company: string, location: string, desc: string, salRaw = ""
-): ParsedJob {
-  const sal = parseInt(salRaw.replace(/[^0-9]/g, ""), 10) || 0;
-  const tags = autoTag(desc + " " + title);
-  return {
-    id: `${prefix}-${Date.now()}-${index}`,
-    title, company, location,
-    salaryMin: sal, salaryMax: sal ? Math.round(sal * 1.2) : 0,
-    description: desc, tags, category: inferCategory(title),
-    alignmentReason: `Strong fit for candidates with ${tags.slice(0, 2).join(" and ")} experience.`,
-    scaryQuestions: [
-      `Tell me about a time you led a high-stakes project at ${company || "a fast-paced company"}.`,
-      `How do you handle ambiguity in a ${title || "senior"} role?`,
-    ],
-  };
-}
-
-// ── CSV / TSV ─────────────────────────────────────────────────────────────────
-
-function splitLine(line: string, delimiter: string): string[] {
+function parseLine(line: string): string[] {
   const result: string[] = [];
   let cur = "";
   let inQ = false;
   for (const ch of line) {
     if (ch === '"') { inQ = !inQ; }
-    else if (ch === delimiter && !inQ) { result.push(cur.trim()); cur = ""; }
+    else if (ch === "," && !inQ) { result.push(cur.trim()); cur = ""; }
     else { cur += ch; }
   }
   result.push(cur.trim());
   return result;
 }
 
-function parseDelimited(text: string, delimiter: string, prefix: string): ParsedJob[] {
+function parseCSV(text: string): ParsedJob[] {
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
   if (lines.length < 2) return [];
-  const headers = splitLine(lines[0], delimiter).map((h) => h.toLowerCase().replace(/\s+/g, "_"));
+  const headers = parseLine(lines[0]).map((h) => h.toLowerCase().replace(/\s+/g, "_"));
   const get = (cols: string[], ...keys: string[]) => {
     const idx = keys.map((k) => headers.indexOf(k)).find((i) => i >= 0) ?? -1;
     return idx >= 0 ? (cols[idx] ?? "") : "";
   };
   return lines.slice(1).map((line, i) => {
-    const c = splitLine(line, delimiter);
-    const title    = get(c, "title", "job_title", "position", "role");
-    const company  = get(c, "company", "employer", "organization");
+    const c = parseLine(line);
+    const title = get(c, "title", "job_title", "position", "role");
+    const company = get(c, "company", "employer", "organization");
     const location = get(c, "location", "city", "place");
-    const desc     = get(c, "description", "desc", "job_description", "summary");
-    const salRaw   = get(c, "salary", "compensation", "pay");
-    if (!title && !company) return null;
-    return makeJob(prefix, i, title, company, location, desc, salRaw);
-  }).filter((j): j is ParsedJob => j !== null && Boolean(j.title) && Boolean(j.company));
-}
-
-const parseCSV = (text: string) => parseDelimited(text, ",", "csv");
-const parseTSV = (text: string) => parseDelimited(text, "\t", "tsv");
-
-// ── JSON ──────────────────────────────────────────────────────────────────────
-
-function parseJSON(text: string): ParsedJob[] {
-  try {
-    const data = JSON.parse(text) as unknown;
-    const arr: Record<string, unknown>[] = Array.isArray(data)
-      ? (data as Record<string, unknown>[])
-      : Array.isArray((data as Record<string, unknown>).jobs)
-      ? ((data as Record<string, unknown[]>).jobs as Record<string, unknown>[])
-      : [];
-    return arr.map((item, i) => {
-      const str = (keys: string[]) =>
-        String(keys.map((k) => item[k]).find((v) => v !== undefined && v !== null) ?? "");
-      const title    = str(["title", "job_title", "position", "role"]);
-      const company  = str(["company", "employer", "organization"]);
-      const location = str(["location", "city", "place"]);
-      const desc     = str(["description", "desc", "job_description", "summary"]);
-      const salRaw   = str(["salary", "salaryMin", "compensation", "pay"]);
-      if (!title && !company) return null;
-      return makeJob("json", i, title, company, location, desc, salRaw);
-    }).filter((j): j is ParsedJob => j !== null && Boolean(j.title) && Boolean(j.company));
-  } catch { return []; }
-}
-
-// ── XML ───────────────────────────────────────────────────────────────────────
-
-function parseXML(text: string): ParsedJob[] {
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, "text/xml");
-    const getEl = (parent: Element | Document, ...tags: string[]) => {
-      for (const tag of tags) {
-        const el = parent.querySelector(tag);
-        if (el?.textContent) return el.textContent.trim();
-      }
-      return "";
+    const desc = get(c, "description", "desc", "job_description", "summary");
+    const salRaw = get(c, "salary", "compensation", "pay");
+    const sal = parseInt(salRaw.replace(/[^0-9]/g, ""), 10) || 0;
+    const tags = autoTag(desc + " " + title);
+    return {
+      id: `csv-${Date.now()}-${i}`,
+      title, company, location,
+      salaryMin: sal,
+      salaryMax: sal ? Math.round(sal * 1.2) : 0,
+      description: desc, tags,
+      category: inferCategory(title),
+      alignmentReason: `Strong fit for candidates with ${tags.slice(0, 2).join(" and ")} experience.`,
+      scaryQuestions: [
+        `Tell me about a time you led a high-stakes project at ${company || "a fast-paced company"}.`,
+        `How do you handle ambiguity in a ${title || "senior"} role?`,
+      ],
     };
-    const jobEls = Array.from(doc.querySelectorAll("job,position,vacancy,listing,item,Job,Position"));
-    return jobEls.map((el, i) => {
-      const title    = getEl(el, "title","job_title","position","role","JobTitle","Title");
-      const company  = getEl(el, "company","employer","organization","Company","CompanyName");
-      const location = getEl(el, "location","city","Location","City");
-      const desc     = getEl(el, "description","desc","job_description","summary","Description");
-      const salRaw   = getEl(el, "salary","compensation","Salary");
-      if (!title && !company) return null;
-      return makeJob("xml", i, title, company, location, desc, salRaw);
-    }).filter((j): j is ParsedJob => j !== null && Boolean(j.title) && Boolean(j.company));
-  } catch { return []; }
-}
-
-// ── Plain Text ────────────────────────────────────────────────────────────────
-
-function parsePlainText(text: string): ParsedJob[] {
-  const jobs: ParsedJob[] = [];
-  const sections = text.split(/\n{2,}|\-{3,}|={3,}/).filter((s) => s.trim().length > 10);
-  for (let i = 0; i < sections.length; i++) {
-    const lines = sections[i].split("\n").map((l) => l.trim()).filter(Boolean);
-    if (!lines.length) continue;
-    const labelGet = (label: string) => {
-      const rx = new RegExp(`^(?:${label})\\s*[:\\-]\\s*(.+)`, "i");
-      for (const l of lines) { const m = l.match(rx); if (m) return m[1].trim(); }
-      return "";
-    };
-    const title    = labelGet("title|job[_ ]?title|position|role") || lines[0];
-    const company  = labelGet("company|employer|organization|org");
-    const location = labelGet("location|city|place|office");
-    const desc     = labelGet("description|desc|summary|about|overview") || lines.slice(1).join(" ").slice(0, 500);
-    const salRaw   = labelGet("salary|compensation|pay|range");
-    if (title && company) jobs.push(makeJob("txt", i, title, company, location, desc, salRaw));
-  }
-  return jobs;
-}
-
-// ── RTF ───────────────────────────────────────────────────────────────────────
-
-function parseRTF(text: string): ParsedJob[] {
-  const plain = text
-    .replace(/\{\*?\\[^{}]+\}/g, "")
-    .replace(/\\par\b/gi, "\n\n")
-    .replace(/\\[a-z]+[-]?\d* ?/gi, "")
-    .replace(/[{}]/g, "")
-    .trim();
-  return parsePlainText(plain);
-}
-
-// ── File readers ──────────────────────────────────────────────────────────────
-
-function readText(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = (e) => resolve(e.target?.result as string);
-    r.onerror = () => reject(new Error("Could not read file"));
-    r.readAsText(file);
-  });
-}
-
-function readBuffer(file: File): Promise<ArrayBuffer> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = (e) => resolve(e.target?.result as ArrayBuffer);
-    r.onerror = () => reject(new Error("Could not read file"));
-    r.readAsArrayBuffer(file);
-  });
-}
-
-// ── Excel ─────────────────────────────────────────────────────────────────────
-
-async function parseExcel(buffer: ArrayBuffer): Promise<ParsedJob[]> {
-  const XLSX = (await import("xlsx")).default;
-  const wb = XLSX.read(buffer, { type: "array" });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  return parseCSV(XLSX.utils.sheet_to_csv(ws));
-}
-
-// ── Word (DOCX) ───────────────────────────────────────────────────────────────
-
-async function parseWord(buffer: ArrayBuffer): Promise<ParsedJob[]> {
-  const mammoth = (await import("mammoth")).default;
-  const { value } = await mammoth.extractRawText({ arrayBuffer: buffer });
-  return parsePlainText(value);
-}
-
-// ── PDF ───────────────────────────────────────────────────────────────────────
-
-async function parsePDF(buffer: ArrayBuffer): Promise<ParsedJob[]> {
-  const pdfjs = await import("pdfjs-dist");
-  pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-  const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
-  let text = "";
-  for (let p = 1; p <= pdf.numPages; p++) {
-    const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    text += content.items
-      .map((item) => ("str" in item ? (item as { str: string }).str : ""))
-      .join(" ") + "\n";
-  }
-  return parsePlainText(text);
+  }).filter((j) => j.title && j.company);
 }
 
 export default function AdminJobsClient() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [jobs, setJobs] = useState<ParsedJob[]>([]);
-  const [pageStatus, setPageStatus] = useState<"idle" | "preview" | "saving" | "done" | "error" | "clearing" | "parsing">("idle");
+  const [pageStatus, setPageStatus] = useState<"idle" | "preview" | "saving" | "done" | "error" | "clearing">("idle");
   const [result, setResult] = useState<{ added: number; total: number } | null>(null);
   const [errMsg, setErrMsg] = useState("");
   const [dbStats, setDbStats] = useState<DbStats>(null);
@@ -266,68 +114,25 @@ export default function AdminJobsClient() {
     } catch { /* ignore */ }
   }
 
-  useEffect(() => { fetchStats(); }, []);
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
-  async function processFile(file: File) {
-    setPageStatus("parsing");
-    setErrMsg("");
-
-    type StandardizedRecord = {
-      title: string;
-      company: string;
-      location: string;
-      description: string;
-      salaryRaw: string;
-    };
-
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "ingest";
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch("/api/admin/seed-jobs/ingest", {
-        method: "POST",
-        body: formData,
-      });
-
-      const payload = (await res.json()) as {
-        error?: string;
-        records?: StandardizedRecord[];
-      };
-
-      if (!res.ok) {
-        throw new Error(payload.error || "Format not yet supported");
-      }
-
-      const standardizedRecords = Array.isArray(payload.records) ? payload.records : [];
-
-      const parsed = standardizedRecords
-        .map((record, index) =>
-          makeJob(
-            ext,
-            index,
-            record.title,
-            record.company,
-            record.location,
-            record.description,
-            record.salaryRaw
-          )
-        )
-        .filter((job) => Boolean(job.title) && Boolean(job.company));
-
-      if (parsed.length) {
-        setJobs(parsed);
-        setPageStatus("preview");
-      } else {
-        setErrMsg("Format not yet supported or file is corrupted");
-        setPageStatus("error");
-      }
-    } catch (err) {
-      const message = err instanceof Error && err.message ? err.message : "Format not yet supported or file is corrupted";
-      setErrMsg(message);
+  function processFile(file: File) {
+    if (!file.name.endsWith(".csv")) {
+      setErrMsg("Only .csv files are supported.");
       setPageStatus("error");
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      const parsed = parseCSV(text);
+      setJobs(parsed);
+      if (parsed.length) { setPageStatus("preview"); }
+      else { setErrMsg("No valid jobs found. Ensure your CSV has Title, Company, Location columns."); setPageStatus("error"); }
+    };
+    reader.readAsText(file);
   }
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -340,7 +145,6 @@ export default function AdminJobsClient() {
     setDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) processFile(file);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSeed() {
@@ -384,8 +188,8 @@ export default function AdminJobsClient() {
         <div style={S.topRow}>
           <div>
             <span style={S.badge}>ADMIN · JOB REFINERY</span>
-            <h1 style={S.title}>Job Seeder</h1>
-            <p style={S.sub}>Upload any file format to populate the Targeting Array database.</p>
+            <h1 style={S.title}>CSV Job Seeder</h1>
+            <p style={S.sub}>Upload LinkedIn/Indeed CSVs to populate the Targeting Array database.</p>
           </div>
           {dbStats !== null && (
             <div style={S.statsBox}>
@@ -410,26 +214,19 @@ export default function AdminJobsClient() {
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" />
               <line x1="12" y1="18" x2="12" y2="12" /><polyline points="9 15 12 12 15 15" />
             </svg>
-            <p style={{ margin: "0 0 4px", fontWeight: 700, color: "#f8fafc", fontSize: "0.95rem" }}>{dragging ? "Drop file here" : "Drag & Drop any file"}</p>
+            <p style={{ margin: "0 0 4px", fontWeight: 700, color: "#f8fafc", fontSize: "0.95rem" }}>{dragging ? "Drop CSV here" : "Drag & Drop a CSV file"}</p>
             <p style={{ margin: "0 0 16px", color: "#94a3b8", fontSize: "0.82rem" }}>or click to browse</p>
-            <span style={S.uploadChip}>Select File →</span>
-            <input ref={fileRef} type="file" accept={ACCEPTED_EXTENSIONS} onChange={handleFile} style={{ display: "none" }} />
+            <span style={S.uploadChip}>Select CSV →</span>
+            <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={handleFile} style={{ display: "none" }} />
           </motion.div>
         )}
 
         {pageStatus === "idle" && (
           <div style={S.hintBox}>
-            <span style={{ color: "#94a3b8", fontSize: "0.8rem", marginRight: 4 }}>Supported:</span>
-            {["CSV", "TSV", "TXT", "RTF", "JSON", "XML", "XLS/XLSX", "DOC/DOCX", "PDF"].map((f) => (
-              <code key={f} style={S.codeChip}>{f}</code>
+            <span style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Required: </span>
+            {["Title", "Company", "Location", "Description"].map(c => (
+              <code key={c} style={S.codeChip}>{c}</code>
             ))}
-          </div>
-        )}
-
-        {pageStatus === "parsing" && (
-          <div style={{ textAlign: "center", padding: "48px" }}>
-            <div style={S.spinner} />
-            <p style={{ color: "#94a3b8", margin: "16px 0 0", fontSize: "0.88rem" }}>Parsing file…</p>
           </div>
         )}
 
