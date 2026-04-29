@@ -3,12 +3,13 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import { XP_PER_LEVEL, loadInterviewHistory } from "../lib/interviewStorage";
+import { loadInterviewHistory } from "../lib/interviewStorage";
+import { getProgressMeta, getTierByIP, isCandidateUnlocked, loadIP, saveIP } from "../lib/progression";
 import CoachTooltip from "../components/CoachTooltip";
 import "./page.css";
-
-const XP_KEY = "hirelyCoachXP";
 const LAB_KEY = "hirelyStarrLabProgressV2";
+const NEGOTIATION_SIM_BEST_KEY = "hirely.starr.negotiation.best.v1";
+const NEGOTIATOR_BADGE_KEY = "hirely.starr.badge.negotiator.v1";
 
 type GameId = "redline" | "sequence" | "pushback" | "quantifier" | "gatekeeper";
 
@@ -30,8 +31,6 @@ type GameCompletion = {
   detail: string;
 };
 
-const APPRENTICE_LEVEL = 3;
-const APPRENTICE_XP_THRESHOLD = (APPRENTICE_LEVEL - 1) * XP_PER_LEVEL;
 const NEW_GAMES: GameId[] = ["redline", "sequence", "pushback", "quantifier"];
 
 const defaultProgress: LabProgress = {
@@ -47,54 +46,40 @@ function clamp(num: number, min: number, max: number) {
   return Math.max(min, Math.min(max, num));
 }
 
-function levelFromXP(xp: number) {
-  return Math.floor(xp / XP_PER_LEVEL) + 1;
-}
-
-function rankFromLevel(level: number) {
-  if (level < 3) return "Novice";
-  if (level < 6) return "Apprentice";
-  if (level < 10) return "Candidate";
-  if (level < 15) return "Professional";
-  return "Executive";
-}
-
-const GAME_META: Record<GameId, { title: string; desc: string; minLevel: number }> = {
+const GAME_META: Record<GameId, { title: string; desc: string; minIp: number }> = {
   redline: {
     title: "Redline Resume Review",
     desc: "Novice flash-card speed drill for fluff and metric cleanup.",
-    minLevel: 1,
+    minIp: 0,
   },
   sequence: {
     title: "STARR Logic Puzzle",
     desc: "Novice drag/drop cards to build S-T-A-R-R flow with decoy control.",
-    minLevel: 1,
+    minIp: 0,
   },
   pushback: {
     title: "Push-Back Counter",
     desc: "Apprentice pressure rounds with multi-question interviewer follow-ups.",
-    minLevel: 3,
+    minIp: 0,
   },
   quantifier: {
     title: "Quantifier Lab",
     desc: "Apprentice metric forge to strengthen measurable outcomes.",
-    minLevel: 3,
+    minIp: 50,
   },
   gatekeeper: {
     title: "Gatekeeper Exam",
     desc: "Candidate gate exam for level-up eligibility and logic certification.",
-    minLevel: 6,
+    minIp: 125,
   },
 };
 
 function loadXP() {
-  if (typeof window === "undefined") return 0;
-  return parseInt(window.localStorage.getItem(XP_KEY) || "0", 10);
+  return loadIP();
 }
 
 function saveXP(next: number) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(XP_KEY, String(next));
+  saveIP(next);
 }
 
 function parseProgress(raw: string | null): LabProgress {
@@ -126,14 +111,6 @@ function saveLabProgress(progress: LabProgress, userId?: string | null) {
   if (typeof window === "undefined") return;
   const key = userId ? `${LAB_KEY}:${userId}` : LAB_KEY;
   window.localStorage.setItem(key, JSON.stringify(progress));
-}
-
-function highFidelityCount(progress: LabProgress) {
-  return NEW_GAMES.filter((g) => progress.highFidelityBadge[g]).length;
-}
-
-function hasApprenticeGate(progress: LabProgress) {
-  return highFidelityCount(progress) >= 2;
 }
 
 function initialTabFromQuery(moduleType: string | null): GameId {
@@ -212,7 +189,7 @@ function RedlineGame({ onComplete }: { onComplete: (result: GameCompletion) => v
       score,
       gold,
       highFidelity: gold,
-      baseXP: 420 + Math.round(score * 1.8),
+      baseXP: 6 + Math.round(score * 0.08),
       detail: `Accuracy ${Math.round(accuracy)}%, speed ${speed}/min`,
     });
   }, [finished, attempts, correct, onComplete]);
@@ -253,7 +230,7 @@ function RedlineGame({ onComplete }: { onComplete: (result: GameCompletion) => v
   }
 
   if (finished) {
-    return <p className="game-done">Scoring complete. Review your XP summary above.</p>;
+    return <p className="game-done">Scoring complete. Review your IP summary above.</p>;
   }
 
   return (
@@ -351,7 +328,7 @@ function SequenceGame({ weakAnswer, onComplete }: { weakAnswer: string; onComple
       score: normalized,
       gold,
       highFidelity: gold,
-      baseXP: 460 + Math.round(normalized * 2),
+      baseXP: 7 + Math.round(normalized * 0.08),
       detail: `Sequence score ${normalized} with decoy discipline`,
     });
   }
@@ -485,8 +462,14 @@ const PUSHBACK_STRESS: PushRound[] = [
   },
 ];
 
-function PushbackGame({ onComplete }: { onComplete: (result: GameCompletion) => void }) {
-  const [mode, setMode] = useState<"novice" | "apprentice">("novice");
+function PushbackGame({
+  onComplete,
+  negotiationMode,
+}: {
+  onComplete: (result: GameCompletion) => void;
+  negotiationMode?: boolean;
+}) {
+  const [mode, setMode] = useState<"novice" | "apprentice">(negotiationMode ? "apprentice" : "novice");
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -512,9 +495,18 @@ function PushbackGame({ onComplete }: { onComplete: (result: GameCompletion) => 
         score,
         gold,
         highFidelity: gold,
-        baseXP: 360 + Math.round(score * 2.2),
+        baseXP: 7 + Math.round(score * 0.08),
         detail: `${mode} pressure round with ${pct}% precision`,
       });
+
+      if (negotiationMode && typeof window !== "undefined") {
+        const best = Math.max(0, Math.min(100, Number(window.localStorage.getItem(NEGOTIATION_SIM_BEST_KEY) || "0")));
+        const nextBest = Math.max(best, score);
+        window.localStorage.setItem(NEGOTIATION_SIM_BEST_KEY, String(nextBest));
+        if (score >= 85) {
+          window.localStorage.setItem(NEGOTIATOR_BADGE_KEY, "1");
+        }
+      }
       return;
     }
     setIndex((v) => v + 1);
@@ -527,8 +519,29 @@ function PushbackGame({ onComplete }: { onComplete: (result: GameCompletion) => 
     <div>
       <div className="game-topline">
         <span className="chip">Mode</span>
-        <button className={`chip-toggle ${mode === "novice" ? "active" : ""}`} onClick={() => { setMode("novice"); setIndex(0); setPicked(null); setCorrect(0); }}>Novice</button>
-        <button className={`chip-toggle ${mode === "apprentice" ? "active" : ""}`} onClick={() => { setMode("apprentice"); setIndex(0); setPicked(null); setCorrect(0); }}>Stress Test</button>
+        <button
+          className={`chip-toggle ${mode === "novice" ? "active" : ""}`}
+          onClick={() => {
+            if (negotiationMode) return;
+            setMode("novice");
+            setIndex(0);
+            setPicked(null);
+            setCorrect(0);
+          }}
+        >
+          Novice
+        </button>
+        <button
+          className={`chip-toggle ${mode === "apprentice" ? "active" : ""}`}
+          onClick={() => {
+            setMode("apprentice");
+            setIndex(0);
+            setPicked(null);
+            setCorrect(0);
+          }}
+        >
+          {negotiationMode ? "Negotiation Sim" : "Stress Test"}
+        </button>
       </div>
       <div className="avatar-bubble">
         <p className="claim-title">AI claim:</p>
@@ -574,7 +587,7 @@ function QuantifierGame({ onComplete }: { onComplete: (result: GameCompletion) =
       score: impactScore,
       gold,
       highFidelity: gold,
-      baseXP: 390 + Math.round(impactScore * 2.4),
+      baseXP: 8 + Math.round(impactScore * 0.09),
       detail: `Impact score ${impactScore} from metric injection`,
     });
   }
@@ -777,6 +790,7 @@ function StarrLabInner() {
   const [lastSummary, setLastSummary] = useState("");
   const [activeGame, setActiveGame] = useState<GameId>(initialTabFromQuery(searchParams.get("moduleType")));
   const [modalGame, setModalGame] = useState<GameId | null>(null);
+  const negotiationMode = searchParams.get("sim") === "negotiation";
 
   const latestAnswer = useMemo(() => {
     const sessions = loadInterviewHistory(userId);
@@ -786,23 +800,18 @@ function StarrLabInner() {
   }, [userId]);
 
   useEffect(() => {
-    setXp(loadXP());
-    setProgress(loadLabProgress(userId));
+    queueMicrotask(() => {
+      setXp(loadXP());
+      setProgress(loadLabProgress(userId));
+    });
   }, [userId]);
 
-  const level = levelFromXP(xp);
-  const canPromote = hasApprenticeGate(progress);
-  const lockedAtNovice = level >= APPRENTICE_LEVEL && !canPromote;
-  const shownRank = lockedAtNovice ? "Novice (Badge Locked)" : rankFromLevel(level);
-
-  const xpToNext = XP_PER_LEVEL - (xp % XP_PER_LEVEL);
-  const xpPct = ((xp % XP_PER_LEVEL) / XP_PER_LEVEL) * 100;
+  const progressMeta = getProgressMeta(xp);
+  const shownRank = getTierByIP(xp).title;
 
   const playedGames = NEW_GAMES.filter((g) => progress.plays[g] > 0).length;
   const goldGames = NEW_GAMES.filter((g) => progress.goldStatus[g]).length;
   const moduleCount = progress.completedModules.length;
-  const hfCount = highFidelityCount(progress);
-
   const noviceReady = moduleCount >= 2 && playedGames >= 3;
   const apprenticeReady = moduleCount >= 5 && goldGames >= 3 && progress.gatekeeperPassed;
 
@@ -810,14 +819,9 @@ function StarrLabInner() {
 
   function lockReason(gameId: GameId): string {
     const meta = GAME_META[gameId];
-    const requiredXp = (meta.minLevel - 1) * XP_PER_LEVEL;
-
-    if (xp < requiredXp) {
-      return `Earn ${requiredXp - xp} XP to unlock ${meta.title}.`;
-    }
-
-    if (gameId === "gatekeeper" && !hasApprenticeGate(progress)) {
-      return "Earn 2 High-Fidelity badges to unlock Gatekeeper Exam.";
+    if (xp < meta.minIp) {
+      const requiredTier = getTierByIP(meta.minIp).title;
+      return `Reach ${requiredTier} level to unlock ${meta.title}.`; 
     }
 
     return "";
@@ -861,15 +865,11 @@ function StarrLabInner() {
       setLastSummary(`${result.gameId.toUpperCase()}: Logic Combo 1.5x applied. ${result.detail}`);
     }
 
-    const gated = !hasApprenticeGate(nextProgress);
-    const nextRawXP = xp + awarded;
-    const finalXP = gated && xp < APPRENTICE_XP_THRESHOLD && nextRawXP >= APPRENTICE_XP_THRESHOLD
-      ? APPRENTICE_XP_THRESHOLD - 1
-      : nextRawXP;
+    const finalXP = xp + awarded;
 
     setXp(finalXP);
     saveXP(finalXP);
-    setXpFlash(`+${finalXP - xp} XP`);
+    setXpFlash(`+${finalXP - xp} IP`);
     setTimeout(() => setXpFlash(""), 1900);
 
     writeProgress(nextProgress);
@@ -888,11 +888,11 @@ function StarrLabInner() {
     writeProgress(nextProgress);
 
     if (passed) {
-      const bonus = 520;
+      const bonus = 15;
       const finalXP = xp + bonus;
       setXp(finalXP);
       saveXP(finalXP);
-      setXpFlash(`+${bonus} XP`);
+      setXpFlash(`+${bonus} IP`);
       setTimeout(() => setXpFlash(""), 1900);
     }
   }
@@ -900,7 +900,7 @@ function StarrLabInner() {
   function renderGame(gameId: GameId) {
     if (gameId === "redline") return <RedlineGame onComplete={applyGameCompletion} />;
     if (gameId === "sequence") return <SequenceGame weakAnswer={latestAnswer} onComplete={applyGameCompletion} />;
-    if (gameId === "pushback") return <PushbackGame onComplete={applyGameCompletion} />;
+    if (gameId === "pushback") return <PushbackGame onComplete={applyGameCompletion} negotiationMode={negotiationMode} />;
     if (gameId === "quantifier") return <QuantifierGame onComplete={applyGameCompletion} />;
     return <GatekeeperExam onComplete={completeGatekeeper} />;
   }
@@ -912,25 +912,27 @@ function StarrLabInner() {
 
         <section className="xp-banner glass-card sl2-banner">
           <div className="xp-banner-left">
-            <span className="xp-level-badge">LV {level}</span>
+            <span className="xp-level-badge">IP</span>
             <div>
               <div className="xp-title">{shownRank}</div>
-              <div className="xp-sub">{xp} XP total · {xpToNext} XP to next level</div>
+              <div className="xp-sub">
+                {xp} IP total
+                {progressMeta.nextTier ? ` · ${progressMeta.remainingToNext} IP to ${progressMeta.nextTier.title}` : " · Master tier reached"}
+              </div>
             </div>
           </div>
           <div className="xp-bar-wrap">
             <div className="xp-bar-track">
-              <div className="xp-bar-fill" style={{ width: `${Math.round(xpPct)}%` }} />
+              <div className="xp-bar-fill" style={{ width: `${Math.round(progressMeta.progressPct)}%` }} />
             </div>
-            <span className="xp-pct">{Math.round(xpPct)}%</span>
+            <span className="xp-pct">{Math.round(progressMeta.progressPct)}%</span>
           </div>
           {xpFlash && <div className="xp-flash">{xpFlash}</div>}
         </section>
 
-        {lockedAtNovice && (
+        {!isCandidateUnlocked(xp) && (
           <div className="sl2-warning glass-card">
-            XP Engine Gate: High-Fidelity Badge required in at least two games before Apprentice unlock.
-            Current badges: {hfCount} / 2
+            Candidate unlock at 125 IP. Hard mode simulation and the 5th game unlock at Candidate.
           </div>
         )}
 
@@ -940,30 +942,14 @@ function StarrLabInner() {
           <p className="th-sub">All accelerator games and progression gates are consolidated here.</p>
         </section>
 
-        <section className="sl2-gatekeeper-table glass-card">
-          <h2>Gatekeeper Exam Ladder</h2>
-          <div className="gate-grid">
-            <div>
-              <strong>Novice</strong>
-              <p>Complete 2 modules</p>
-              <p>Play 3 games</p>
-              <p>Gatekeeper: N/A</p>
-            </div>
-            <div>
-              <strong>Apprentice</strong>
-              <p>Complete 5 modules</p>
-              <p>Gold in 3 games</p>
-              <p>Pass Gatekeeper 3-minute exam (Logic Score 7+)</p>
-            </div>
-            <div>
-              <strong>Live Status</strong>
-              <p>Modules: {moduleCount}/5</p>
-              <p>Games played: {playedGames}/3</p>
-              <p>Gold games: {goldGames}/3</p>
-              <p>Gatekeeper: {progress.gatekeeperPassed ? "Passed" : "Pending"}</p>
-              <p>Novice ready: {noviceReady ? "Yes" : "No"}</p>
-              <p>Apprentice ready: {apprenticeReady ? "Yes" : "No"}</p>
-            </div>
+        <section className="sl2-live-status glass-card">
+          <p className="eyebrow">Live Progress</p>
+          <div className="gate-status-row">
+            <span>Modules: {moduleCount}</span>
+            <span>Gold games: {goldGames}</span>
+            <span>Gatekeeper: {progress.gatekeeperPassed ? "✓ Passed" : "Pending"}</span>
+            <span>Novice ready: {noviceReady ? "✓" : "—"}</span>
+            <span>Apprentice ready: {apprenticeReady ? "✓" : "—"}</span>
           </div>
         </section>
 
@@ -991,7 +977,7 @@ function StarrLabInner() {
                   {locked ? <span className="sl2-lock-chip">LOCKED</span> : <span className="sl2-open-chip">OPEN</span>}
                 </div>
                 <p>{meta.desc}</p>
-                <p className="sl2-launch-level">Tier: {rankFromLevel(meta.minLevel)}</p>
+                <p className="sl2-launch-level">Tier: {getTierByIP(meta.minIp).title}</p>
                 {locked ? <p className="sl2-lock-note">{reason}</p> : <p className="sl2-open-note">Click to open this game nudge.</p>}
               </button>
             );
@@ -1017,8 +1003,8 @@ function StarrLabInner() {
 
         <section className="sl2-summary glass-card">
           <h3>Session Summary</h3>
-          <p>{lastSummary || "Complete any game to generate your performance summary and XP event."}</p>
-          <p>Logic Combo status: {progress.logicComboPrimed ? "Primed (win STARR Logic Puzzle for 1.5x XP)" : "Not primed"}</p>
+          <p>{lastSummary || "Complete any game to generate your performance summary and IP event."}</p>
+          <p>Logic Combo status: {progress.logicComboPrimed ? "Primed (win STARR Logic Puzzle for 1.5x IP)" : "Not primed"}</p>
         </section>
 
         {modalGame && (

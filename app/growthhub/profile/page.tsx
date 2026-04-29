@@ -5,7 +5,9 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser, useClerk } from "@clerk/nextjs";
 import mammoth from "mammoth";
-import { XP_PER_LEVEL } from "../../lib/interviewStorage";
+import { loadImpactEntries } from "../../lib/impactLog";
+import { XP_PER_LEVEL, loadInterviewHistory, loadTrainingProgress } from "../../lib/interviewStorage";
+import { getTierByIP, loadHighestResumeScore, loadIP, loadStreakState } from "../../lib/progression";
 import KjNudge from "../../components/KjNudge";
 import {
   clearSavedResume,
@@ -155,6 +157,11 @@ export default function ProfileHubPage() {
     weeklyInsights: false,
     jobAlerts: false,
   });
+  const [verificationPublic, setVerificationPublic] = useState(false);
+  const [verificationShowContact, setVerificationShowContact] = useState(false);
+  const [verificationSlug, setVerificationSlug] = useState("");
+  const [verificationSaved, setVerificationSaved] = useState(false);
+  const [verificationError, setVerificationError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [exitReason, setExitReason] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState("");
@@ -166,6 +173,21 @@ export default function ProfileHubPage() {
   useEffect(() => {
     if (!isLoaded) return;
 
+    async function loadVerificationProfile() {
+      try {
+        const res = await fetch("/api/user/verification-profile");
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          profile?: { publicEnabled?: boolean; showContact?: boolean; slug?: string };
+        };
+        setVerificationPublic(Boolean(data.profile?.publicEnabled));
+        setVerificationShowContact(Boolean(data.profile?.showContact));
+        setVerificationSlug(String(data.profile?.slug || ""));
+      } catch {
+        // ignore
+      }
+    }
+
     const profileRaw = localStorage.getItem(PROFILE_KEY);
     const profile: Partial<ProfileData> = profileRaw ? JSON.parse(profileRaw) : {};
     const kjRaw =
@@ -174,19 +196,22 @@ export default function ProfileHubPage() {
     const notifRaw = localStorage.getItem(NOTIF_KEY);
     const savedNotifs: Partial<NotifPrefs> = notifRaw ? JSON.parse(notifRaw) : {};
 
-    setJobTitle(profile.currentJobTitle ?? kj.knownJobTitle ?? "");
-    setSkills(kj.coreSkills ?? []);
-    setCity(profile.city ?? kj.city ?? "");
-    setState(profile.state ?? kj.state ?? "");
-    setZip(profile.zip ?? kj.zip ?? "");
-    setPreferredRole(profile.preferredRole ?? kj.knownJobTitle ?? "");
-    setCompanies(profile.targetCompanies ?? []);
-    setRelocation(profile.relocationPreferences ?? ["Local only"]);
-    setNotifs({ ...{ emailDigest: true, sessionReminders: true, weeklyInsights: false, jobAlerts: false }, ...savedNotifs });
-    setXp(loadXP());
-    const savedResume = loadSavedResume();
-    setResumeName(savedResume?.fileName ?? "");
-    setHydrated(true);
+    queueMicrotask(() => {
+      setJobTitle(profile.currentJobTitle ?? kj.knownJobTitle ?? "");
+      setSkills(kj.coreSkills ?? []);
+      setCity(profile.city ?? kj.city ?? "");
+      setState(profile.state ?? kj.state ?? "");
+      setZip(profile.zip ?? kj.zip ?? "");
+      setPreferredRole(profile.preferredRole ?? kj.knownJobTitle ?? "");
+      setCompanies(profile.targetCompanies ?? []);
+      setRelocation(profile.relocationPreferences ?? ["Local only"]);
+      setNotifs({ ...{ emailDigest: true, sessionReminders: true, weeklyInsights: false, jobAlerts: false }, ...savedNotifs });
+      setXp(loadXP());
+      const savedResume = loadSavedResume();
+      setResumeName(savedResume?.fileName ?? "");
+      setHydrated(true);
+    });
+    void loadVerificationProfile();
   }, [isLoaded]);
 
   const readTextFile = async (file: File) =>
@@ -339,6 +364,70 @@ export default function ProfileHubPage() {
     localStorage.setItem(NOTIF_KEY, JSON.stringify(updated));
   }
 
+  async function saveVerificationProfile() {
+    const masterUnlocked = getTierByIP(loadIP()).title === "Master";
+    if (verificationPublic && !masterUnlocked) {
+      setVerificationError("Public verification unlocks at Master tier (10,000 IP + required gate).");
+      return;
+    }
+    setVerificationError("");
+
+    const history = loadInterviewHistory();
+    const topSimulationScore = history.reduce((best, session) => {
+      const score = Number(session.starrScore || 0);
+      return Math.max(best, Number.isFinite(score) ? score : 0);
+    }, 0);
+    const tierTitle = getTierByIP(xp).title;
+    const verificationEntries = loadImpactEntries(userId);
+    const processLeadershipWins = verificationEntries.filter((entry) => {
+      const text = `${entry.action} ${entry.proof} ${entry.result}`.toLowerCase();
+      return /process\s*improvement|leadership/.test(text);
+    }).length;
+
+    if (tierTitle === "Expert") {
+      const hasMinimumWins = verificationEntries.length >= 15;
+      const hasMinimumCategoryWins = processLeadershipWins >= 5;
+      if (!hasMinimumWins || !hasMinimumCategoryWins) {
+        setVerificationError("Expert verification requires 15 Archive wins and at least 5 Process Improvement or Leadership wins.");
+        return;
+      }
+    }
+    const resumeScore = loadHighestResumeScore();
+    const consistencyWeeks = Math.floor(loadStreakState().streakDays / 7);
+    const certificationsCompleted = loadTrainingProgress().completedModules.length;
+    const badges = [
+      topSimulationScore >= 92 ? "Verified STAR Method Proficiency: Top 10%" : "",
+      consistencyWeeks >= 30 ? "Consistent Badge" : "",
+      certificationsCompleted >= 1 ? `${certificationsCompleted} Courses Completed` : "",
+    ].filter(Boolean);
+
+    try {
+      const res = await fetch("/api/user/verification-profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          publicEnabled: verificationPublic,
+          showContact: verificationShowContact,
+          levelTitle: tierTitle,
+          resumeScore,
+          topSimulationScore,
+          consistencyWeeks,
+          certificationsCompleted,
+          badges,
+        }),
+      });
+
+      const data = (await res.json()) as { profile?: { slug?: string } };
+      if (res.ok) {
+        setVerificationSlug(String(data.profile?.slug || verificationSlug));
+        setVerificationSaved(true);
+        setTimeout(() => setVerificationSaved(false), 2500);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   // ── Delete account ───────────────────────────────────────────────────────
   async function deleteAccount() {
     const keysToRemove = [PROFILE_KEY, PROFILE_DONE_KEY, KJ_EXTRACT_KEY, XP_KEY, NOTIF_KEY, "hirelyKjData"];
@@ -378,6 +467,7 @@ export default function ProfileHubPage() {
 
   const level = xpLevel(xp);
   const xpInLevel = xp % XP_PER_LEVEL;
+  const masterUnlocked = getTierByIP(loadIP()).title === "Master";
 
   return (
     <div className="ph-root">
@@ -789,6 +879,68 @@ export default function ProfileHubPage() {
                   on={notifs.jobAlerts}
                   onToggle={() => saveNotifs({ ...notifs, jobAlerts: !notifs.jobAlerts })}
                 />
+              </div>
+
+              <div className="ph-danger-box" style={{ borderColor: "rgba(16, 185, 129, 0.28)", marginTop: 24 }}>
+                <p className="ph-danger-title" style={{ color: "#6ee7b7" }}>Verified Talent Profile</p>
+                <p className="ph-danger-text">
+                  Publish a public verification page that highlights measurable professional achievements without exposing personal drafts.
+                </p>
+                <div className="ph-toggle-row" style={{ marginBottom: 12 }}>
+                  <div className="ph-toggle-info">
+                    <p className="ph-toggle-label">Public Profile</p>
+                    <p className="ph-toggle-desc">
+                      {masterUnlocked
+                        ? `Enable public view at /verify/${verificationSlug || "your-id"}`
+                        : "Unlock at Master tier (10,000 IP + gate) to publish publicly."}
+                    </p>
+                  </div>
+                  <Toggle
+                    on={verificationPublic}
+                    onToggle={() => {
+                      if (!masterUnlocked) {
+                        setVerificationError("Public verification unlocks at Master tier.");
+                        return;
+                      }
+                      setVerificationError("");
+                      setVerificationPublic((v) => !v);
+                    }}
+                  />
+                </div>
+                <div className="ph-toggle-row" style={{ marginBottom: 16 }}>
+                  <div className="ph-toggle-info">
+                    <p className="ph-toggle-label">Show Contact Info</p>
+                    <p className="ph-toggle-desc">Hide all personal details unless explicitly visible.</p>
+                  </div>
+                  <Toggle on={verificationShowContact} onToggle={() => setVerificationShowContact((v) => !v)} />
+                </div>
+                <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                  <button type="button" className="ph-btn-primary" onClick={saveVerificationProfile}>
+                    Save Verification Profile
+                  </button>
+                  {verificationSlug && (
+                    <a className="ph-btn-secondary" href={`/verify/${verificationSlug}`} target="_blank" rel="noreferrer">
+                      Open Public Profile
+                    </a>
+                  )}
+                  <AnimatePresence>
+                    {verificationSaved && (
+                      <motion.span
+                        className="ph-save-toast"
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        ✓ Verification profile updated
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                  {verificationError && (
+                    <span className="ph-save-toast" style={{ color: "#fca5a5", borderColor: "rgba(239, 68, 68, 0.35)" }}>
+                      {verificationError}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Danger Zone */}

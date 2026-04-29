@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import mammoth from "mammoth";
 import { useAuth } from "@clerk/nextjs";
@@ -11,6 +12,18 @@ import {
   type AtsCompatibility,
   type ResumeAuditReport,
 } from "@/app/lib/resumeAudit";
+import {
+  awardResumeScanForUniqueFile,
+  awardSuggestionAccepted,
+  getProgressMeta,
+  loadIP,
+  saveBaselineResumeScore,
+} from "@/app/lib/progression";
+import {
+  clearSavedResume,
+  loadSavedResume,
+  saveSavedResume,
+} from "@/app/lib/resumeStorage";
 import styles from "./page.module.css";
 
 type PdfTextContent = { items: Array<{ str?: string }> };
@@ -28,10 +41,17 @@ type PersistedOptimizerState = {
   scanCount: number;
   fileHash: string;
   scanKey?: string;
+  cacheVersion?: number;
   updatedAt: number;
 };
 
+type RuntimeConfig = {
+  resumeCacheVersion: number;
+};
+
 const OPTIMIZER_STATE_KEY_PREFIX = "hirely.optimizer.state.v1";
+const OPTIMIZER_HIGHSCORE_KEY = "hirely.optimizer.highscore.v1";
+const CANVAS_DRAFT_KEY = "hirely.canvas.draft.v1";
 
 function optimizerStateKey(userId: string | null | undefined): string {
   return `${OPTIMIZER_STATE_KEY_PREFIX}:${userId ?? "guest"}`;
@@ -73,6 +93,46 @@ function savePersistedOptimizerState(
 function clearPersistedOptimizerState(userId: string | null | undefined) {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(optimizerStateKey(userId));
+}
+
+function loadHighScore(): number {
+  if (typeof window === "undefined") return 0;
+  const value = Number(window.localStorage.getItem(OPTIMIZER_HIGHSCORE_KEY) || "0");
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.floor(value));
+}
+
+function maybeSaveHighScore(score: number): number {
+  const current = loadHighScore();
+  const next = Math.max(current, Math.max(0, Math.floor(score)));
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(OPTIMIZER_HIGHSCORE_KEY, String(next));
+  }
+  return next;
+}
+
+async function fetchRuntimeConfig(): Promise<RuntimeConfig> {
+  try {
+    const res = await fetch("/api/runtime-config");
+    if (!res.ok) return { resumeCacheVersion: 1 };
+    const data = (await res.json()) as RuntimeConfig;
+    return {
+      resumeCacheVersion: Number(data.resumeCacheVersion || 1),
+    };
+  } catch {
+    return { resumeCacheVersion: 1 };
+  }
+}
+
+async function fetchServerImpactEntries(): Promise<ImpactEntry[]> {
+  try {
+    const res = await fetch("/api/user/impact-ledger");
+    if (!res.ok) return [];
+    const data = (await res.json()) as { entries?: ImpactEntry[] };
+    return Array.isArray(data.entries) ? data.entries : [];
+  } catch {
+    return [];
+  }
 }
 
 function scoreTone(score: number): "good" | "warn" | "bad" {
@@ -127,6 +187,7 @@ function OptimizerSignalIcon() {
 }
 
 export default function UploadPage() {
+  const router = useRouter();
   const { userId } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [resumeText, setResumeText] = useState("");
@@ -142,28 +203,102 @@ export default function UploadPage() {
   const [report, setReport] = useState<ResumeAuditReport | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [lastScanKey, setLastScanKey] = useState("");
+  const [cacheVersion, setCacheVersion] = useState(1);
+  const [ip, setIp] = useState(0);
+  const [rewardFlash, setRewardFlash] = useState("");
+  const [highScore, setHighScore] = useState(0);
+  const [acceptedSuggestionTokens, setAcceptedSuggestionTokens] = useState<Record<string, true>>({});
+  const [usingPrefilledResume, setUsingPrefilledResume] = useState(false);
+  const [recentCutoffTs, setRecentCutoffTs] = useState(
+    () => Date.now() - 90 * 24 * 60 * 60 * 1000
+  );
 
-  useEffect(() => {
-    setImpactEntries(loadImpactEntries(userId));
-
-    const persisted = loadPersistedOptimizerState(userId);
-    if (persisted) {
-      setResumeText(persisted.resumeText);
-      setFileName(persisted.fileName);
-      setReport(persisted.report);
-      setScanCount(persisted.scanCount || 0);
-      setLastScanKey(persisted.scanKey || "");
-      setScoreDelta(null);
+  const refreshImpactEntries = useCallback(async () => {
+    const cutoffTs = Date.now() - 90 * 24 * 60 * 60 * 1000;
+    setRecentCutoffTs(cutoffTs);
+    const localEntries = loadImpactEntries(userId);
+    if (!userId) {
+      setImpactEntries(localEntries);
+      return localEntries;
     }
+
+    const serverEntries = await fetchServerImpactEntries();
+    const merged = [...serverEntries, ...localEntries]
+      .filter((entry, index, all) => all.findIndex((item) => item.id === entry.id) === index)
+      .sort((left, right) => right.createdAt - left.createdAt)
+      .slice(0, 40);
+    setImpactEntries(merged);
+    return merged;
   }, [userId]);
 
   useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      const runtime = await fetchRuntimeConfig();
+      if (cancelled) return;
+
+      setCacheVersion(runtime.resumeCacheVersion);
+      setIp(loadIP());
+      setHighScore(loadHighScore());
+      await refreshImpactEntries();
+
+      const persisted = loadPersistedOptimizerState(userId);
+      if (persisted && (persisted.cacheVersion || 1) !== runtime.resumeCacheVersion) {
+        clearPersistedOptimizerState(userId);
+        return;
+      }
+
+      if (persisted) {
+        setResumeText(persisted.resumeText);
+        setFileName(persisted.fileName);
+        setReport(persisted.report);
+        setScanCount(persisted.scanCount || 0);
+        setLastScanKey(persisted.scanKey || "");
+        setScoreDelta(null);
+        return;
+      }
+
+      if (userId) {
+        const savedResume = loadSavedResume();
+        if (savedResume?.text?.trim()) {
+          setResumeText(cleanResumeText(savedResume.text));
+          setFileName(savedResume.fileName || "Saved resume");
+          setUsingPrefilledResume(true);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, refreshImpactEntries]);
+
+  useEffect(() => {
+    function onFocus() {
+      void refreshImpactEntries();
+    }
+
+    function onStorage(event: StorageEvent) {
+      if (!event.key || !event.key.includes("hirelyImpactLog")) return;
+      void refreshImpactEntries();
+    }
+
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [refreshImpactEntries]);
+
+  useEffect(() => {
     if (!isScanning) {
-      setScanProgress(0);
+      queueMicrotask(() => setScanProgress(0));
       return;
     }
 
-    setScanProgress(12);
+    queueMicrotask(() => setScanProgress(12));
     const id = window.setInterval(() => {
       setScanProgress((value) => (value >= 90 ? value : value + 6));
     }, 180);
@@ -250,10 +385,14 @@ export default function UploadPage() {
       clearPersistedOptimizerState(userId);
       setResumeText(cleaned);
       setFileName(file.name);
+      setUsingPrefilledResume(false);
       setReport(null);
       setScanCount(0);
       setLastScanKey("");
       setScoreDelta(null);
+      if (userId && cleaned) {
+        saveSavedResume({ text: cleaned, fileName: file.name });
+      }
       await scanResume(cleaned, file.name);
     } catch {
       setError("Unable to read the file. Please try a different file.");
@@ -274,8 +413,7 @@ export default function UploadPage() {
     setError("");
 
     const previousScore = report?.overallScore ?? null;
-    const latestImpactEntries = loadImpactEntries(userId);
-    setImpactEntries(latestImpactEntries);
+    const latestImpactEntries = await refreshImpactEntries();
     const recentEntriesForScan = latestImpactEntries.filter(
       (entry) => entry.createdAt >= Date.now() - 90 * 24 * 60 * 60 * 1000
     );
@@ -295,7 +433,20 @@ export default function UploadPage() {
 
     if (report && lastScanKey === nextScanKey) {
       setScoreDelta(0);
-      setScanCount((count) => count + 1);
+      setScanCount((count) => {
+        const nextCount = count + 1;
+        savePersistedOptimizerState(userId, {
+          resumeText: cleaned,
+          fileName: activeFileName,
+          report,
+          scanCount: nextCount,
+          fileHash: hashText(cleaned),
+          scanKey: nextScanKey,
+          cacheVersion,
+          updatedAt: Date.now(),
+        });
+        return nextCount;
+      });
       return;
     }
 
@@ -320,6 +471,9 @@ export default function UploadPage() {
       setReport(nextReport);
       setFileName(activeFileName);
       setResumeText(cleaned);
+      if (userId && cleaned) {
+        saveSavedResume({ text: cleaned, fileName: activeFileName || "Saved resume" });
+      }
       setLastScanKey(nextScanKey);
       setScanProgress(100);
       const fileHash = hashText(cleaned);
@@ -332,10 +486,39 @@ export default function UploadPage() {
           scanCount: nextCount,
           fileHash,
           scanKey: nextScanKey,
+          cacheVersion,
           updatedAt: Date.now(),
         });
         return nextCount;
       });
+
+      if (userId) {
+        await fetch("/api/user/resume-audit-state", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            overallScore: nextReport.overallScore,
+            fileName: activeFileName,
+            updatedAt: Date.now(),
+          }),
+        });
+      }
+
+      // Persist first-ever scan as the immutable baseline
+      saveBaselineResumeScore(nextReport.overallScore);
+
+      const scanReward = awardResumeScanForUniqueFile(fileHash, cleaned.length);
+      if (scanReward.awarded) {
+        setIp(scanReward.ip);
+        setRewardFlash("+10 IP (Unique file scanned)");
+        window.setTimeout(() => setRewardFlash(""), 2200);
+      } else if (scanReward.reason) {
+        setRewardFlash(scanReward.reason);
+        window.setTimeout(() => setRewardFlash(""), 3000);
+      }
+
+      setHighScore(maybeSaveHighScore(nextReport.overallScore));
+
       setScoreDelta(
         previousScore === null ? null : nextReport.overallScore - previousScore
       );
@@ -362,6 +545,22 @@ export default function UploadPage() {
     }
   };
 
+  const removePrefilledResume = () => {
+    clearSavedResume();
+    clearPersistedOptimizerState(userId);
+    setResumeText("");
+    setFileName("");
+    setUsingPrefilledResume(false);
+    setReport(null);
+    setScanCount(0);
+    setScoreDelta(null);
+    setError("");
+    setLastScanKey("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const copyImpactEntry = async (entry: ImpactEntry) => {
     try {
       await navigator.clipboard.writeText(formatImpactEntry(entry));
@@ -373,15 +572,39 @@ export default function UploadPage() {
   };
 
   const currentTone = toneStyles(report?.overallScore ?? 0);
+  const progressMeta = getProgressMeta(ip);
   const activeSwaps = report?.detailedSwaps.length ? report.detailedSwaps : [];
   const activeCleanUp = report?.cleanUp.length ? report.cleanUp : [];
-  const ninetyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
-  const recentImpactEntries = impactEntries.filter((entry) => entry.createdAt >= ninetyDaysAgo);
+  const recentImpactEntries = impactEntries.filter((entry) => entry.createdAt >= recentCutoffTs);
   const duplicateMap = new Map<string, number>();
   for (const entry of recentImpactEntries) {
     const key = `${normalizeText(entry.action)}|${normalizeText(entry.result)}`;
     duplicateMap.set(key, (duplicateMap.get(key) || 0) + 1);
   }
+
+  const acceptSuggestion = (token: string) => {
+    const reward = awardSuggestionAccepted(token);
+    if (reward.awarded) {
+      setIp(reward.ip);
+      setRewardFlash("+10 IP (Suggestion applied)");
+      window.setTimeout(() => setRewardFlash(""), 2200);
+      setAcceptedSuggestionTokens((prev) => ({ ...prev, [token]: true }));
+    }
+  };
+
+  const openCanvasWithDraft = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(
+        CANVAS_DRAFT_KEY,
+        JSON.stringify({
+          resumeText: cleanResumeText(resumeText),
+          source: "optimizer",
+          updatedAt: Date.now(),
+        })
+      );
+    }
+    router.push("/canvas");
+  };
 
   return (
     <main className={styles.page}>
@@ -399,20 +622,23 @@ export default function UploadPage() {
               <p className={styles.kicker}>Resume Optimizer</p>
               <h1 className={styles.title}>Instant Resume Optimization Engine</h1>
               <p className={styles.subtitle}>
-                Upload, scan, improve, and re-scan. Every click runs a fresh audit and shows
-                whether your score moved.
+                Scan your resume, design your armor in Canvas, then pressure-test it in Final Boss sims.
               </p>
               <div className={styles.heroControls}>
                 <button
                   type="button"
                   className={styles.drawerBtn}
-                  onClick={() => setDrawerOpen(true)}
+                  onClick={() => {
+                    void refreshImpactEntries();
+                    setDrawerOpen(true);
+                  }}
                 >
                   My Impact Log
                 </button>
                 <span className={styles.heroMeta}>
-                  {impactEntries.length} saved win{impactEntries.length === 1 ? "" : "s"}
+                  {impactEntries.length} saved win{impactEntries.length === 1 ? "" : "s"} • {ip} IP • {progressMeta.tier.title}
                 </span>
+                {rewardFlash && <span className={styles.rewardFlash}>{rewardFlash}</span>}
               </div>
             </div>
             <div className={styles.signalOrb} aria-hidden="true">
@@ -431,7 +657,7 @@ export default function UploadPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.08, ease: "easeOut" }}
           >
-            <h2 className={styles.sectionTitle}>1) Intake and Edit</h2>
+            <h2 className={styles.sectionTitle}>1) Scan and Design</h2>
 
             <div className={styles.uploadRow}>
               <input
@@ -452,6 +678,16 @@ export default function UploadPage() {
               </button>
 
               {fileName && <span className={styles.filePill}>{fileName}</span>}
+              {usingPrefilledResume && (
+                <button
+                  type="button"
+                  onClick={removePrefilledResume}
+                  className={styles.secondaryBtn}
+                  disabled={isParsing || isScanning}
+                >
+                  Remove Prefilled Resume
+                </button>
+              )}
             </div>
 
             <p className={styles.hint}>
@@ -509,7 +745,32 @@ export default function UploadPage() {
                         : "No score change"
                   : "Ready for first scan"}
               </span>
+              {report && (
+                <span className={styles.highScoreBadge}>
+                  High Score: {Math.max(highScore, report.overallScore)}
+                </span>
+              )}
             </div>
+
+            <div className={styles.canvasCtaRow}>
+              <p className={styles.canvasCtaText}>
+                Moving from reading to designing: open Hirely Canvas to architect your resume blocks.
+              </p>
+              <button type="button" className={styles.canvasCtaBtn} onClick={openCanvasWithDraft}>
+                Fix in Canvas
+              </button>
+            </div>
+
+            {report && report.overallScore < 70 && (
+              <div className={styles.canvasCtaRow}>
+                <p className={styles.canvasCtaText}>
+                  Scan is below battle-ready. Fix in Canvas with your current draft preloaded.
+                </p>
+                <button type="button" className={styles.canvasCtaBtn} onClick={openCanvasWithDraft}>
+                  Fix in Canvas
+                </button>
+              </div>
+            )}
 
             {isScanning && (
               <div className={styles.scanProgress} aria-live="polite">
@@ -525,6 +786,10 @@ export default function UploadPage() {
 
             <p className={styles.hint}>
               See how recruiters will view your experience.
+            </p>
+
+            <p className={styles.hint}>
+              When your design is ready, enter the Tactical Arena and test it against Final Boss personas.
             </p>
           </motion.article>
 
@@ -670,6 +935,16 @@ export default function UploadPage() {
 
                       <p className={styles.xyzLabel}>Power Suggestion</p>
                       <p className={styles.xyzPower}>{audit.powerSuggestion}</p>
+                      <button
+                        type="button"
+                        className={styles.acceptBtn}
+                        onClick={() => acceptSuggestion(`xyz:${audit.powerSuggestion}`)}
+                        disabled={Boolean(acceptedSuggestionTokens[`xyz:${audit.powerSuggestion}`])}
+                      >
+                        {acceptedSuggestionTokens[`xyz:${audit.powerSuggestion}`]
+                          ? "Applied"
+                          : "Apply Suggestion (+10 IP)"}
+                      </button>
                     </article>
                   ))}
                 </div>
@@ -691,6 +966,16 @@ export default function UploadPage() {
                       <p className={styles.swapAfter}>{swap.tryThis}</p>
                       <p className={styles.xyzLabel}>Why This Is Better</p>
                       <p className={styles.swapReason}>{swap.reason}</p>
+                      <button
+                        type="button"
+                        className={styles.acceptBtn}
+                        onClick={() => acceptSuggestion(`swap:${swap.tryThis}`)}
+                        disabled={Boolean(acceptedSuggestionTokens[`swap:${swap.tryThis}`])}
+                      >
+                        {acceptedSuggestionTokens[`swap:${swap.tryThis}`]
+                          ? "Applied"
+                          : "Apply Rewrite (+10 IP)"}
+                      </button>
                     </article>
                   ))}
                 </div>

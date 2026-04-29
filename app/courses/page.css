@@ -1,0 +1,366 @@
+/* ── Root ── */
+.ac-root {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 24px 120px;
+  position: relative;
+}
+
+/* ── Header ── */
+.ac-header {
+  margin-bottom: 32px;
+}
+
+.ac-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #10b981;
+  margin: 0 0 8px;
+}
+
+.ac-h1 {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 800;
+  color: #f1f5f9;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.ac-sub {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin: 0;
+  max-width: 56ch;
+  line-height: 1.6;
+}
+
+/* ── Level Group ── */
+.ac-level-group {
+  margin-bottom: 36px;
+}
+
+.ac-level-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ac-level-progress {
+  margin: 0 0 16px;
+}
+
+.ac-level-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.ac-level-progress-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.ac-level-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22d3ee, #0284c7);
+}
+
+.ac-level-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.ac-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ac-level-badge--unlocked {
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.07);
+}
+
+/* ── Course Grid ── */
+.ac-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+/* ── Course Card ── */
+.ac-card {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ac-card--unlocked:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(16, 185, 129, 0.2) inset;
+}
+
+.ac-card--locked {
+  filter: grayscale(0.9) blur(0.35px);
+  opacity: 0.62;
+}
+
+.ac-card--apprentice {
+  border-color: rgba(217, 119, 6, 0.35);
+  box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.08) inset;
+}
+
+.ac-card--apprentice.ac-card--unlocked:hover {
+  border-color: rgba(217, 119, 6, 0.55);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(217, 119, 6, 0.25) inset;
+}
+
+.ac-card--unlocked.ac-card--candidate {
+  border-color: rgba(14, 165, 233, 0.35);
+  box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.1) inset;
+}
+
+.ac-card--candidate.ac-card--unlocked:hover {
+  border-color: rgba(14, 165, 233, 0.5);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(14, 165, 233, 0.25) inset;
+}
+
+.ac-card--executive {
+  border-color: rgba(250, 204, 21, 0.35);
+  box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.08) inset;
+  background:
+    linear-gradient(145deg, rgba(250, 204, 21, 0.08), rgba(203, 213, 225, 0.06)),
+    rgba(255, 255, 255, 0.03);
+}
+
+.ac-card--executive.ac-card--unlocked:hover {
+  border-color: rgba(250, 204, 21, 0.58);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(250, 204, 21, 0.32) inset;
+}
+
+.ac-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.ac-card-track {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #10b981;
+}
+
+.ac-masterclass-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #fde68a;
+  background: rgba(250, 204, 21, 0.14);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.ac-card-completed-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.ac-card-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+
+.ac-card-summary {
+  font-size: 0.84rem;
+  color: #94a3b8;
+  margin: 0 0 16px;
+  line-height: 1.55;
+  flex: 1;
+}
+
+.ac-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ac-card-time {
+  font-size: 0.71rem;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.ac-card-level-pill {
+  font-size: 0.71rem;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ac-bullet-progress {
+  margin-bottom: 12px;
+}
+
+.ac-bullet-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.ac-bullet-progress-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.ac-bullet-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0ea5e9, #0284c7);
+}
+
+.ac-card-progress-note {
+  margin: 0 0 12px;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: #7dd3fc;
+  background: rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.ac-card-progress-note--executive {
+  color: #fde68a;
+  background: rgba(250, 204, 21, 0.1);
+  border-color: rgba(250, 204, 21, 0.32);
+}
+
+/* ── Buttons ── */
+.ac-btn-start {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+  background: linear-gradient(135deg, #064e3b, #065f46);
+  color: #fff;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  text-decoration: none;
+}
+
+.ac-btn-start:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 8px 20px rgba(6, 78, 59, 0.4);
+}
+
+.ac-btn-review {
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ac-btn-review:hover {
+  filter: brightness(1.15);
+  box-shadow: none;
+}
+
+.ac-btn-locked {
+  background: rgba(255, 255, 255, 0.04);
+  color: #475569;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: not-allowed;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  gap: 6px;
+}
+
+/* Lock overlay on card */
+.ac-lock-icon {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  opacity: 0.35;
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
+/* ── Divider ── */
+.ac-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 36px;
+}

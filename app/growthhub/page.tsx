@@ -4,12 +4,11 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import {
   loadGrowthHubSnapshot,
   loadInterviewHistory,
   migrateGuestDataToUser,
-  XP_PER_LEVEL,
   type GrowthHubSnapshot,
 } from "../lib/interviewStorage";
 import {
@@ -24,28 +23,48 @@ import {
   saveImpactEntry,
   type ImpactEntry,
 } from "../lib/impactLog";
+import {
+  applyDailyStreakBonus,
+  awardImpactLedgerEntry,
+  HARD_GATES,
+  LEVELS,
+  getProgressMeta,
+  loadIP,
+  loadStreakState,
+} from "../lib/progression";
+import {
+  buildCourseGateSignals,
+  COURSE_CATALOG,
+  getCourseLevelAccess,
+  LEVEL_ORDER,
+  loadCompletedCourses,
+} from "../courses/data";
 import "./page.css";
 
+async function fetchServerImpactEntries(): Promise<ImpactEntry[]> {
+  try {
+    const res = await fetch("/api/user/impact-ledger");
+    if (!res.ok) return [];
+    const data = (await res.json()) as { entries?: ImpactEntry[] };
+    return Array.isArray(data.entries) ? data.entries : [];
+  } catch {
+    return [];
+  }
+}
+
+async function pushImpactEntriesToServer(entries: ImpactEntry[]) {
+  try {
+    await fetch("/api/user/impact-ledger", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ entries }),
+    });
+  } catch {
+    // ignore sync failures
+  }
+}
+
 // ─── XP helpers (mirrors training page) ───────────────────────────────────
-const XP_KEY = "hirelyCoachXP";
-
-function loadXP(): number {
-  if (typeof window === "undefined") return 0;
-  return parseInt(window.localStorage.getItem(XP_KEY) || "0", 10);
-}
-
-function xpLevel(xp: number) {
-  return Math.floor(xp / XP_PER_LEVEL) + 1;
-}
-
-function xpTitle(level: number): string {
-  if (level < 3) return "Novice";
-  if (level < 6) return "Apprentice";
-  if (level < 10) return "Professional";
-  if (level < 15) return "Senior";
-  return "Executive";
-}
-
 // ─── STARR → readiness (weighted toward recent performance) ───────────────
 function readiness(starrScore: number): number {
   return Math.min(100, Math.round(starrScore));
@@ -57,17 +76,24 @@ function sessionJobTitle(session: { jobTitle?: string; job: string }): string {
 }
 
 function sessionLevel(session: { level?: string; questions: string[] }): string {
-  if (session.level) return session.level;
+  const fromLevel = session.level?.match(/tier-(\d)/i)?.[1];
+  const tierFromLevel = fromLevel ? Number(fromLevel) : 0;
+  if (tierFromLevel >= 1 && tierFromLevel <= 7) return `Tier ${tierFromLevel}`;
+
   const n = session.questions.length;
-  if (n <= 3) return "Quick";
-  if (n <= 6) return "Medium";
-  return "Intensive";
+  if (n <= 3) return "Tier 1";
+  if (n === 4) return "Tier 2";
+  if (n === 5) return "Tier 3";
+  if (n === 6) return "Tier 4";
+  if (n === 7) return "Tier 5";
+  if (n === 8) return "Tier 6";
+  return "Tier 7";
 }
 
 function levelVariant(level: string): "quick" | "medium" | "intensive" {
-  const l = level.toLowerCase();
-  if (l === "quick") return "quick";
-  if (l === "medium") return "medium";
+  const tier = Number(level.match(/tier\s*(\d)/i)?.[1] || "1");
+  if (tier <= 2) return "quick";
+  if (tier <= 5) return "medium";
   return "intensive";
 }
 
@@ -145,6 +171,21 @@ function weaknessToModule(weakness: string): string {
   }
   return "Core STARR Fundamentals";
 }
+
+const PROFESSIONAL_TITLES: Record<(typeof LEVEL_ORDER)[number], string> = {
+  Novice: "Associate",
+  Apprentice: "Specialist",
+  Candidate: "Elite Prospect",
+  Expert: "Systems Architect",
+  Executive: "Strategic Leader",
+  Advanced: "Principal Strategist",
+  Master: "Industry Authority",
+};
+
+type LevelUpModalData = {
+  level: (typeof LEVEL_ORDER)[number];
+  title: string;
+};
 
 // ─── Circular SVG progress ────────────────────────────────────────────────
 function ReadinessMeter({ score }: { score: number }) {
@@ -284,6 +325,17 @@ function TargetingIcon() {
   );
 }
 
+  function AcademyIcon() {
+    return (
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <path d="M24 8L8 18L24 28L40 18L24 8Z" />
+        <path d="M14 23V33C17 36 20.5 37.5 24 37.5C27.5 37.5 31 36 34 33V23" />
+        <path d="M40 18V30" />
+        <circle cx="40" cy="32" r="2" />
+      </svg>
+    );
+  }
+
   function ProfileHubIcon() {
     return (
       <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
@@ -320,6 +372,20 @@ function ReadinessPill({ score }: { score: number }) {
   return <span className="gh-readiness-pill">{score}% Readiness</span>;
 }
 
+function StreakRing({ streakDays }: { streakDays: number }) {
+  const capped = Math.max(1, Math.min(streakDays, 14));
+  const pct = Math.round((capped / 14) * 100);
+
+  return (
+    <div className="gh-streak-wrap" title="Consistency streak">
+      <div className="gh-streak-ring" style={{ ["--streak-pct" as string]: `${pct}%` }}>
+        <span className="gh-streak-flame" aria-hidden="true">🔥</span>
+      </div>
+      <span className="gh-streak-days">{streakDays}d</span>
+    </div>
+  );
+}
+
 // ─── Action Card ─────────────────────────────────────────────────────────
 function ActionCard({
   href,
@@ -333,7 +399,7 @@ function ActionCard({
   icon: ReactNode;
   title: string;
   desc: string;
-  variant: "simulation" | "training" | "archive" | "targeting" | "profile";
+  variant: "simulation" | "training" | "archive" | "targeting" | "profile" | "academy";
   delay: number;
 }) {
   return (
@@ -360,9 +426,17 @@ function ActionCard({
 
 // ─── Main Page ────────────────────────────────────────────────────────────
 const PROFILE_DONE_KEY = "hirelyProfileDone";
+const MASTERY_UNLOCK_KEY = "hirely.mastery.unlocked.v1";
+const MASTERY_EVENT_PENDING_KEY = "hirely.mastery.event.pending.v1";
+const MASTERY_EVENT_SEEN_KEY = "hirely.mastery.event.seen.v1";
+
+type VerificationProfilePayload = {
+  profile?: { publicEnabled?: boolean; slug?: string; credentialId?: string };
+};
 
 export default function GrowthHubPage() {
   const { userId } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
   const [snapshot, setSnapshot] = useState<GrowthHubSnapshot | null>(null);
   const [history, setHistory] = useState<ReturnType<typeof loadInterviewHistory>>([]);
@@ -372,11 +446,23 @@ export default function GrowthHubPage() {
   const [impactResult, setImpactResult] = useState("");
   const [impactMessage, setImpactMessage] = useState("");
   const [xp, setXp] = useState(0);
+  const [streakDays, setStreakDays] = useState(0);
   const [hydrated, setHydrated] = useState(false);
   const [focusModal, setFocusModal] = useState<FocusModalData | null>(null);
+  const [levelUpModal, setLevelUpModal] = useState<LevelUpModalData | null>(null);
+  const [eliteModalOpen, setEliteModalOpen] = useState(false);
+  const [publicPortfolioUrl, setPublicPortfolioUrl] = useState("");
+  const [publicPortfolioEnabled, setPublicPortfolioEnabled] = useState(false);
+  const [verificationCredentialId, setVerificationCredentialId] = useState("");
+  const [copiedPortfolioUrl, setCopiedPortfolioUrl] = useState(false);
+  const [masteryUnlocked, setMasteryUnlocked] = useState(false);
+  const [certificateBusy, setCertificateBusy] = useState(false);
+  const [certificateMessage, setCertificateMessage] = useState("");
   const [accountProgress, setAccountProgress] = useState<AccountInterviewProgress>(EMPTY_INTERVIEW_PROGRESS);
 
   useEffect(() => {
+    let cancelled = false;
+
     // ── Onboarding gate: hard redirect if profile not confirmed ──
     const profileDone = localStorage.getItem(PROFILE_DONE_KEY);
     if (!profileDone) {
@@ -390,37 +476,66 @@ export default function GrowthHubPage() {
     const localSnap = loadGrowthHubSnapshot(userId);
     const hist = loadInterviewHistory(userId);
     const impacts = loadImpactEntries(userId);
-    const storedXp = loadXP();
+    const storedIp = loadIP();
+    const streakUpdate = applyDailyStreakBonus();
+    const fallbackStreak = loadStreakState();
+    const effectiveIp = Math.max(storedIp, streakUpdate.ip);
 
     if (userId) {
       loadAccountInterviewProgress()
         .then((progress) => {
+          if (cancelled) return;
           setAccountProgress(progress);
           const fallbackSnap = localSnap ?? snapshotFromProgress(progress);
           setSnapshot(fallbackSnap);
         })
         .catch(() => {
+          if (cancelled) return;
           setAccountProgress(EMPTY_INTERVIEW_PROGRESS);
           setSnapshot(localSnap);
         })
-        .finally(() => {
+        .finally(async () => {
+          if (cancelled) return;
+          const serverEntries = await fetchServerImpactEntries();
+          const mergedEntries = [...serverEntries, ...impacts]
+            .filter((entry, index, all) => all.findIndex((item) => item.id === entry.id) === index)
+            .sort((left, right) => right.createdAt - left.createdAt)
+            .slice(0, 40);
+
+          if (!cancelled) {
+            if (mergedEntries.length) {
+              await pushImpactEntriesToServer(mergedEntries);
+            }
+            setImpactEntries(mergedEntries);
+          }
+
           setHistory(hist);
-          setImpactEntries(impacts);
-          setXp(storedXp);
+          setXp(effectiveIp);
+          setStreakDays((streakUpdate.streak.streakDays || fallbackStreak.streakDays || 0));
           setHydrated(true);
         });
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
-    setAccountProgress(EMPTY_INTERVIEW_PROGRESS);
-    setSnapshot(localSnap);
-    setHistory(hist);
-    setImpactEntries(impacts);
-    setXp(storedXp);
-    setHydrated(true);
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setAccountProgress(EMPTY_INTERVIEW_PROGRESS);
+      setSnapshot(localSnap);
+      setHistory(hist);
+      setImpactEntries(impacts);
+      setXp(effectiveIp);
+      setStreakDays((streakUpdate.streak.streakDays || fallbackStreak.streakDays || 0));
+      setHydrated(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [userId, router]);
 
-  const saveImpactLogEntry = () => {
+  const saveImpactLogEntry = async () => {
     const savedEntry = saveImpactEntry(
       {
         action: impactAction,
@@ -435,19 +550,268 @@ export default function GrowthHubPage() {
       return;
     }
 
-    setImpactEntries(loadImpactEntries(userId));
+    const nextEntries = loadImpactEntries(userId);
+    setImpactEntries(nextEntries);
+
+    const reward = awardImpactLedgerEntry(savedEntry.id);
+    if (reward.awarded) {
+      setXp(reward.ip);
+    }
+
+    if (userId) {
+      await pushImpactEntriesToServer(nextEntries);
+    }
     setImpactAction("");
     setImpactProof("");
     setImpactResult("");
-    setImpactMessage("Impact saved. Resume Optimizer can use it now.");
+    setImpactMessage(reward.awarded ? "Impact saved. +5 IP added." : "Impact saved.");
   };
 
   const score = snapshot ? readiness(snapshot.starrScore) : 0;
-  const module = snapshot?.topWeakness
+  const focusModule = snapshot?.topWeakness
     ? weaknessToModule(snapshot.topWeakness)
     : null;
 
   const isReturningUser = Boolean(snapshot) || history.length > 0 || accountProgress.hasCompletedInterview;
+  const progressMeta = getProgressMeta(xp);
+  const completedCourses = hydrated ? loadCompletedCourses() : new Set<string>();
+  const totalCourses = COURSE_CATALOG.length;
+  const completedCourseCount = completedCourses.size;
+  const allCoursesComplete = completedCourseCount >= totalCourses;
+  const certificateUnlocked = allCoursesComplete && xp > 10000;
+  const gateSignals = buildCourseGateSignals(completedCourses, userId);
+  const { access, levelGateDetails } = getCourseLevelAccess(xp, gateSignals);
+  const unlockedLevels = LEVEL_ORDER.filter((level) => access.get(level));
+  const attainedLevel = unlockedLevels.length
+    ? unlockedLevels[unlockedLevels.length - 1]
+    : "Novice";
+  const nextLockedLevel = LEVEL_ORDER.find((level) => !(access.get(level) ?? false)) || null;
+  const minIpByLevel = new Map(LEVELS.map((level) => [level.title, level.minIp]));
+  const nextLockedMinIp = nextLockedLevel ? minIpByLevel.get(nextLockedLevel) ?? 0 : 0;
+
+  const nextRecommendedCourse = COURSE_CATALOG.find((course) => {
+    const levelUnlocked = access.get(course.level) ?? false;
+    const prereqMet = !course.prerequisiteCourseId || completedCourses.has(course.prerequisiteCourseId);
+    return levelUnlocked && prereqMet && !completedCourses.has(course.id);
+  });
+
+  const completedSimulations = history.filter((session) => {
+    const answered = session.answers.filter((answer) => String(answer || "").trim().length >= 20).length;
+    const totalChars = session.answers.reduce((sum, answer) => sum + String(answer || "").trim().length, 0);
+    return answered >= 3 && totalChars >= 240;
+  }).length;
+
+  const promotionPending = Boolean(nextLockedLevel && xp >= nextLockedMinIp);
+  const promotionGateDetail = nextLockedLevel ? levelGateDetails.get(nextLockedLevel) || "" : "";
+  const alumniStatus = masteryUnlocked && attainedLevel === "Master";
+
+  async function copyPortfolioUrl() {
+    if (!publicPortfolioUrl) return;
+    try {
+      await navigator.clipboard.writeText(publicPortfolioUrl);
+      setCopiedPortfolioUrl(true);
+      setTimeout(() => setCopiedPortfolioUrl(false), 1400);
+    } catch {
+      setCopiedPortfolioUrl(false);
+    }
+  }
+
+  async function downloadMasterCertificate() {
+    if (!certificateUnlocked) {
+      setCertificateMessage("The path to Mastery is built on Impact. Keep logging wins to earn your credential.");
+      return;
+    }
+
+    setCertificateBusy(true);
+    setCertificateMessage("");
+
+    try {
+      const verificationRes = await fetch("/api/user/verification-profile");
+      let credentialId = verificationCredentialId;
+      if (verificationRes.ok) {
+        const data = (await verificationRes.json()) as VerificationProfilePayload;
+        credentialId = String(data.profile?.credentialId || credentialId || "").trim();
+      }
+
+      if (!credentialId) {
+        const fallbackSeed = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+        credentialId = `HC-2026-${fallbackSeed.toUpperCase()}`;
+      }
+
+      const verifyUrl = `https://hirelycoach.com/verify/${encodeURIComponent(credentialId)}`;
+
+      const [{ default: QRCode }, { jsPDF }] = await Promise.all([
+        import("qrcode"),
+        import("jspdf"),
+      ]);
+
+      const qrDataUrl = await QRCode.toDataURL(verifyUrl, {
+        errorCorrectionLevel: "H",
+        margin: 1,
+        width: 360,
+      });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 2480;
+      canvas.height = 3508;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas unavailable");
+
+      ctx.fillStyle = "#f5f1e6";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < 1400; i += 1) {
+        const alpha = Math.random() * 0.035;
+        ctx.fillStyle = `rgba(106, 84, 58, ${alpha.toFixed(3)})`;
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = Math.random() * 2.2;
+        ctx.fillRect(x, y, size, size);
+      }
+
+      ctx.strokeStyle = "#1f2937";
+      ctx.lineWidth = 6;
+      ctx.strokeRect(120, 120, canvas.width - 240, canvas.height - 240);
+      ctx.lineWidth = 2;
+      ctx.strokeRect(150, 150, canvas.width - 300, canvas.height - 300);
+
+      const corner = 86;
+      const drawCorner = (x: number, y: number, dx: number, dy: number) => {
+        ctx.beginPath();
+        ctx.moveTo(x, y + dy * corner);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x + dx * corner, y);
+        ctx.stroke();
+      };
+      ctx.lineWidth = 4;
+      drawCorner(180, 180, 1, 1);
+      drawCorner(canvas.width - 180, 180, -1, 1);
+      drawCorner(180, canvas.height - 180, 1, -1);
+      drawCorner(canvas.width - 180, canvas.height - 180, -1, -1);
+
+      ctx.fillStyle = "#111827";
+      ctx.textAlign = "center";
+      ctx.font = "600 42px 'Times New Roman', serif";
+      ctx.fillText("HIRELY COACH ACADEMY OF PROFESSIONAL EXCELLENCE", canvas.width / 2, 360);
+
+      ctx.font = "700 122px 'Times New Roman', serif";
+      ctx.fillText("MASTER OF PROFESSIONAL STRATEGY", canvas.width / 2, 620);
+
+      const fullName = [user?.firstName || "", user?.lastName || ""].filter(Boolean).join(" ") || "Hirely Coach Professional";
+      ctx.font = "600 84px Georgia, serif";
+      ctx.fillText(fullName, canvas.width / 2, 860);
+
+      ctx.font = "italic 40px Georgia, serif";
+      ctx.fillStyle = "#334155";
+      const why = "For achieving the rank of Master through verified impact, systemic optimization, and executive leadership.";
+      ctx.fillText(why, canvas.width / 2, 980);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.textAlign = "left";
+      ctx.font = "500 34px 'Helvetica Neue', Arial, sans-serif";
+      ctx.fillText(`Total IP Earned: ${xp}  |  Impact Wins Verified: ${impactEntries.length}`, 230, 3110);
+
+      ctx.font = "500 28px 'Courier New', monospace";
+      ctx.fillText(`Unique Credential ID: ${credentialId}`, 230, 3195);
+
+      const qrImg = new Image();
+      await new Promise<void>((resolve, reject) => {
+        qrImg.onload = () => resolve();
+        qrImg.onerror = () => reject(new Error("QR image failed"));
+        qrImg.src = qrDataUrl;
+      });
+      ctx.drawImage(qrImg, canvas.width - 640, canvas.height - 720, 360, 360);
+
+      ctx.textAlign = "center";
+      ctx.font = "500 24px 'Helvetica Neue', Arial, sans-serif";
+      ctx.fillStyle = "#334155";
+      ctx.fillText("Scan to verify credential and performance portfolio", canvas.width - 460, canvas.height - 330);
+
+      const sealX = canvas.width - 430;
+      const sealY = canvas.height - 230;
+      ctx.beginPath();
+      ctx.arc(sealX, sealY, 120, 0, Math.PI * 2);
+      ctx.fillStyle = "#c9972b";
+      ctx.fill();
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = "#f5d27a";
+      ctx.stroke();
+      ctx.fillStyle = "#fff7dd";
+      ctx.font = "700 30px 'Times New Roman', serif";
+      ctx.textAlign = "center";
+      ctx.fillText("MASTER", sealX, sealY - 4);
+      ctx.font = "600 18px 'Helvetica Neue', Arial, sans-serif";
+      ctx.fillText("STAMP OF EXCELLENCE", sealX, sealY + 28);
+
+      const image = canvas.toDataURL("image/png", 1);
+      const pdf = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      pdf.addImage(image, "PNG", 0, 0, pageW, pageH, undefined, "FAST");
+      pdf.save(`hirely-master-certificate-${credentialId}.pdf`);
+      setCertificateMessage("Master Certificate generated.");
+    } catch {
+      setCertificateMessage("Could not generate certificate. Please try again.");
+    } finally {
+      setCertificateBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!hydrated || typeof window === "undefined") return;
+    const unlocked = window.localStorage.getItem(MASTERY_UNLOCK_KEY) === "1";
+    const pending = window.localStorage.getItem(MASTERY_EVENT_PENDING_KEY);
+    const seen = window.localStorage.getItem(MASTERY_EVENT_SEEN_KEY);
+
+    queueMicrotask(() => {
+      setMasteryUnlocked(unlocked);
+      if (unlocked && pending && seen !== pending) {
+        setEliteModalOpen(true);
+      }
+    });
+  }, [hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+
+    async function loadVerification() {
+      try {
+        const res = await fetch("/api/user/verification-profile");
+        if (!res.ok) return;
+        const data = (await res.json()) as VerificationProfilePayload;
+        const slug = String(data.profile?.slug || "").trim();
+        const credentialId = String(data.profile?.credentialId || "").trim();
+        const enabled = Boolean(data.profile?.publicEnabled);
+        setVerificationCredentialId(credentialId);
+        const pathId = credentialId || slug;
+        setPublicPortfolioEnabled(enabled && pathId.length > 0);
+        if (enabled && pathId.length > 0 && typeof window !== "undefined") {
+          setPublicPortfolioUrl(`${window.location.origin}/verify/${pathId}`);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    void loadVerification();
+  }, [hydrated]);
+
+  useEffect(() => {
+    if (!hydrated || typeof window === "undefined") return;
+    const key = "hirely.level.current.v1";
+    const previousLevel = window.localStorage.getItem(key);
+    if (previousLevel !== attainedLevel) {
+      if (previousLevel) {
+        setTimeout(() => {
+          setLevelUpModal({
+            level: attainedLevel,
+            title: PROFESSIONAL_TITLES[attainedLevel],
+          });
+        }, 0);
+      }
+      window.localStorage.setItem(key, attainedLevel);
+    }
+  }, [attainedLevel, hydrated]);
 
   return (
     <div className="lp-root">
@@ -503,6 +867,31 @@ export default function GrowthHubPage() {
                     <div className="gh-title-row">
                       <h1 className="gh-h1">GrowthHub</h1>
                       <ReadinessPill score={score} />
+                      <StreakRing streakDays={streakDays} />
+                    </div>
+                    <div className="gh-ip-banner" aria-label="Professional progression">
+                      <div className="gh-ip-head">
+                        <strong>
+                          {alumniStatus
+                            ? "Hirely Coach Alumni / Master"
+                            : `${attainedLevel} · ${PROFESSIONAL_TITLES[attainedLevel]}`}
+                        </strong>
+                        <span>{xp} IP</span>
+                      </div>
+                      <div className={`gh-ip-track${promotionPending ? " gh-ip-track--gold" : ""}`}>
+                        <span className="gh-ip-fill" style={{ width: `${progressMeta.progressPct}%` }} />
+                      </div>
+                      {promotionPending ? (
+                        <p className="gh-ip-note gh-ip-note--pending">
+                          {nextLockedLevel ? HARD_GATES[nextLockedLevel]?.promotionMessage : "Promotion pending."} ({promotionGateDetail})
+                        </p>
+                      ) : (
+                        <p className="gh-ip-note">
+                          {nextLockedLevel
+                            ? `${Math.max(0, nextLockedMinIp - xp)} IP to ${nextLockedLevel}`
+                            : "Master tier unlocked"}
+                        </p>
+                      )}
                     </div>
                     {snapshot?.jobTitle && (
                       <p className="gh-session-meta">
@@ -590,6 +979,16 @@ export default function GrowthHubPage() {
                         desc="Scan your resume, get prioritized fixes, and re-scan for score gains."
                        variant="training"
                       delay={0.6}
+                    />
+                    <ActionCard
+                       href="/courses"
+                       icon={<AcademyIcon />}
+                       title="Hirely Academy"
+                       desc={nextRecommendedCourse
+                        ? `Next Recommended Lesson: ${nextRecommendedCourse.title}`
+                        : "All currently unlocked lessons are complete. Keep earning IP to open the next tier."}
+                       variant="academy"
+                      delay={0.7}
                     />
                   </div>
 
@@ -686,9 +1085,9 @@ export default function GrowthHubPage() {
                         <p className="gh-nudge-text">
                           This area is holding back your readiness. A quick session in the lab will fix it.
                         </p>
-                        {module && (
+                        {focusModule && (
                           <Link href="/training" className="gh-nudge-cta">
-                            Open {module} →
+                            Open {focusModule} →
                           </Link>
                         )}
                       </div>
@@ -700,15 +1099,83 @@ export default function GrowthHubPage() {
                   {/* Quick stats */}
                   <div className="gh-sidebar-card glass-card gh-stats-box">
                     <p className="gh-stats-title">Quick Stats</p>
-                    <StatRow label="Simulations" value={history.length.toString()} />
-                    <StatRow label="Global Rank" value={xpTitle(xpLevel(xp))} />
-                    <StatRow label="Total XP" value={`${xp} XP`} />
+                    <StatRow label="Simulations" value={`${completedSimulations} qualified`} />
+                    <StatRow
+                      label="Status"
+                      value={
+                        alumniStatus
+                          ? "Hirely Coach Alumni / Master"
+                          : `${attainedLevel} · ${PROFESSIONAL_TITLES[attainedLevel]}`
+                      }
+                    />
+                    <StatRow label="Total IP" value={`${xp} IP`} />
                   </div>
+
+                  <div className="gh-sidebar-card glass-card gh-cert-card">
+                    <p className="gh-stats-title">Master Certificate</p>
+                    {certificateUnlocked ? (
+                      <button
+                        type="button"
+                        className="gh-cert-btn"
+                        onClick={downloadMasterCertificate}
+                        disabled={certificateBusy}
+                      >
+                        {certificateBusy ? "Generating..." : "Download Certificate"}
+                      </button>
+                    ) : (
+                      <div className="gh-cert-locked">
+                        <strong>Locked</strong>
+                        <p>The path to Mastery is built on Impact. Keep logging wins to earn your credential.</p>
+                        <p className="gh-cert-progress">{completedCourseCount}/{totalCourses} courses complete · {xp}/10001 IP</p>
+                      </div>
+                    )}
+                    {certificateMessage && <p className="gh-cert-msg">{certificateMessage}</p>}
+                  </div>
+
+                  {alumniStatus && (
+                    <div className="gh-sidebar-card glass-card gh-legacy-card">
+                      <p className="gh-stats-title">Legacy Mode</p>
+                      <p className="gh-sidebar-body">
+                        Passive attraction activated. Focus on market signal leadership and selective executive search opportunities.
+                      </p>
+                      <div className="gh-legacy-list">
+                        <Link href="/growthhub/targeting" className="gh-legacy-link">
+                          View high-level market trend mapping
+                        </Link>
+                        <a href="https://www.heidrick.com/en/what-we-do/executive-search" target="_blank" rel="noreferrer" className="gh-legacy-link">
+                          Heidrick & Struggles executive search
+                        </a>
+                        <a href="https://www.spencerstuart.com/what-we-do/executive-search" target="_blank" rel="noreferrer" className="gh-legacy-link">
+                          Spencer Stuart executive search
+                        </a>
+                      </div>
+                      <div className="gh-portfolio-box">
+                        <p className="gh-sidebar-focus-label">Verified Public Portfolio</p>
+                        {publicPortfolioEnabled && publicPortfolioUrl ? (
+                          <>
+                            <a href={publicPortfolioUrl} className="gh-portfolio-link" target="_blank" rel="noreferrer">
+                              {publicPortfolioUrl}
+                            </a>
+                            <button type="button" className="gh-copy-btn" onClick={copyPortfolioUrl}>
+                              {copiedPortfolioUrl ? "Copied" : "Copy URL"}
+                            </button>
+                          </>
+                        ) : (
+                          <Link href="/growthhub/profile" className="gh-legacy-link">
+                            Unlock your read-only public URL in Profile Hub
+                          </Link>
+                        )}
+                      </div>
+
+                    </div>
+                  )}
 
                   <div className="gh-sidebar-card glass-card gh-impact-box">
                     <p className="gh-stats-title">Impact Log</p>
                     <p className="gh-sidebar-body">
-                      Think about your week. What's one thing you're proud of? Tell us what you did, the numbers involved, and the final result. We'll store this in your Archive to help you prove your value later.
+                      {alumniStatus
+                        ? "You've reached Mastery, but the market is evolving. Log your latest win to maintain your Authority Score."
+                        : "Think about your week. What's one thing you're proud of? Tell us what you did, the numbers involved, and the final result. We'll store this in your Archive to help you prove your value later."}
                     </p>
                     <div className="gh-impact-form">
                       <label className="gh-impact-label" htmlFor="gh-impact-action">The Action</label>
@@ -768,6 +1235,54 @@ export default function GrowthHubPage() {
       {/* ── FOCUS MODAL ── */}
       {focusModal && (
         <FocusModal data={focusModal} onClose={() => setFocusModal(null)} />
+      )}
+
+      {levelUpModal && (
+        <div className="gh-levelup-overlay" onClick={() => setLevelUpModal(null)}>
+          <div className="gh-levelup-modal" onClick={(event) => event.stopPropagation()}>
+            <p className="gh-levelup-label">Level Unlocked</p>
+            <h3 className="gh-levelup-title">{levelUpModal.level}</h3>
+            <p className="gh-levelup-sub">Professional Title: {levelUpModal.title}</p>
+            <button
+              type="button"
+              className="gh-levelup-btn"
+              onClick={() => setLevelUpModal(null)}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
+
+      {eliteModalOpen && (
+        <div className="gh-elite-overlay" onClick={() => {
+          setEliteModalOpen(false);
+          if (typeof window !== "undefined") {
+            const pending = window.localStorage.getItem(MASTERY_EVENT_PENDING_KEY);
+            if (pending) window.localStorage.setItem(MASTERY_EVENT_SEEN_KEY, pending);
+          }
+        }}>
+          <div className="gh-elite-modal" onClick={(event) => event.stopPropagation()}>
+            <p className="gh-elite-label">Elite Achievement</p>
+            <h3 className="gh-elite-title">Mastery Protocol Complete</h3>
+            <p className="gh-elite-sub">
+              You are now Hirely Coach Alumni / Master. Legacy Mode is unlocked.
+            </p>
+            <button
+              type="button"
+              className="gh-elite-btn"
+              onClick={() => {
+                setEliteModalOpen(false);
+                if (typeof window !== "undefined") {
+                  const pending = window.localStorage.getItem(MASTERY_EVENT_PENDING_KEY);
+                  if (pending) window.localStorage.setItem(MASTERY_EVENT_SEEN_KEY, pending);
+                }
+              }}
+            >
+              Enter Legacy Mode
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

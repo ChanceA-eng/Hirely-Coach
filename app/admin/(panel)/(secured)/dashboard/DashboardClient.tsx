@@ -15,11 +15,115 @@ type AdminUser = {
   lastName: string | null;
   email: string;
   createdAt: number;
-  publicMetadata: Record<string, string | number | undefined>;
+  publicMetadata: Record<string, unknown>;
 };
 
 type DbStats = { total: number } | null;
-type Tab = "overview" | "users" | "refinery";
+type Tab = "overview" | "users" | "refinery" | "advanced";
+type StarrLabTierConfig = {
+  tier: number;
+  title: string;
+  scenarioTitle: string;
+  persona: string;
+  questionCount: number;
+  systemPrompt: string;
+  focusSkill: string;
+  temperature: number;
+  presencePenalty: number;
+  silenceAnchorMs: number;
+  interruptThresholdSeconds: number;
+  multiPartSegments: number;
+};
+type AcademyLessonConfig = {
+  tier: number;
+  title: string;
+  description: string;
+  videoId: string;
+  logicCheck: string;
+  ipReward: number;
+  tierUnlockIpCost: number;
+  prerequisiteTier: number | null;
+};
+type CanvasRegistryConfig = {
+  templates: string[];
+  assetLibrary: string[];
+  approvedPalettes: string[];
+  approvedFontPairings: string[];
+  minFontSizePt: number;
+  minMarginInches: number;
+};
+type ImpactLedgerVerbWeight = {
+  verb: string;
+  weight: number;
+};
+type HcConfig = {
+  systemPrompt: string;
+  temperature: number;
+  model: string;
+  modelOptions: string[];
+  resumeCacheVersion: number;
+  starrLab: {
+    tiers: Record<string, StarrLabTierConfig>;
+  };
+  academy: {
+    lessons: AcademyLessonConfig[];
+  };
+  canvas: CanvasRegistryConfig;
+  impactLedger: {
+    powerVerbs: ImpactLedgerVerbWeight[];
+  };
+  updatedAt: number;
+};
+type AuditUser = {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: number;
+};
+type UserAuditResponse = {
+  user: AuditUser;
+  impactLedger: Array<{
+    id: string;
+    createdAt: number;
+    action: string;
+    proof: string;
+    result: string;
+  }>;
+  resumeAuditState: {
+    overallScore?: number;
+    updatedAt?: number;
+    fileName?: string;
+  } | null;
+};
+type LeaderboardRow = {
+  userId: string;
+  name: string;
+  email: string;
+  score: number;
+  updatedAt: number;
+  fileName: string;
+};
+type RawAuditLog = {
+  id: string;
+  createdAt: number;
+  userId: string | null;
+  email: string | null;
+  model: string;
+  temperature: number;
+  promptPreview: string;
+  resumeSnippet: string;
+  impactEntries: Array<{
+    id: string;
+    createdAt: number;
+    action: string;
+    proof: string;
+    result: string;
+  }>;
+  rawResponse: string;
+  normalizedReport: {
+    overallScore?: number;
+  };
+};
 type PdfTextContent = { items: Array<{ str?: string }> };
 type PdfPage = { getTextContent: () => Promise<PdfTextContent> };
 type PdfDocument = { numPages: number; getPage: (index: number) => Promise<PdfPage> };
@@ -59,6 +163,17 @@ function buildGrowthData(users: AdminUser[]) {
 function displayName(u: AdminUser) {
   const name = [u.firstName, u.lastName].filter(Boolean).join(" ");
   return name || "—";
+}
+
+function toLineInput(value: string[]) {
+  return value.join("\n");
+}
+
+function fromLineInput(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
 }
 
 /* ─── Sub-components ─────────────────────────────────────────────────── */
@@ -127,9 +242,27 @@ export default function DashboardClient() {
   const [leadershipWeight, setLeadershipWeight] = useState(50);
   const [technicalWeight, setTechnicalWeight] = useState(50);
   const [founderNote, setFounderNote] = useState("");
+  const [masterUnlock, setMasterUnlock] = useState(false);
+  const [forcedTier, setForcedTier] = useState<number | "">("");
+  const [impactPointsDelta, setImpactPointsDelta] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const resumeFileRef = useRef<HTMLInputElement>(null);
+
+  // Advanced Controls state
+  const [hcConfig, setHcConfig] = useState<HcConfig | null>(null);
+  const [configDraft, setConfigDraft] = useState<HcConfig | null>(null);
+  const [configMsg, setConfigMsg] = useState("");
+  const [savingConfig, setSavingConfig] = useState(false);
+  const [auditUserId, setAuditUserId] = useState("");
+  const [auditResult, setAuditResult] = useState<UserAuditResponse | null>(null);
+  const [auditMsg, setAuditMsg] = useState("");
+  const [loadingAudit, setLoadingAudit] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+  const [rawLogs, setRawLogs] = useState<RawAuditLog[]>([]);
+  const [loadingRawLogs, setLoadingRawLogs] = useState(false);
+  const [selectedRawLogId, setSelectedRawLogId] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -145,6 +278,100 @@ export default function DashboardClient() {
       .finally(() => setLoadingUsers(false));
   }, []);
 
+  async function loadHcConfig() {
+    try {
+      const res = await fetch("/api/admin/hc-config");
+      const data = (await res.json()) as HcConfig | { error?: string };
+      if (!res.ok) throw new Error((data as { error?: string }).error || "Failed to load config");
+      const config = data as HcConfig;
+      setHcConfig(config);
+      setConfigDraft(config);
+    } catch {
+      setConfigMsg("Could not load AI global config.");
+    }
+  }
+
+  async function loadLeaderboard() {
+    setLoadingLeaderboard(true);
+    try {
+      const res = await fetch("/api/admin/leaderboard");
+      const data = (await res.json()) as { leaderboard?: LeaderboardRow[] };
+      if (!res.ok) throw new Error();
+      setLeaderboard(Array.isArray(data.leaderboard) ? data.leaderboard : []);
+    } catch {
+      setLeaderboard([]);
+    } finally {
+      setLoadingLeaderboard(false);
+    }
+  }
+
+  async function loadRawLogs() {
+    setLoadingRawLogs(true);
+    try {
+      const res = await fetch("/api/admin/raw-audit-logs");
+      const data = (await res.json()) as { logs?: RawAuditLog[] };
+      if (!res.ok) throw new Error();
+      const nextLogs = Array.isArray(data.logs) ? data.logs : [];
+      setRawLogs(nextLogs);
+      if (nextLogs.length && !selectedRawLogId) {
+        setSelectedRawLogId(nextLogs[0].id);
+      }
+    } catch {
+      setRawLogs([]);
+    } finally {
+      setLoadingRawLogs(false);
+    }
+  }
+
+  async function saveGlobalConfig(options?: { clearCache?: boolean }) {
+    if (!configDraft) return;
+    setSavingConfig(true);
+    setConfigMsg("");
+    try {
+      const res = await fetch("/api/admin/hc-config", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          config: configDraft,
+          clearResumeCache: Boolean(options?.clearCache),
+        }),
+      });
+      const data = (await res.json()) as { ok?: boolean; config?: HcConfig; error?: string };
+      if (!res.ok || !data.ok || !data.config) {
+        throw new Error(data.error || "Failed to save");
+      }
+
+      setHcConfig(data.config);
+      setConfigDraft(data.config);
+      setConfigMsg(options?.clearCache ? "Saved and cache invalidation issued." : "Global config saved.");
+    } catch {
+      setConfigMsg("Failed to save global config.");
+    } finally {
+      setSavingConfig(false);
+    }
+  }
+
+  async function loadUserAudit() {
+    if (!auditUserId.trim()) {
+      setAuditMsg("Enter a user ID first.");
+      return;
+    }
+
+    setLoadingAudit(true);
+    setAuditMsg("");
+    setAuditResult(null);
+    try {
+      const res = await fetch(`/api/admin/user-audit/${encodeURIComponent(auditUserId.trim())}`);
+      const data = (await res.json()) as UserAuditResponse | { error?: string };
+      if (!res.ok) throw new Error((data as { error?: string }).error || "Not found");
+      setAuditResult(data as UserAuditResponse);
+    } catch {
+      setAuditMsg("Could not load that user audit.");
+    } finally {
+      setLoadingAudit(false);
+    }
+  }
+
   function openEdit(u: AdminUser) {
     setEditUser(u);
     setEditKj(String(u.publicMetadata?.kj ?? ""));
@@ -153,6 +380,13 @@ export default function DashboardClient() {
     setLeadershipWeight(Number(u.publicMetadata?.leadershipWeight ?? 50));
     setTechnicalWeight(Number(u.publicMetadata?.technicalWeight ?? 50));
     setFounderNote(String(u.publicMetadata?.founderNote ?? ""));
+    const override = (u.publicMetadata?.interviewAdminOverride ?? {}) as {
+      masterUnlock?: boolean;
+      forcedTier?: number | null;
+    };
+    setMasterUnlock(Boolean(override.masterUnlock));
+    setForcedTier(typeof override.forcedTier === "number" ? override.forcedTier : "");
+    setImpactPointsDelta(Number(u.publicMetadata?.adminImpactPointsDelta ?? 0));
     setSaveMsg("");
   }
 
@@ -234,23 +468,19 @@ export default function DashboardClient() {
           leadershipWeight,
           technicalWeight,
           founderNote,
+          masterUnlock,
+          forcedTier: forcedTier === "" ? null : forcedTier,
+          impactPointsDelta,
         }),
       });
-      if (!res.ok) throw new Error();
+      const data = (await res.json()) as { ok?: boolean; publicMetadata?: Record<string, unknown> };
+      if (!res.ok || !data.ok) throw new Error();
       setUsers((prev) =>
         prev.map((u) =>
           u.id === editUser.id
             ? {
                 ...u,
-                publicMetadata: {
-                  ...u.publicMetadata,
-                  kj: editKj,
-                  acceleratorLevel: editLevel,
-                  resumeText: editResumeText,
-                  leadershipWeight,
-                  technicalWeight,
-                  founderNote,
-                },
+                publicMetadata: data.publicMetadata || u.publicMetadata,
               }
             : u,
         ),
@@ -262,6 +492,82 @@ export default function DashboardClient() {
       setSaving(false);
     }
   }
+
+  async function runUserSnapshotAction(action: "save" | "restore") {
+    if (!editUser) return;
+    setSaving(true);
+    setSaveMsg("");
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetUserId: editUser.id,
+          snapshotAction: action,
+        }),
+      });
+      const data = (await res.json()) as { ok?: boolean; publicMetadata?: Record<string, unknown> };
+      if (!res.ok || !data.ok) throw new Error();
+      setUsers((prev) =>
+        prev.map((u) => (u.id === editUser.id ? { ...u, publicMetadata: data.publicMetadata || u.publicMetadata } : u))
+      );
+      if (data.publicMetadata) {
+        openEdit({ ...editUser, publicMetadata: data.publicMetadata });
+      }
+      setSaveMsg(action === "save" ? "Snapshot captured." : "Snapshot restored.");
+    } catch {
+      setSaveMsg(action === "save" ? "Snapshot failed." : "Restore failed.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function updateConfigDraft(updater: (current: HcConfig) => HcConfig) {
+    setConfigDraft((current) => (current ? updater(current) : current));
+  }
+
+  function updateTierDraft(tier: number, updater: (current: StarrLabTierConfig) => StarrLabTierConfig) {
+    updateConfigDraft((current) => ({
+      ...current,
+      starrLab: {
+        ...current.starrLab,
+        tiers: {
+          ...current.starrLab.tiers,
+          [tier]: updater(current.starrLab.tiers[String(tier)]),
+        },
+      },
+    }));
+  }
+
+  function updateLessonDraft(tier: number, updater: (current: AcademyLessonConfig) => AcademyLessonConfig) {
+    updateConfigDraft((current) => ({
+      ...current,
+      academy: {
+        ...current.academy,
+        lessons: current.academy.lessons.map((lesson) =>
+          lesson.tier === tier ? updater(lesson) : lesson,
+        ),
+      },
+    }));
+  }
+
+  const battleMonitor = Array.from({ length: 7 }, (_, index) => index + 1).map((tier) => {
+    const inTier = users.filter((user) => {
+      const progress = (user.publicMetadata?.interviewProgress ?? {}) as { highestCompletedTier?: number; latestStarrScore?: number };
+      return Number(progress.highestCompletedTier || 0) >= tier;
+    });
+    const passCount = inTier.filter((user) => {
+      const progress = (user.publicMetadata?.interviewProgress ?? {}) as { latestStarrScore?: number };
+      return Number(progress.latestStarrScore || 0) >= 70;
+    }).length;
+
+    return {
+      tier,
+      activeUsers: inTier.length,
+      passRate: inTier.length ? Math.round((passCount / inTier.length) * 100) : 0,
+      dropOff: Math.max(users.length - inTier.length, 0),
+    };
+  });
 
   const filteredUsers = users.filter((u) => {
     const q = search.toLowerCase();
@@ -301,11 +607,19 @@ export default function DashboardClient() {
             { id: "overview", label: "📊  Overview" },
             { id: "users", label: "👥  Users" },
             { id: "refinery", label: "⚙️  Job Refinery" },
+            { id: "advanced", label: "🧠  Advanced Controls" },
           ] as { id: Tab; label: string }[]
         ).map((t) => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => {
+              setTab(t.id);
+              if (t.id === "advanced") {
+                void loadHcConfig();
+                void loadLeaderboard();
+                void loadRawLogs();
+              }
+            }}
             style={{
               ...S.tabBtn,
               ...(tab === t.id ? S.tabActive : {}),
@@ -669,6 +983,538 @@ export default function DashboardClient() {
               <JobsClient />
             </motion.div>
           )}
+
+          {/* ══ ADVANCED CONTROLS ═══════════════════════════════════════ */}
+          {tab === "advanced" && (
+            <motion.div
+              key="advanced"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22 }}
+            >
+              <div style={S.section}>
+                <div style={S.sectionHead}>
+                  <h2 style={S.sectionTitle}>The Master Key</h2>
+                  <span style={S.sectionSub}>Global AI and command-center persistence</span>
+                </div>
+
+                {!configDraft ? (
+                  <div style={S.emptyState}><p style={{ margin: 0, color: "#9ca3af", fontSize: "0.84rem" }}>Load the admin config to edit command-center settings.</p></div>
+                ) : (
+                  <div style={{ display: "grid", gap: 12 }}>
+                    <div>
+                      <label style={S.drawerLabel}>Prompt Editor (System Instructions)</label>
+                      <textarea
+                        value={configDraft.systemPrompt}
+                        onChange={(e) => updateConfigDraft((current) => ({ ...current, systemPrompt: e.target.value }))}
+                        style={{ ...S.drawerTextarea, minHeight: 220 }}
+                        placeholder="System prompt for resume auditing"
+                      />
+                    </div>
+
+                    <div style={{ ...S.sliderBlock, gap: 16 }}>
+                      <div>
+                        <div style={S.sliderLabelRow}>
+                          <span>Temperature</span>
+                          <strong>{configDraft.temperature.toFixed(2)}</strong>
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          value={configDraft.temperature}
+                          onChange={(e) => updateConfigDraft((current) => ({ ...current, temperature: Number(e.target.value) }))}
+                          style={S.slider}
+                        />
+                        {configDraft.temperature !== 0 && (
+                          <p style={S.warningText}>
+                            Non-zero temperature can cause scoring drift between scans.
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label style={S.drawerLabel}>Model Version</label>
+                        <select
+                          value={configDraft.model}
+                          onChange={(e) => updateConfigDraft((current) => ({ ...current, model: e.target.value }))}
+                          style={S.drawerInput}
+                        >
+                          {(hcConfig?.modelOptions || []).map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.77rem" }}>
+                        Cache version: {hcConfig?.resumeCacheVersion ?? "—"}
+                      </p>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <button
+                        type="button"
+                        style={{ ...S.primaryBtn, opacity: savingConfig ? 0.6 : 1 }}
+                        disabled={savingConfig}
+                        onClick={() => saveGlobalConfig()}
+                      >
+                        {savingConfig ? "Saving..." : "Save Control Panel"}
+                      </button>
+                      <button
+                        type="button"
+                        style={S.ghostDangerBtn}
+                        disabled={savingConfig}
+                        onClick={() => saveGlobalConfig({ clearCache: true })}
+                      >
+                        Clear All Resume Cache
+                      </button>
+                      <button type="button" style={S.secondaryBtn} onClick={() => void loadHcConfig()}>
+                        Reload
+                      </button>
+                    </div>
+
+                    {configMsg && <p style={S.inlineMsg}>{configMsg}</p>}
+                  </div>
+                )}
+              </div>
+
+              {configDraft && (
+                <>
+                  <div style={S.section}>
+                    <div style={S.sectionHead}>
+                      <h2 style={S.sectionTitle}>Persona Lab</h2>
+                      <span style={S.sectionSub}>Tier prompts, silence anchor, interrupt threshold, and logic strictness</span>
+                    </div>
+                    <div style={{ display: "grid", gap: 14 }}>
+                      {Object.values(configDraft.starrLab.tiers)
+                        .sort((a, b) => a.tier - b.tier)
+                        .map((tierConfig) => (
+                          <div key={tierConfig.tier} style={S.miniPanel}>
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+                              <div>
+                                <p style={S.miniTitle}>Tier {tierConfig.tier}: {tierConfig.title}</p>
+                                <p style={S.sectionSub}>{tierConfig.scenarioTitle} • {tierConfig.persona}</p>
+                              </div>
+                              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                                <input
+                                  value={tierConfig.persona}
+                                  onChange={(e) => updateTierDraft(tierConfig.tier, (current) => ({ ...current, persona: e.target.value }))}
+                                  style={{ ...S.drawerInput, minWidth: 180 }}
+                                  placeholder="Persona name"
+                                />
+                                <input
+                                  value={tierConfig.scenarioTitle}
+                                  onChange={(e) => updateTierDraft(tierConfig.tier, (current) => ({ ...current, scenarioTitle: e.target.value }))}
+                                  style={{ ...S.drawerInput, minWidth: 220 }}
+                                  placeholder="Scenario"
+                                />
+                              </div>
+                            </div>
+                            <textarea
+                              value={tierConfig.systemPrompt}
+                              onChange={(e) => updateTierDraft(tierConfig.tier, (current) => ({ ...current, systemPrompt: e.target.value }))}
+                              style={{ ...S.drawerTextarea, minHeight: 140, marginBottom: 12 }}
+                              placeholder="Tier system instructions"
+                            />
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 12 }}>
+                              <div>
+                                <label style={S.drawerLabel}>Questions</label>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  max={12}
+                                  value={tierConfig.questionCount}
+                                  onChange={(e) => updateTierDraft(tierConfig.tier, (current) => ({ ...current, questionCount: Number(e.target.value) || current.questionCount }))}
+                                  style={S.drawerInput}
+                                />
+                              </div>
+                              <div>
+                                <label style={S.drawerLabel}>Silence Anchor (ms)</label>
+                                <input
+                                  type="number"
+                                  min={500}
+                                  step={100}
+                                  value={tierConfig.silenceAnchorMs}
+                                  onChange={(e) => updateTierDraft(tierConfig.tier, (current) => ({ ...current, silenceAnchorMs: Number(e.target.value) || current.silenceAnchorMs }))}
+                                  style={S.drawerInput}
+                                />
+                              </div>
+                              <div>
+                                <label style={S.drawerLabel}>Interrupt Threshold (s)</label>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  max={120}
+                                  value={tierConfig.interruptThresholdSeconds}
+                                  onChange={(e) => updateTierDraft(tierConfig.tier, (current) => ({ ...current, interruptThresholdSeconds: Number(e.target.value) || current.interruptThresholdSeconds }))}
+                                  style={S.drawerInput}
+                                />
+                              </div>
+                              <div>
+                                <label style={S.drawerLabel}>Multi-Part Pips</label>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={5}
+                                  value={tierConfig.multiPartSegments}
+                                  onChange={(e) => updateTierDraft(tierConfig.tier, (current) => ({ ...current, multiPartSegments: Number(e.target.value) || 0 }))}
+                                  style={S.drawerInput}
+                                />
+                              </div>
+                            </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12, marginTop: 12 }}>
+                              <div>
+                                <div style={S.sliderLabelRow}>
+                                  <span>Logic Strictness</span>
+                                  <strong>{tierConfig.temperature.toFixed(2)}</strong>
+                                </div>
+                                <input
+                                  type="range"
+                                  min={0}
+                                  max={1}
+                                  step={0.01}
+                                  value={tierConfig.temperature}
+                                  onChange={(e) => updateTierDraft(tierConfig.tier, (current) => ({ ...current, temperature: Number(e.target.value) }))}
+                                  style={S.slider}
+                                />
+                              </div>
+                              <div>
+                                <div style={S.sliderLabelRow}>
+                                  <span>Presence Penalty</span>
+                                  <strong>{tierConfig.presencePenalty.toFixed(2)}</strong>
+                                </div>
+                                <input
+                                  type="range"
+                                  min={-0.2}
+                                  max={0.2}
+                                  step={0.01}
+                                  value={tierConfig.presencePenalty}
+                                  onChange={(e) => updateTierDraft(tierConfig.tier, (current) => ({ ...current, presencePenalty: Number(e.target.value) }))}
+                                  style={S.slider}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  <div style={S.section}>
+                    <div style={S.sectionHead}>
+                      <h2 style={S.sectionTitle}>Battle Monitor</h2>
+                      <span style={S.sectionSub}>Active tier counts, pass-rate snapshots, and drop-off points</span>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 12 }}>
+                      {battleMonitor.map((row) => (
+                        <div key={`battle-${row.tier}`} style={S.statCard}>
+                          <p style={{ ...S.statNum, fontSize: "1.6rem" }}>T{row.tier}</p>
+                          <p style={S.statLabel}>{row.activeUsers} active</p>
+                          <p style={{ ...S.sectionSub, display: "block", marginTop: 8 }}>Pass rate {row.passRate}%</p>
+                          <p style={{ ...S.sectionSub, display: "block", marginTop: 4 }}>Drop-off {row.dropOff}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={S.section}>
+                    <div style={S.sectionHead}>
+                      <h2 style={S.sectionTitle}>Academy Registry</h2>
+                      <span style={S.sectionSub}>Lesson CMS, IP valuator, and prerequisite flow</span>
+                    </div>
+                    <div style={{ display: "grid", gap: 14 }}>
+                      {configDraft.academy.lessons
+                        .sort((a, b) => a.tier - b.tier)
+                        .map((lesson) => (
+                          <div key={`lesson-${lesson.tier}`} style={S.miniPanel}>
+                            <p style={S.miniTitle}>Tier {lesson.tier} lesson</p>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12, marginBottom: 12 }}>
+                              <input
+                                value={lesson.title}
+                                onChange={(e) => updateLessonDraft(lesson.tier, (current) => ({ ...current, title: e.target.value }))}
+                                style={S.drawerInput}
+                                placeholder="Lesson title"
+                              />
+                              <input
+                                value={lesson.videoId}
+                                onChange={(e) => updateLessonDraft(lesson.tier, (current) => ({ ...current, videoId: e.target.value }))}
+                                style={S.drawerInput}
+                                placeholder="Video ID"
+                              />
+                            </div>
+                            <textarea
+                              value={lesson.description}
+                              onChange={(e) => updateLessonDraft(lesson.tier, (current) => ({ ...current, description: e.target.value }))}
+                              style={{ ...S.drawerTextarea, minHeight: 90, marginBottom: 12 }}
+                              placeholder="Lesson description"
+                            />
+                            <textarea
+                              value={lesson.logicCheck}
+                              onChange={(e) => updateLessonDraft(lesson.tier, (current) => ({ ...current, logicCheck: e.target.value }))}
+                              style={{ ...S.drawerTextarea, minHeight: 90, marginBottom: 12 }}
+                              placeholder="3-question logic check"
+                            />
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
+                              <input
+                                type="number"
+                                value={lesson.ipReward}
+                                onChange={(e) => updateLessonDraft(lesson.tier, (current) => ({ ...current, ipReward: Number(e.target.value) || current.ipReward }))}
+                                style={S.drawerInput}
+                                placeholder="IP reward"
+                              />
+                              <input
+                                type="number"
+                                value={lesson.tierUnlockIpCost}
+                                onChange={(e) => updateLessonDraft(lesson.tier, (current) => ({ ...current, tierUnlockIpCost: Number(e.target.value) || current.tierUnlockIpCost }))}
+                                style={S.drawerInput}
+                                placeholder="Next tier cost"
+                              />
+                              <select
+                                value={lesson.prerequisiteTier ?? ""}
+                                onChange={(e) => updateLessonDraft(lesson.tier, (current) => ({ ...current, prerequisiteTier: e.target.value ? Number(e.target.value) : null }))}
+                                style={S.drawerInput}
+                              >
+                                <option value="">No prerequisite</option>
+                                {Array.from({ length: 7 }, (_, index) => index + 1).map((tier) => (
+                                  <option key={`lesson-prereq-${tier}`} value={tier}>Tier {tier}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  <div style={S.section}>
+                    <div style={S.sectionHead}>
+                      <h2 style={S.sectionTitle}>Canvas Registry</h2>
+                      <span style={S.sectionSub}>Template forge, asset injector, and redline rules</span>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 14 }}>
+                      <div>
+                        <label style={S.drawerLabel}>Templates</label>
+                        <textarea
+                          value={toLineInput(configDraft.canvas.templates)}
+                          onChange={(e) => updateConfigDraft((current) => ({ ...current, canvas: { ...current.canvas, templates: fromLineInput(e.target.value) } }))}
+                          style={{ ...S.drawerTextarea, minHeight: 120 }}
+                        />
+                      </div>
+                      <div>
+                        <label style={S.drawerLabel}>Asset Library</label>
+                        <textarea
+                          value={toLineInput(configDraft.canvas.assetLibrary)}
+                          onChange={(e) => updateConfigDraft((current) => ({ ...current, canvas: { ...current.canvas, assetLibrary: fromLineInput(e.target.value) } }))}
+                          style={{ ...S.drawerTextarea, minHeight: 120 }}
+                        />
+                      </div>
+                      <div>
+                        <label style={S.drawerLabel}>Approved Palettes</label>
+                        <textarea
+                          value={toLineInput(configDraft.canvas.approvedPalettes)}
+                          onChange={(e) => updateConfigDraft((current) => ({ ...current, canvas: { ...current.canvas, approvedPalettes: fromLineInput(e.target.value) } }))}
+                          style={{ ...S.drawerTextarea, minHeight: 120 }}
+                        />
+                      </div>
+                      <div>
+                        <label style={S.drawerLabel}>Approved Font Pairings</label>
+                        <textarea
+                          value={toLineInput(configDraft.canvas.approvedFontPairings)}
+                          onChange={(e) => updateConfigDraft((current) => ({ ...current, canvas: { ...current.canvas, approvedFontPairings: fromLineInput(e.target.value) } }))}
+                          style={{ ...S.drawerTextarea, minHeight: 120 }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12, marginTop: 12 }}>
+                      <input
+                        type="number"
+                        value={configDraft.canvas.minFontSizePt}
+                        onChange={(e) => updateConfigDraft((current) => ({ ...current, canvas: { ...current.canvas, minFontSizePt: Number(e.target.value) || current.canvas.minFontSizePt } }))}
+                        style={S.drawerInput}
+                        placeholder="Minimum font size"
+                      />
+                      <input
+                        type="number"
+                        step="0.05"
+                        value={configDraft.canvas.minMarginInches}
+                        onChange={(e) => updateConfigDraft((current) => ({ ...current, canvas: { ...current.canvas, minMarginInches: Number(e.target.value) || current.canvas.minMarginInches } }))}
+                        style={S.drawerInput}
+                        placeholder="Minimum margin inches"
+                      />
+                    </div>
+                  </div>
+
+                  <div style={S.section}>
+                    <div style={S.sectionHead}>
+                      <h2 style={S.sectionTitle}>Impact Ledger Engine</h2>
+                      <span style={S.sectionSub}>Power verb dictionary and manual scoring weights</span>
+                    </div>
+                    <div style={{ display: "grid", gap: 10 }}>
+                      {configDraft.impactLedger.powerVerbs.map((entry, index) => (
+                        <div key={`verb-${index}`} style={{ display: "grid", gridTemplateColumns: "1fr 120px", gap: 12 }}>
+                          <input
+                            value={entry.verb}
+                            onChange={(e) => updateConfigDraft((current) => ({
+                              ...current,
+                              impactLedger: {
+                                ...current.impactLedger,
+                                powerVerbs: current.impactLedger.powerVerbs.map((verbEntry, verbIndex) =>
+                                  verbIndex === index ? { ...verbEntry, verb: e.target.value } : verbEntry,
+                                ),
+                              },
+                            }))}
+                            style={S.drawerInput}
+                            placeholder="Verb"
+                          />
+                          <input
+                            type="number"
+                            min={1}
+                            value={entry.weight}
+                            onChange={(e) => updateConfigDraft((current) => ({
+                              ...current,
+                              impactLedger: {
+                                ...current.impactLedger,
+                                powerVerbs: current.impactLedger.powerVerbs.map((verbEntry, verbIndex) =>
+                                  verbIndex === index ? { ...verbEntry, weight: Number(e.target.value) || verbEntry.weight } : verbEntry,
+                                ),
+                              },
+                            }))}
+                            style={S.drawerInput}
+                            placeholder="Weight"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div style={S.section}>
+                <div style={S.sectionHead}>
+                  <h2 style={S.sectionTitle}>User Audit</h2>
+                  <span style={S.sectionSub}>Inspect Impact Ledger quality</span>
+                </div>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
+                  <input
+                    value={auditUserId}
+                    onChange={(e) => setAuditUserId(e.target.value)}
+                    placeholder="Clerk user ID"
+                    style={{ ...S.searchInput, width: 340 }}
+                  />
+                  <button type="button" style={S.primaryBtn} onClick={loadUserAudit}>
+                    {loadingAudit ? "Loading..." : "Load User Audit"}
+                  </button>
+                </div>
+                {auditMsg && <p style={S.inlineMsg}>{auditMsg}</p>}
+                {auditResult && (
+                  <div style={S.miniPanel}>
+                    <p style={S.miniTitle}>{auditResult.user.name} ({auditResult.user.email})</p>
+                    <p style={S.sectionSub}>
+                      Current score: {auditResult.resumeAuditState?.overallScore ?? "—"} • Last update: {auditResult.resumeAuditState?.updatedAt ? new Date(auditResult.resumeAuditState.updatedAt).toLocaleString() : "—"}
+                    </p>
+                    <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+                      {(auditResult.impactLedger || []).slice(0, 10).map((entry) => (
+                        <div key={entry.id} style={S.logCard}>
+                          <p style={S.logDate}>{new Date(entry.createdAt).toLocaleDateString()}</p>
+                          <p style={S.logLabel}>Action</p>
+                          <p style={S.logCopy}>{entry.action}</p>
+                          <p style={S.logLabel}>Proof</p>
+                          <p style={S.logCopy}>{entry.proof}</p>
+                          <p style={S.logLabel}>Result</p>
+                          <p style={S.logCopy}>{entry.result}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div style={S.section}>
+                <div style={S.sectionHead}>
+                  <h2 style={S.sectionTitle}>Top 10 Resume Scores</h2>
+                  <span style={S.sectionSub}>Power user leaderboard</span>
+                </div>
+                <button type="button" style={{ ...S.secondaryBtn, marginBottom: 12 }} onClick={() => void loadLeaderboard()}>
+                  Refresh Leaderboard
+                </button>
+                {loadingLeaderboard ? (
+                  <div style={S.skeleton} />
+                ) : leaderboard.length === 0 ? (
+                  <div style={S.emptyState}><p style={{ margin: 0, color: "#9ca3af", fontSize: "0.84rem" }}>No scored users yet.</p></div>
+                ) : (
+                  <div style={S.tableWrap}>
+                    <table style={S.table}>
+                      <thead>
+                        <tr>
+                          <th style={S.th}>Rank</th>
+                          <th style={S.th}>User</th>
+                          <th style={S.th}>Score</th>
+                          <th style={S.th}>Updated</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {leaderboard.map((row, index) => (
+                          <tr key={row.userId}>
+                            <td style={S.td}>#{index + 1}</td>
+                            <td style={S.td}>{row.name} ({row.email})</td>
+                            <td style={S.td}>{row.score}</td>
+                            <td style={S.td}>{new Date(row.updatedAt).toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              <div style={S.section}>
+                <div style={S.sectionHead}>
+                  <h2 style={S.sectionTitle}>Raw Log Inspector</h2>
+                  <span style={S.sectionSub}>Model JSON debugging</span>
+                </div>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
+                  <button type="button" style={S.secondaryBtn} onClick={() => void loadRawLogs()}>
+                    Refresh Logs
+                  </button>
+                  <select
+                    value={selectedRawLogId}
+                    onChange={(e) => setSelectedRawLogId(e.target.value)}
+                    style={{ ...S.drawerInput, maxWidth: 360 }}
+                  >
+                    <option value="">Select a scan</option>
+                    {rawLogs.map((log) => (
+                      <option key={log.id} value={log.id}>
+                        {new Date(log.createdAt).toLocaleString()} - {log.email || log.userId || "Guest"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {loadingRawLogs ? (
+                  <div style={S.skeleton} />
+                ) : (
+                  (() => {
+                    const selected = rawLogs.find((log) => log.id === selectedRawLogId) || rawLogs[0];
+                    if (!selected) {
+                      return <div style={S.emptyState}><p style={{ margin: 0, color: "#9ca3af", fontSize: "0.84rem" }}>No audit logs captured yet.</p></div>;
+                    }
+
+                    return (
+                      <div style={{ display: "grid", gap: 10 }}>
+                        <div style={S.miniPanel}>
+                          <p style={S.miniTitle}>{selected.email || selected.userId || "Guest"}</p>
+                          <p style={S.sectionSub}>Model: {selected.model} • Temp: {selected.temperature} • Score: {selected.normalizedReport?.overallScore ?? "—"}</p>
+                          <p style={{ ...S.sectionSub, marginTop: 6 }}>Prompt preview: {selected.promptPreview}</p>
+                        </div>
+                        <textarea readOnly value={selected.rawResponse} style={{ ...S.drawerTextarea, minHeight: 220 }} />
+                      </div>
+                    );
+                  })()
+                )}
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 
@@ -845,6 +1691,47 @@ export default function DashboardClient() {
                       placeholder="Add a private operator note for this user's coaching profile"
                       style={S.drawerTextarea}
                     />
+                  </div>
+
+                  <div>
+                    <label style={S.drawerLabel}>Testing Suite Overrides</label>
+                    <div style={{ display: "grid", gap: 12 }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: 10, color: "#e2e8f0", fontSize: "0.84rem" }}>
+                        <input
+                          type="checkbox"
+                          checked={masterUnlock}
+                          onChange={(e) => setMasterUnlock(e.target.checked)}
+                        />
+                        Master unlock all interview tiers
+                      </label>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+                        <select
+                          value={forcedTier}
+                          onChange={(e) => setForcedTier(e.target.value ? Number(e.target.value) : "")}
+                          style={S.drawerInput}
+                        >
+                          <option value="">Tier jumper</option>
+                          {Array.from({ length: 7 }, (_, index) => index + 1).map((tier) => (
+                            <option key={`forced-tier-${tier}`} value={tier}>Tier {tier}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="number"
+                          value={impactPointsDelta}
+                          onChange={(e) => setImpactPointsDelta(Number(e.target.value) || 0)}
+                          style={S.drawerInput}
+                          placeholder="IP injector delta"
+                        />
+                      </div>
+                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                        <button type="button" style={S.secondaryBtn} onClick={() => void runUserSnapshotAction("save")}>
+                          Snapshot State
+                        </button>
+                        <button type="button" style={S.ghostDangerBtn} onClick={() => void runUserSnapshotAction("restore")}>
+                          Restore Snapshot
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1244,6 +2131,57 @@ const S: Record<string, React.CSSProperties> = {
   slider: {
     width: "100%",
     accentColor: "#10b981",
+  },
+  warningText: {
+    margin: "8px 0 0",
+    fontSize: "0.76rem",
+    color: "#fbbf24",
+  },
+  inlineMsg: {
+    margin: 0,
+    color: "#cbd5e1",
+    fontSize: "0.8rem",
+    background: "rgba(15,23,42,0.7)",
+    border: "1px solid rgba(148,163,184,0.24)",
+    borderRadius: 8,
+    padding: "9px 11px",
+  },
+  miniPanel: {
+    background: "rgba(2, 6, 23, 0.5)",
+    border: "1px solid rgba(148,163,184,0.22)",
+    borderRadius: 10,
+    padding: 14,
+  },
+  miniTitle: {
+    margin: "0 0 4px",
+    color: "#f8fafc",
+    fontWeight: 700,
+    fontSize: "0.86rem",
+  },
+  logCard: {
+    border: "1px solid rgba(148,163,184,0.2)",
+    borderRadius: 10,
+    padding: 10,
+    background: "rgba(15,23,42,0.5)",
+  },
+  logDate: {
+    margin: "0 0 6px",
+    color: "#94a3b8",
+    fontSize: "0.74rem",
+  },
+  logLabel: {
+    margin: "0 0 2px",
+    color: "#94a3b8",
+    fontSize: "0.72rem",
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+  },
+  logCopy: {
+    margin: "0 0 8px",
+    color: "#e2e8f0",
+    fontSize: "0.8rem",
+    lineHeight: 1.45,
+    whiteSpace: "pre-wrap",
   },
   drawerFooter: {
     padding: "16px 24px",

@@ -1,4 +1,12 @@
 import OpenAI from "openai";
+import {
+  coerceStarrTierId,
+  getStarrTierConfig,
+  getTierSkillAssessment,
+  evaluateBattleStats,
+  buildReviewTape,
+  formatBattleStatsForReport,
+} from "@/app/lib/hirelySupremacy";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -6,7 +14,7 @@ const client = new OpenAI({
 
 export async function POST(req) {
   try {
-    const { resume, job, questions, answers } = await req.json();
+    const { resume, job, questions, answers, tier } = await req.json();
 
     if (!resume || !job || !Array.isArray(questions) || !Array.isArray(answers)) {
       return Response.json(
@@ -62,7 +70,27 @@ List exactly 3 specific, actionable recommendations. Use a **bold label** for ea
       messages: [{ role: "user", content: prompt }],
     });
 
-    return Response.json({ feedback: completion.choices[0].message.content });
+    const qaTurns = questions.map((question, index) => ({
+      question,
+      answer: answers[index] || "",
+    }));
+    const selectedTier = coerceStarrTierId(tier);
+    const tierConfig = getStarrTierConfig(selectedTier);
+    const battleStats = evaluateBattleStats(qaTurns);
+    const reviewTape = buildReviewTape(qaTurns);
+    const tierAssessment = getTierSkillAssessment(tierConfig, battleStats);
+    const supremacyAppendix = formatBattleStatsForReport(battleStats, reviewTape);
+    const postMatchAnalysis = [
+      "### Post-Match Analysis",
+      `Tier ${tierConfig.tier} - ${tierConfig.title} (${tierConfig.persona})`,
+      `Mastered: ${tierAssessment.mastered}`,
+      `Missed: ${tierAssessment.missed}`,
+    ].join("\n");
+
+    const baseFeedback = completion.choices[0].message.content || "";
+    const feedback = `${baseFeedback}\n\n${supremacyAppendix}\n\n${postMatchAnalysis}`;
+
+    return Response.json({ feedback });
   } catch (err) {
     return Response.json(
       { error: "Server error", details: err.message },

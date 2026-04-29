@@ -21,6 +21,11 @@ function coerceProgress(value: unknown): AccountInterviewProgress {
     latestJobTitle: typeof data.latestJobTitle === "string" ? data.latestJobTitle : "",
     latestTopWeakness: typeof data.latestTopWeakness === "string" ? data.latestTopWeakness : "",
     latestStarrScore: typeof data.latestStarrScore === "number" ? data.latestStarrScore : 0,
+    completedTiers: Array.isArray(data.completedTiers)
+      ? data.completedTiers.filter((tier): tier is number => typeof tier === "number" && tier >= 1 && tier <= 7)
+      : [],
+    highestCompletedTier:
+      typeof data.highestCompletedTier === "number" ? data.highestCompletedTier : 0,
   };
 }
 
@@ -42,7 +47,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json() as { snapshot?: GrowthHubSnapshot };
+  const body = await request.json() as { snapshot?: GrowthHubSnapshot; completedTier?: number };
   if (!body.snapshot) {
     return NextResponse.json({ error: "snapshot required" }, { status: 400 });
   }
@@ -51,6 +56,14 @@ export async function POST(request: Request) {
   const user = await client.users.getUser(userId);
   const current = coerceProgress(user.publicMetadata?.interviewProgress);
   const incoming = progressFromSnapshot(body.snapshot);
+  const incomingTier =
+    typeof body.completedTier === "number" && body.completedTier >= 1 && body.completedTier <= 7
+      ? body.completedTier
+      : null;
+  const completedSet = new Set<number>(current.completedTiers);
+  if (incomingTier) completedSet.add(incomingTier);
+  const completedTiers = [...completedSet].sort((a, b) => a - b);
+  const highestCompletedTier = completedTiers.length ? completedTiers[completedTiers.length - 1] : 0;
 
   const next: AccountInterviewProgress = {
     hasCompletedInterview: true,
@@ -68,6 +81,8 @@ export async function POST(request: Request) {
       incoming.latestInterviewAt >= current.latestInterviewAt
         ? incoming.latestStarrScore
         : current.latestStarrScore,
+    completedTiers,
+    highestCompletedTier,
   };
 
   await client.users.updateUserMetadata(userId, {

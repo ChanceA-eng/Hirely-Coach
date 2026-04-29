@@ -7,6 +7,8 @@ export type AccountInterviewProgress = {
   latestJobTitle: string;
   latestTopWeakness: string;
   latestStarrScore: number;
+  completedTiers: number[];
+  highestCompletedTier: number;
 };
 
 export const EMPTY_INTERVIEW_PROGRESS: AccountInterviewProgress = {
@@ -16,6 +18,8 @@ export const EMPTY_INTERVIEW_PROGRESS: AccountInterviewProgress = {
   latestJobTitle: "",
   latestTopWeakness: "",
   latestStarrScore: 0,
+  completedTiers: [],
+  highestCompletedTier: 0,
 };
 
 export function progressFromSnapshot(snapshot: GrowthHubSnapshot): AccountInterviewProgress {
@@ -26,6 +30,8 @@ export function progressFromSnapshot(snapshot: GrowthHubSnapshot): AccountInterv
     latestJobTitle: snapshot.jobTitle,
     latestTopWeakness: snapshot.topWeakness,
     latestStarrScore: snapshot.starrScore,
+    completedTiers: [],
+    highestCompletedTier: 0,
   };
 }
 
@@ -40,11 +46,14 @@ export function snapshotFromProgress(progress: AccountInterviewProgress): Growth
   };
 }
 
-export async function syncInterviewProgress(snapshot: GrowthHubSnapshot) {
+export async function syncInterviewProgress(
+  snapshot: GrowthHubSnapshot,
+  options?: { completedTier?: number }
+) {
   const response = await fetch("/api/user/interview-progress", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ snapshot }),
+    body: JSON.stringify({ snapshot, completedTier: options?.completedTier }),
   });
 
   if (!response.ok) {

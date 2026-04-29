@@ -11,23 +11,17 @@ import { useAuth } from "@clerk/nextjs";
 import {
   CORE_MODULE_XP,
   REQUIRED_CORE_XP,
-  XP_PER_LEVEL,
   hasCompletedAllTrainingModules,
   loadInterviewHistory,
   loadTrainingProgress,
   saveTrainingProgress,
   type TrainingModuleId,
 } from "../lib/interviewStorage";
+import { getProgressMeta, loadIP } from "../lib/progression";
 import "./page.css";
 
 // ─── XP storage ─────────────────────────────────────────────────────────────
-const XP_KEY = "hirelyCoachXP";
 const SKILL_XP_KEY = "hirelyCoachSkillXP";
-
-function loadXP(): number {
-  if (typeof window === "undefined") return 0;
-  return parseInt(window.localStorage.getItem(XP_KEY) || "0", 10);
-}
 
 type SkillXP = { logic: number; storytelling: number; delivery: number };
 
@@ -36,16 +30,6 @@ function loadSkillXP(): SkillXP {
   try {
     return (JSON.parse(window.localStorage.getItem(SKILL_XP_KEY) || "{}") as SkillXP) || { logic: 0, storytelling: 0, delivery: 0 };
   } catch { return { logic: 0, storytelling: 0, delivery: 0 }; }
-}
-
-function xpLevel(xp: number) { return Math.floor(xp / XP_PER_LEVEL) + 1; }
-function xpProgress(xp: number) { return ((xp % XP_PER_LEVEL) / XP_PER_LEVEL) * 100; }
-function xpTitle(level: number) {
-  if (level < 3) return "Novice";
-  if (level < 6) return "Apprentice";
-  if (level < 10) return "Professional";
-  if (level < 15) return "Senior";
-  return "Executive";
 }
 
 // ─── Weakness parser ─────────────────────────────────────────────────────────
@@ -210,7 +194,7 @@ export default function TrainingHubPage() {
   useEffect(() => {
     const history = loadInterviewHistory(userId);
     const latest = history[0] ?? null;
-    const currentXP = loadXP();
+    const currentXP = loadIP();
     const skills = loadSkillXP();
     const progress = loadTrainingProgress(userId);
 
@@ -221,37 +205,27 @@ export default function TrainingHubPage() {
       }
     });
 
-    const reconstructedCoreXP = Array.from(reconstructedCompleted).reduce(
-      (sum, moduleId) => sum + CORE_MODULE_XP[moduleId],
-      0,
-    );
-    const reconciledXP = Math.max(currentXP, reconstructedCoreXP);
-
     if (reconstructedCompleted.size !== progress.completedModules.length) {
       saveTrainingProgress({ completedModules: Array.from(reconstructedCompleted) }, userId);
     }
-    if (reconciledXP !== currentXP && typeof window !== "undefined") {
-      window.localStorage.setItem(XP_KEY, String(reconciledXP));
-    }
-
-    setGlobalXP(reconciledXP);
-    setSkillXP(skills);
-    setCompletedModules(reconstructedCompleted);
-    if (latest) {
-      const w = parseWeaknesses(latest.feedback || "");
-      setWeaknesses(w);
-      setHasSession(true);
-      setCoachTip(pickTip(w));
-    } else {
-      setCoachTip(pickTip([]));
-    }
+    queueMicrotask(() => {
+      setGlobalXP(currentXP);
+      setSkillXP(skills);
+      setCompletedModules(reconstructedCompleted);
+      if (latest) {
+        const w = parseWeaknesses(latest.feedback || "");
+        setWeaknesses(w);
+        setHasSession(true);
+        setCoachTip(pickTip(w));
+      } else {
+        setCoachTip(pickTip([]));
+      }
+    });
     setTimeout(() => setTipVisible(true), 600);
   }, [userId]);
 
   const weakestModuleId = weaknessToModuleId(weaknesses);
-  const level = xpLevel(globalXP);
-  const progress = xpProgress(globalXP);
-  const title = xpTitle(level);
+  const progressMeta = getProgressMeta(globalXP);
   const coreCompleted = hasCompletedAllTrainingModules({ completedModules: Array.from(completedModules) });
   const coreXP = Array.from(completedModules).reduce((sum, moduleId) => sum + CORE_MODULE_XP[moduleId], 0);
   const advancedUnlocked = coreCompleted && coreXP >= REQUIRED_CORE_XP;
@@ -268,17 +242,20 @@ export default function TrainingHubPage() {
         {/* ── GLOBAL XP BAR ── */}
         <section className="xp-banner glass-card">
           <div className="xp-banner-left">
-            <span className="xp-level-badge">LV {level}</span>
+            <span className="xp-level-badge">IP</span>
             <div>
-              <div className="xp-title">{title} Candidate</div>
-              <div className="xp-sub">{globalXP} XP total · {XP_PER_LEVEL - (globalXP % XP_PER_LEVEL)} XP to next level</div>
+              <div className="xp-title">{progressMeta.tier.title}</div>
+              <div className="xp-sub">
+                {globalXP} IP total
+                {progressMeta.nextTier ? ` · ${progressMeta.remainingToNext} IP to ${progressMeta.nextTier.title}` : " · Master tier reached"}
+              </div>
             </div>
           </div>
           <div className="xp-bar-wrap">
             <div className="xp-bar-track">
-              <div className="xp-bar-fill" style={{ width: `${Math.round(progress)}%` }} />
+              <div className="xp-bar-fill" style={{ width: `${Math.round(progressMeta.progressPct)}%` }} />
             </div>
-            <span className="xp-pct">{Math.round(progress)}%</span>
+            <span className="xp-pct">{Math.round(progressMeta.progressPct)}%</span>
           </div>
         </section>
 

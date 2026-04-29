@@ -1,20 +1,21 @@
 import OpenAI from "openai";
+import {
+  coerceStarrTierId,
+  buildBossQuestionRules,
+} from "@/app/lib/hirelySupremacy";
+import { loadHcAdminConfig } from "@/app/lib/hcAdminConfig";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const QUESTION_LIMITS = {
-  quick: 3,
-  medium: 6,
-  intensive: 9,
-};
-
 export async function POST(req) {
   try {
-    const { resume, job, jobLink, level } = await req.json();
+    const { resume, job, jobLink, tier } = await req.json();
+    const adminConfig = await loadHcAdminConfig();
 
-    const selectedLevel = QUESTION_LIMITS[level] ? level : "medium";
+    const selectedTier = coerceStarrTierId(tier);
+    const bossConfig = adminConfig.starrLab.tiers[selectedTier];
     const jobInput = (job || "").trim() || (jobLink ? `Job listing URL: ${jobLink}` : "");
 
     if (!resume || !jobInput) {
@@ -24,7 +25,7 @@ export async function POST(req) {
       );
     }
 
-    const count = QUESTION_LIMITS[selectedLevel] || QUESTION_LIMITS.medium;
+    const count = bossConfig.questionCount;
 
     const prompt = `You are an expert interview coach.
 Generate exactly ${count} high-quality mock interview questions tailored to the candidate and role.
@@ -38,18 +39,34 @@ ${jobInput}
 Rules:
 - Output ONLY the questions
 - One question per line
-- No headings, no commentary, no explanations`; 
+- No headings, no commentary, no explanations
+
+STARR Lab Tier:
+- Tier ${bossConfig.tier}: ${bossConfig.title}
+- Scenario: ${bossConfig.scenarioTitle}
+- Persona: ${bossConfig.persona}
+- Persona Prompt: ${bossConfig.systemPrompt}
+- ${buildBossQuestionRules(bossConfig)}`;
 
     const completion = await client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: adminConfig.model,
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
+      temperature: bossConfig.temperature,
+      presence_penalty: bossConfig.presencePenalty,
     });
 
     const content = completion.choices?.[0]?.message?.content || "";
 
     return Response.json({
       questions: content,
+      tier: bossConfig.tier,
+      tierTitle: bossConfig.title,
+      bossPersona: bossConfig.persona,
+      runtimeBehavior: {
+        silenceAnchorMs: bossConfig.silenceAnchorMs,
+        interruptThresholdSeconds: bossConfig.interruptThresholdSeconds,
+        multiPartSegments: bossConfig.multiPartSegments,
+      },
     });
   } catch (err) {
     return Response.json(

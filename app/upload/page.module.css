@@ -121,6 +121,16 @@
   font-size: 0.84rem;
 }
 
+.rewardFlash {
+  color: #6ee7b7;
+  font-size: 0.8rem;
+  font-weight: 800;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  background: rgba(6, 95, 70, 0.3);
+  border-radius: 999px;
+  padding: 5px 10px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -215,6 +225,16 @@
   line-height: 1.6;
 }
 
+.highScoreBadge {
+  color: #6ee7b7;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(6, 95, 70, 0.25);
+  border-radius: 999px;
+  padding: 5px 10px;
+}
+
 .textarea {
   width: 100%;
   min-height: 200px;
@@ -281,6 +301,43 @@
   border-radius: 999px;
   background: linear-gradient(90deg, #22c55e, #0ea5e9);
   transition: width 180ms ease;
+}
+
+.canvasCtaRow {
+  margin-top: 14px;
+  border: 1px dashed rgba(16, 185, 129, 0.35);
+  background: rgba(6, 95, 70, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.canvasCtaText {
+  margin: 0;
+  color: #a7f3d0;
+  font-size: 0.84rem;
+}
+
+.canvasCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  background: rgba(6, 95, 70, 0.22);
+  color: #a7f3d0;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.canvasCtaBtn:hover {
+  filter: brightness(1.08);
 }
 
 .delta {
@@ -625,6 +682,23 @@
   margin: 6px 0 0;
   color: #cbd5e1;
   line-height: 1.55;
+}
+
+.acceptBtn {
+  margin-top: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.36);
+  background: rgba(6, 95, 70, 0.22);
+  color: #a7f3d0;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.acceptBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .missingProof {

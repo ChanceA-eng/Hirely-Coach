@@ -7,9 +7,19 @@ import { useAuth } from "@clerk/nextjs";
 import {
   clearInterviewHistory,
   loadInterviewHistory,
+  loadTrainingProgress,
   type InterviewSession,
 } from "../lib/interviewStorage";
 import { loadImpactEntries, type ImpactEntry } from "../lib/impactLog";
+import {
+  awardFirstPortfolioExport,
+  getProgressMeta,
+  getTierByIP,
+  loadBaselineResumeScore,
+  loadHighestResumeScore,
+  loadIP,
+  loadStreakState,
+} from "../lib/progression";
 
 // ─── Markdown renderer ────────────────────────────────────────────────────────
 function formatFeedbackHtml(md: string): string {
@@ -23,17 +33,24 @@ function formatFeedbackHtml(md: string): string {
 
 // ─── Level helpers ────────────────────────────────────────────────────────────
 function sessionLevel(session: InterviewSession): string {
-  if (session.level) return session.level;
+  const fromLevel = session.level?.match(/tier-(\d)/i)?.[1];
+  const tierFromLevel = fromLevel ? Number(fromLevel) : 0;
+  if (tierFromLevel >= 1 && tierFromLevel <= 7) return `Tier ${tierFromLevel}`;
+
   const n = session.questions.length;
-  if (n <= 3) return "Quick";
-  if (n <= 6) return "Medium";
-  return "Intensive";
+  if (n <= 3) return "Tier 1";
+  if (n === 4) return "Tier 2";
+  if (n === 5) return "Tier 3";
+  if (n === 6) return "Tier 4";
+  if (n === 7) return "Tier 5";
+  if (n === 8) return "Tier 6";
+  return "Tier 7";
 }
 
 function levelClass(level: string) {
-  const l = level.toLowerCase();
-  if (l === "quick") return "level-badge--quick";
-  if (l === "medium") return "level-badge--medium";
+  const tier = Number(level.match(/tier\s*(\d)/i)?.[1] || "1");
+  if (tier <= 2) return "level-badge--quick";
+  if (tier <= 5) return "level-badge--medium";
   return "level-badge--intensive";
 }
 
@@ -94,6 +111,24 @@ function formatLedgerDate(timestamp: number) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+type EmailMode = "pulse" | "promotion" | "recap";
+type EmailTone = "casual" | "formal";
+
+function impactStrength(entry: ImpactEntry): number {
+  const text = `${entry.action} ${entry.proof} ${entry.result}`.toLowerCase();
+  const numbers = (text.match(/\d+/g) || []).length;
+  const outcomeWords = ["increased", "reduced", "saved", "improved", "launched", "delivered", "grew"];
+  const outcomeHits = outcomeWords.reduce((sum, word) => sum + (text.includes(word) ? 1 : 0), 0);
+  const lengthSignal = Math.min(40, Math.round((entry.result.length + entry.proof.length) / 10));
+  return numbers * 10 + outcomeHits * 8 + lengthSignal;
+}
+
+function topImpactWins(entries: ImpactEntry[], count = 5): ImpactEntry[] {
+  return [...entries]
+    .sort((a, b) => impactStrength(b) - impactStrength(a))
+    .slice(0, count);
 }
 
 // ─── Session card ─────────────────────────────────────────────────────────────
@@ -234,12 +269,33 @@ export default function HistoryPage() {
   const [ledgerRange, setLedgerRange] = useState<LedgerRange>("90d");
   const [selectedWeekKey, setSelectedWeekKey] = useState<string | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+  const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [ip, setIp] = useState(0);
+  const [exportMessage, setExportMessage] = useState("");
+  const [emailMode, setEmailMode] = useState<EmailMode>("pulse");
+  const [emailTone, setEmailTone] = useState<EmailTone>("formal");
+  const [emailDraft, setEmailDraft] = useState("");
+  const [emailSubject, setEmailSubject] = useState("");
+  const [isDraftingEmail, setIsDraftingEmail] = useState(false);
 
   useEffect(() => {
-    setHistory(loadInterviewHistory(userId));
-    setImpactEntries(loadImpactEntries(userId));
-    setHydrated(true);
+    queueMicrotask(() => {
+      setHistory(loadInterviewHistory(userId));
+      setImpactEntries(loadImpactEntries(userId));
+      setIp(loadIP());
+      setHydrated(true);
+    });
+  }, [userId]);
+
+  useEffect(() => {
+    function onFocus() {
+      setIp(loadIP());
+      setImpactEntries(loadImpactEntries(userId));
+    }
+
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [userId]);
 
   const filteredImpactEntries = useMemo(() => {
@@ -270,30 +326,202 @@ export default function HistoryPage() {
       .filter((key) => (groupedByWeek.get(key)?.length || 0) > 0);
 
     if (availableWeekKeys.length === 0) {
-      setSelectedWeekKey(null);
-      setSelectedEntryId(null);
+      queueMicrotask(() => {
+        setSelectedWeekKey(null);
+        setSelectedEntryId(null);
+      });
       return;
     }
 
     const latestWeek = availableWeekKeys[availableWeekKeys.length - 1];
-    setSelectedWeekKey((prev) => (prev && availableWeekKeys.includes(prev) ? prev : latestWeek));
+    queueMicrotask(() => {
+      setSelectedWeekKey((prev) => (prev && availableWeekKeys.includes(prev) ? prev : latestWeek));
+    });
   }, [lens, weekSlots, groupedByWeek]);
 
-  const selectedWeekEntries = selectedWeekKey ? groupedByWeek.get(selectedWeekKey) || [] : [];
+  const selectedWeekEntries = useMemo(
+    () => (selectedWeekKey ? groupedByWeek.get(selectedWeekKey) || [] : []),
+    [selectedWeekKey, groupedByWeek]
+  );
 
   useEffect(() => {
     if (selectedWeekEntries.length === 0) {
-      setSelectedEntryId(null);
+      queueMicrotask(() => setSelectedEntryId(null));
       return;
     }
 
     const exists = selectedWeekEntries.some((entry) => entry.id === selectedEntryId);
     if (!exists) {
-      setSelectedEntryId(selectedWeekEntries[0].id);
+      queueMicrotask(() => setSelectedEntryId(selectedWeekEntries[0].id));
     }
   }, [selectedWeekEntries, selectedEntryId]);
 
   const selectedEntry = selectedWeekEntries.find((entry) => entry.id === selectedEntryId) || null;
+  const progressMeta = getProgressMeta(ip);
+  const filteredTopWins = topImpactWins(filteredImpactEntries, 5);
+  const selectedWins = filteredImpactEntries.filter((entry) => selectedEntryIds.includes(entry.id));
+
+  const baselineResumeScore = loadBaselineResumeScore();
+  const highestResumeScore = loadHighestResumeScore();
+  const resumeDelta = baselineResumeScore
+    ? Math.max(0, highestResumeScore - baselineResumeScore)
+    : 0;
+  const trainingCompleted = loadTrainingProgress(userId).completedModules.length;
+  const streakDays = loadStreakState().streakDays;
+
+  function toggleEntrySelection(entryId: string) {
+    setSelectedEntryIds((prev) =>
+      prev.includes(entryId)
+        ? prev.filter((id) => id !== entryId)
+        : [...prev, entryId].slice(0, 5)
+    );
+  }
+
+  async function generatePortfolioPdf() {
+    if (filteredImpactEntries.length === 0) {
+      setExportMessage("No wins in this range yet.");
+      return;
+    }
+
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const navy = [15, 23, 42] as const;
+    const slate = [71, 85, 105] as const;
+
+    let y = 60;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...navy);
+    doc.setFontSize(20);
+    doc.text("Hirely Coach Performance Portfolio", 48, y);
+
+    y += 20;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...slate);
+    doc.text(`Date Range: ${ledgerRange.toUpperCase()} · Generated ${new Date().toLocaleDateString()}`, 48, y);
+
+    y += 26;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...navy);
+    doc.text("Highlight Reel (Top 5 Impact Wins)", 48, y);
+    y += 14;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+
+    for (const win of filteredTopWins) {
+      const line = `${formatLedgerDate(win.createdAt)} | ${win.action} -> ${win.result}`;
+      const lines = doc.splitTextToSize(line, 500);
+      doc.text(lines, 56, y);
+      y += lines.length * 12 + 4;
+      if (y > 720) {
+        doc.addPage();
+        y = 60;
+      }
+    }
+
+    y += 10;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...navy);
+    doc.text("Growth Metrics", 48, y);
+    y += 16;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...slate);
+    doc.text(`Resume Score: ${baselineResumeScore ?? 0} -> ${highestResumeScore} (${resumeDelta >= 0 ? "+" : ""}${resumeDelta})`, 56, y);
+    y += 16;
+    doc.text(`Skill Mastery: ${trainingCompleted} certifications completed`, 56, y);
+    y += 16;
+    doc.text(`Professional Tier: ${getTierByIP(ip).title}`, 56, y);
+    y += 16;
+    doc.text(`Consistency: ${streakDays}-day streak`, 56, y);
+
+    y += 18;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...navy);
+    doc.text("Detailed Ledger", 48, y);
+    y += 14;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    for (const entry of [...filteredImpactEntries].sort((a, b) => a.createdAt - b.createdAt)) {
+      const actionLine = `Action: ${entry.action}`;
+      const proofLine = `Proof: ${entry.proof}`;
+      const resultLine = `Result: ${entry.result}`;
+      const dateLine = formatLedgerDate(entry.createdAt);
+      const block = [dateLine, actionLine, proofLine, resultLine, ""];
+
+      for (const text of block) {
+        const lines = doc.splitTextToSize(text, 500);
+        doc.text(lines, 56, y);
+        y += lines.length * 11;
+      }
+
+      if (y > 730) {
+        doc.addPage();
+        y = 60;
+      }
+    }
+
+    doc.save(`hirely-performance-portfolio-${Date.now()}.pdf`);
+    const reward = awardFirstPortfolioExport();
+    if (reward.awarded) {
+      setIp(reward.ip);
+      setExportMessage("Portfolio exported. +25 IP for first export.");
+    } else {
+      setExportMessage("Portfolio exported.");
+    }
+  }
+
+  async function draftManagerEmail() {
+    if (selectedWins.length < 3) {
+      setExportMessage("Select 3 to 5 wins to draft a manager update.");
+      return;
+    }
+
+    setIsDraftingEmail(true);
+    try {
+      const res = await fetch("/api/impact-ledger/email-draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wins: selectedWins,
+          mode: emailMode,
+          tone: emailTone,
+          levelTitle: getTierByIP(ip).title,
+          certificationsCompleted: trainingCompleted,
+        }),
+      });
+      const data = (await res.json()) as { subject?: string; body?: string; error?: string };
+      if (!res.ok || !data.body) {
+        setExportMessage(data.error || "Could not generate draft email.");
+        return;
+      }
+      setEmailSubject(data.subject || "Professional Update");
+      setEmailDraft(data.body);
+      setExportMessage("Draft generated.");
+    } catch {
+      setExportMessage("Could not generate draft email.");
+    } finally {
+      setIsDraftingEmail(false);
+    }
+  }
+
+  function copyDraft() {
+    if (!emailDraft) return;
+    navigator.clipboard.writeText(`Subject: ${emailSubject}\n\n${emailDraft}`);
+    setExportMessage("Draft copied to clipboard.");
+  }
+
+  function openInMail() {
+    if (!emailDraft) return;
+    const subject = encodeURIComponent(emailSubject || "Professional Update");
+    const body = encodeURIComponent(emailDraft);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  }
 
   const handleClear = () => {
     if (!window.confirm("Delete all interview history from this browser?")) return;
@@ -351,6 +579,34 @@ export default function HistoryPage() {
             Impact Ledger
           </button>
         </div>
+
+        {lens === "ledger" && (
+          <div className="glass-card anim-fade-up anim-fade-up--d1" style={{ padding: "12px 16px", marginBottom: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+              <strong style={{ color: "#f8fafc", fontSize: "0.86rem" }}>
+                Ledger Mastery
+              </strong>
+              <span style={{ color: "#cbd5e1", fontSize: "0.82rem" }}>
+                Wins Logged: {impactEntries.length} • {ip} IP • {progressMeta.tier.title}
+              </span>
+            </div>
+            <div style={{ marginTop: 8, height: 7, borderRadius: 999, overflow: "hidden", background: "rgba(255,255,255,0.1)" }}>
+              <span
+                style={{
+                  display: "block",
+                  width: `${progressMeta.progressPct}%`,
+                  height: "100%",
+                  background: "linear-gradient(90deg, #10b981, #34d399)",
+                }}
+              />
+            </div>
+            <p style={{ margin: "8px 0 0", color: "#94a3b8", fontSize: "0.76rem" }}>
+              {progressMeta.nextTier
+                ? `${progressMeta.remainingToNext} IP to ${progressMeta.nextTier.title}`
+                : "Master tier achieved"}
+            </p>
+          </div>
+        )}
 
         {/* ── Action bar ── */}
         {lens === "sessions" ? (
@@ -414,10 +670,44 @@ export default function HistoryPage() {
                 1 Year
               </button>
             </div>
-            <button className="lp-btn-ghost" type="button" onClick={() => router.push("/growthhub")}>
-              GrowthHub
-            </button>
+            <div className="archive-ledger-actions">
+              <select
+                className="archive-input"
+                value={emailMode}
+                onChange={(event) => setEmailMode(event.target.value as EmailMode)}
+              >
+                <option value="pulse">Weekly/Monthly Pulse</option>
+                <option value="promotion">Promotion/Raise Request</option>
+                <option value="recap">Project Recap</option>
+              </select>
+              <select
+                className="archive-input"
+                value={emailTone}
+                onChange={(event) => setEmailTone(event.target.value as EmailTone)}
+              >
+                <option value="casual">Casual / Brief</option>
+                <option value="formal">Formal / Detailed</option>
+              </select>
+              <button className="lp-btn-primary" type="button" onClick={generatePortfolioPdf}>
+                Generate Performance Portfolio
+              </button>
+              <button
+                className="lp-btn-ghost"
+                type="button"
+                onClick={draftManagerEmail}
+                disabled={isDraftingEmail}
+              >
+                {isDraftingEmail ? "Drafting…" : "Draft Update for Manager"}
+              </button>
+              <button className="lp-btn-ghost" type="button" onClick={() => router.push("/growthhub")}>
+                GrowthHub
+              </button>
+            </div>
           </div>
+        )}
+
+        {lens === "ledger" && exportMessage && (
+          <div className="archive-export-msg">{exportMessage}</div>
         )}
 
         {/* ── Session list ── */}
@@ -474,15 +764,27 @@ export default function HistoryPage() {
                       <p className="archive-ledger-empty">No wins recorded for this week.</p>
                     ) : (
                       selectedWeekEntries.map((entry) => (
-                        <button
+                        <div
                           key={entry.id}
-                          type="button"
                           className={`archive-ledger-entry ${selectedEntryId === entry.id ? "is-active" : ""}`}
-                          onClick={() => setSelectedEntryId(entry.id)}
                         >
-                          <span>{formatLedgerDate(entry.createdAt)}</span>
-                          <strong>{entry.action.slice(0, 64)}</strong>
-                        </button>
+                          <label className="archive-ledger-pick">
+                            <input
+                              type="checkbox"
+                              checked={selectedEntryIds.includes(entry.id)}
+                              onChange={() => toggleEntrySelection(entry.id)}
+                            />
+                            <span>Select</span>
+                          </label>
+                          <button
+                            type="button"
+                            className="archive-ledger-entry-btn"
+                            onClick={() => setSelectedEntryId(entry.id)}
+                          >
+                            <span>{formatLedgerDate(entry.createdAt)}</span>
+                            <strong>{entry.action.slice(0, 64)}</strong>
+                          </button>
+                        </div>
                       ))
                     )}
                   </div>
@@ -500,6 +802,18 @@ export default function HistoryPage() {
                         <p className="archive-ledger-label">Result</p>
                         <p className="archive-ledger-copy">{selectedEntry.result}</p>
                       </>
+                    )}
+
+                    {emailDraft && (
+                      <div className="archive-email-preview">
+                        <p className="archive-ledger-label">Drafted Email Preview</p>
+                        <p className="archive-ledger-copy"><strong>Subject:</strong> {emailSubject}</p>
+                        <pre className="archive-email-copy">{emailDraft}</pre>
+                        <div className="archive-email-actions">
+                          <button type="button" className="lp-btn-ghost" onClick={copyDraft}>Copy to Clipboard</button>
+                          <button type="button" className="lp-btn-primary" onClick={openInMail}>Open in Mail</button>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>

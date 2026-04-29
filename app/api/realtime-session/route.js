@@ -1,10 +1,20 @@
+import {
+  coerceStarrTierId,
+  buildRealtimeBossInstructions,
+} from "@/app/lib/hirelySupremacy";
+import { loadHcAdminConfig } from "@/app/lib/hcAdminConfig";
+
 export async function POST(req) {
   try {
-    const { questions } = await req.json();
+    const { questions, tier } = await req.json();
+    const adminConfig = await loadHcAdminConfig();
 
     if (!Array.isArray(questions) || questions.length === 0) {
       return Response.json({ error: "Questions are required" }, { status: 400 });
     }
+
+    const selectedTier = coerceStarrTierId(tier);
+  const bossConfig = adminConfig.starrLab.tiers[selectedTier];
 
     const questionsText = questions
       .map((q, i) => `${i + 1}. ${q}`)
@@ -21,18 +31,27 @@ export async function POST(req) {
         voice: "alloy",
         instructions: `You are a Senior Career Coach and Professional Interview Specialist conducting a live mock interview session. Your role is to create a realistic, professional interview environment that helps the candidate grow.
 
-You will mentally evaluate every response using the STARR Performance Metric — Situation, Task, Action, Result, and Reflection — as the candidate speaks, because written feedback will be generated at the end.
+You will mentally evaluate every response using the STARR Performance Metric - Situation, Task, Action, Result, and Reflection - as the candidate speaks, because written feedback will be generated at the end.
 
 You have exactly ${questions.length} questions to ask, in this order:
 
 ${questionsText}
 
+STARR Lab persona:
+- Tier ${bossConfig.tier}: ${bossConfig.title}
+- Scenario: ${bossConfig.scenarioTitle}
+- Persona: ${bossConfig.persona}
+- Persona Prompt: ${bossConfig.systemPrompt}
+- Runtime instruction: ${selectedTier === 6 ? `Run a financial gatekeeper style challenge. After the candidate finishes, hold a ${Math.round(bossConfig.silenceAnchorMs / 1000)}-second silence before continuing.` : buildRealtimeBossInstructions(bossConfig)}
+- Interrupt threshold: ${bossConfig.interruptThresholdSeconds} seconds before cutting off rambling answers.
+- Multi-part prompt slots: ${bossConfig.multiPartSegments}.
+
 Conduct Rules:
 - Open with a single warm, professional greeting, then immediately ask Question 1. Do not explain the STARR process or mention it to the candidate.
 - Ask exactly one question at a time. Wait for the candidate to finish speaking before responding.
-- After each answer give only a brief, neutral acknowledgment (e.g. "Thank you, I appreciate that." or "Got it, let's move on.") — no coaching, no hints, no feedback during the session.
+- After each answer give only a brief, neutral acknowledgment (e.g. "Thank you, I appreciate that." or "Got it, let's move on.") - no coaching, no hints, no feedback during the session.
 - Do NOT ask follow-up questions, clarifications, or deviate from the question list above.
-- Maintain a professional, calm, and encouraging tone throughout — like a senior HR Business Partner at a top-tier company.
+- Maintain a professional, calm, and encouraging tone throughout - like a senior HR Business Partner at a top-tier company.
 - After ALL ${questions.length} questions have been answered, provide a brief professional closing and end your response by saying exactly: "Thank you." and then stay completely silent.
 
 - If the candidate gives a non-substantive answer (examples: "okay", "yeah", "mmm", "no", very short fragments), re-ask the same question one more time to request a clear, specific response. Do this at most once per question, then continue.
@@ -42,7 +61,7 @@ Persona: Professional, precise, encouraging, and highly observant. Use industry-
           type: "server_vad",
           threshold: 0.9,
           prefix_padding_ms: 300,
-          silence_duration_ms: 2000,
+          silence_duration_ms: bossConfig.silenceAnchorMs,
         },
         input_audio_transcription: {
           model: "whisper-1",
@@ -59,7 +78,14 @@ Persona: Professional, precise, encouraging, and highly observant. Use industry-
     }
 
     const session = await response.json();
-    return Response.json({ clientSecret: session.client_secret.value });
+    return Response.json({
+      clientSecret: session.client_secret.value,
+      runtimeBehavior: {
+        silenceAnchorMs: bossConfig.silenceAnchorMs,
+        interruptThresholdSeconds: bossConfig.interruptThresholdSeconds,
+        multiPartSegments: bossConfig.multiPartSegments,
+      },
+    });
   } catch (err) {
     return Response.json(
       { error: "Server error", details: err.message },

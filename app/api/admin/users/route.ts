@@ -46,6 +46,10 @@ export async function PATCH(request: Request) {
     leadershipWeight?: number;
     technicalWeight?: number;
     founderNote?: string;
+    masterUnlock?: boolean;
+    forcedTier?: number | null;
+    impactPointsDelta?: number;
+    snapshotAction?: "save" | "restore";
   };
 
   if (!body.targetUserId) {
@@ -53,18 +57,86 @@ export async function PATCH(request: Request) {
   }
 
   const client = await clerkClient();
+  const user = await client.users.getUser(body.targetUserId);
+  const currentPublicMetadata = (user.publicMetadata ?? {}) as Record<string, unknown>;
+  const currentPrivateMetadata = (user.privateMetadata ?? {}) as Record<string, unknown>;
+  const currentProgress = (currentPublicMetadata.interviewProgress ?? {}) as Record<string, unknown>;
+  const forcedTier =
+    typeof body.forcedTier === "number" && body.forcedTier >= 1 && body.forcedTier <= 7
+      ? body.forcedTier
+      : null;
+  const fullTierSet = [1, 2, 3, 4, 5, 6, 7];
+
+  const snapshot = currentPrivateMetadata.adminCommandSnapshot as Record<string, unknown> | undefined;
+
+  let nextPublicMetadata: Record<string, unknown> = {
+    ...currentPublicMetadata,
+    ...(body.kj !== undefined ? { kj: body.kj } : {}),
+    ...(body.acceleratorLevel !== undefined ? { acceleratorLevel: body.acceleratorLevel } : {}),
+    ...(body.resumeText !== undefined ? { resumeText: body.resumeText } : {}),
+    ...(body.leadershipWeight !== undefined ? { leadershipWeight: body.leadershipWeight } : {}),
+    ...(body.technicalWeight !== undefined ? { technicalWeight: body.technicalWeight } : {}),
+    ...(body.founderNote !== undefined ? { founderNote: body.founderNote } : {}),
+    ...(body.impactPointsDelta !== undefined ? { adminImpactPointsDelta: body.impactPointsDelta } : {}),
+  };
+
+  const nextPrivateMetadata: Record<string, unknown> = {
+    ...currentPrivateMetadata,
+  };
+
+  if (body.snapshotAction === "save") {
+    nextPrivateMetadata.adminCommandSnapshot = {
+      savedAt: Date.now(),
+      acceleratorLevel: currentPublicMetadata.acceleratorLevel ?? null,
+      adminImpactPointsDelta: currentPublicMetadata.adminImpactPointsDelta ?? 0,
+      interviewProgress: currentPublicMetadata.interviewProgress ?? null,
+      interviewAdminOverride: currentPublicMetadata.interviewAdminOverride ?? null,
+    };
+  }
+
+  if (body.snapshotAction === "restore" && snapshot) {
+    nextPublicMetadata = {
+      ...currentPublicMetadata,
+      acceleratorLevel: snapshot.acceleratorLevel ?? "",
+      adminImpactPointsDelta: snapshot.adminImpactPointsDelta ?? 0,
+      interviewProgress: snapshot.interviewProgress ?? null,
+      interviewAdminOverride: snapshot.interviewAdminOverride ?? null,
+    };
+  } else {
+    const currentOverride = (currentPublicMetadata.interviewAdminOverride ?? {}) as Record<string, unknown>;
+    const nextOverride = {
+      ...currentOverride,
+      ...(body.masterUnlock !== undefined ? { masterUnlock: body.masterUnlock } : {}),
+      ...(body.forcedTier !== undefined ? { forcedTier } : {}),
+      updatedAt: Date.now(),
+    };
+
+    if (body.masterUnlock !== undefined || body.forcedTier !== undefined) {
+      nextPublicMetadata.interviewAdminOverride = nextOverride;
+    }
+
+    if (body.masterUnlock === true) {
+      nextPublicMetadata.interviewProgress = {
+        ...currentProgress,
+        hasCompletedInterview: true,
+        completedTiers: fullTierSet,
+        highestCompletedTier: 7,
+      };
+    } else if (forcedTier) {
+      const unlockedTiers = fullTierSet.slice(0, forcedTier);
+      nextPublicMetadata.interviewProgress = {
+        ...currentProgress,
+        hasCompletedInterview: true,
+        completedTiers: unlockedTiers,
+        highestCompletedTier: forcedTier,
+      };
+    }
+  }
+
   await client.users.updateUserMetadata(body.targetUserId, {
-    publicMetadata: {
-      ...(body.kj !== undefined ? { kj: body.kj } : {}),
-      ...(body.acceleratorLevel !== undefined
-        ? { acceleratorLevel: body.acceleratorLevel }
-        : {}),
-      ...(body.resumeText !== undefined ? { resumeText: body.resumeText } : {}),
-      ...(body.leadershipWeight !== undefined ? { leadershipWeight: body.leadershipWeight } : {}),
-      ...(body.technicalWeight !== undefined ? { technicalWeight: body.technicalWeight } : {}),
-      ...(body.founderNote !== undefined ? { founderNote: body.founderNote } : {}),
-    },
+    publicMetadata: nextPublicMetadata,
+    privateMetadata: nextPrivateMetadata,
   });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, publicMetadata: nextPublicMetadata });
 }
