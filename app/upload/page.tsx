@@ -49,6 +49,46 @@ type RuntimeConfig = {
   resumeCacheVersion: number;
 };
 
+type FastAuditReport = {
+  overallScore: number;
+  overallGrade: ResumeAuditReport["overallGrade"];
+  metrics: ResumeAuditReport["metrics"];
+  impactScore: number;
+  atsCompatibility: AtsCompatibility;
+  scoreDiagnostics: ResumeAuditReport["scoreDiagnostics"];
+  keywords: string[];
+  phase?: "fast";
+  cached?: boolean;
+  durationMs?: number;
+};
+
+function buildFastReport(fast: FastAuditReport, previous: ResumeAuditReport | null): ResumeAuditReport {
+  return {
+    overallScore: Number(fast.overallScore || previous?.overallScore || 0),
+    metrics: {
+      language: Number(fast.metrics?.language || previous?.metrics.language || 1),
+      structure: Number(fast.metrics?.structure || previous?.metrics.structure || 1),
+      layout: Number(fast.metrics?.layout || previous?.metrics.layout || 1),
+    },
+    impactScore: Number(fast.impactScore || previous?.impactScore || 1),
+    overallGrade: fast.overallGrade || previous?.overallGrade || "Needs Work",
+    coachSummary: previous?.coachSummary || "Detailed analysis is loading...",
+    logSuggestions: previous?.logSuggestions || "",
+    topAdvice: previous?.topAdvice || "Fast-pass complete. Deeper recommendations are loading.",
+    criticalFixes: previous?.criticalFixes || [],
+    optimizations: previous?.optimizations || [],
+    suggestedPowerVerbs: previous?.suggestedPowerVerbs || fast.keywords || [],
+    xyzAudit: previous?.xyzAudit || [],
+    detailedSwaps: previous?.detailedSwaps || [],
+    cleanUp: previous?.cleanUp || [],
+    sentenceSwaps: previous?.sentenceSwaps || [],
+    thingsToRemove: previous?.thingsToRemove || [],
+    missingProof: previous?.missingProof || "",
+    atsCompatibility: fast.atsCompatibility || previous?.atsCompatibility || "Low",
+    scoreDiagnostics: fast.scoreDiagnostics || previous?.scoreDiagnostics || [],
+  };
+}
+
 const OPTIMIZER_STATE_KEY_PREFIX = "hirely.optimizer.state.v1";
 const OPTIMIZER_HIGHSCORE_KEY = "hirely.optimizer.highscore.v1";
 const CANVAS_DRAFT_KEY = "hirely.canvas.draft.v1";
@@ -201,6 +241,7 @@ export default function UploadPage() {
   const [copiedEntryId, setCopiedEntryId] = useState("");
   const [impactEntries, setImpactEntries] = useState<ImpactEntry[]>([]);
   const [report, setReport] = useState<ResumeAuditReport | null>(null);
+  const [deepLoading, setDeepLoading] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [lastScanKey, setLastScanKey] = useState("");
   const [cacheVersion, setCacheVersion] = useState(1);
@@ -447,28 +488,76 @@ export default function UploadPage() {
         });
         return nextCount;
       });
+      setIsScanning(false);
       return;
     }
 
     try {
-      const res = await fetch("/api/resume-audit", {
+      const fileHash = hashText(cleaned);
+      let rewardsGranted = false;
+      const applyScoreRewards = (score: number) => {
+        if (rewardsGranted) return;
+        rewardsGranted = true;
+        saveBaselineResumeScore(score);
+        const scanReward = awardResumeScanForUniqueFile(fileHash, cleaned.length);
+        if (scanReward.awarded) {
+          setIp(scanReward.ip);
+          setRewardFlash("+10 IP (Unique file scanned)");
+          window.setTimeout(() => setRewardFlash(""), 2200);
+        } else if (scanReward.reason) {
+          setRewardFlash(scanReward.reason);
+          window.setTimeout(() => setRewardFlash(""), 3000);
+        }
+      };
+
+      const payload = {
+        resumeText: cleaned,
+        fileName: activeFileName,
+        impactEntries: recentEntriesForScan,
+        scanKey: nextScanKey,
+      };
+
+      const fastPromise = fetch("/api/resume-audit?phase=fast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          resumeText: cleaned,
-          fileName: activeFileName,
-          impactEntries: recentEntriesForScan,
-        }),
+        body: JSON.stringify(payload),
+      });
+      const deepPromise = fetch("/api/resume-audit?phase=deep", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
-      const data = (await res.json()) as ResumeAuditReport | { error?: string };
-      if (!res.ok) {
-        setError((data as { error?: string }).error || "Resume scan failed.");
+      let fastReport: ResumeAuditReport | null = null;
+      const fastRes = await fastPromise;
+      const fastData = (await fastRes.json()) as FastAuditReport | { error?: string };
+      if (fastRes.ok) {
+        fastReport = buildFastReport(fastData as FastAuditReport, report);
+        setReport(fastReport);
+        setDeepLoading(true);
+        setScanProgress(58);
+        setScoreDelta(previousScore === null ? null : fastReport.overallScore - previousScore);
+        setHighScore(maybeSaveHighScore(fastReport.overallScore));
+        applyScoreRewards(fastReport.overallScore);
+      }
+
+      const deepRes = await deepPromise;
+      const deepData = (await deepRes.json()) as ResumeAuditReport | { error?: string };
+      if (!deepRes.ok && !fastReport) {
+        setError((deepData as { error?: string }).error || "Resume scan failed.");
+        setDeepLoading(false);
         return;
       }
 
-      const nextReport = data as ResumeAuditReport;
-      setReport(nextReport);
+      const finalReport = deepRes.ok ? (deepData as ResumeAuditReport) : fastReport;
+      if (!finalReport) {
+        setError("Resume scan failed.");
+        setDeepLoading(false);
+        return;
+      }
+
+      setReport(finalReport);
+      setDeepLoading(false);
       setFileName(activeFileName);
       setResumeText(cleaned);
       if (userId && cleaned) {
@@ -476,13 +565,13 @@ export default function UploadPage() {
       }
       setLastScanKey(nextScanKey);
       setScanProgress(100);
-      const fileHash = hashText(cleaned);
+
       setScanCount((count) => {
         const nextCount = count + 1;
         savePersistedOptimizerState(userId, {
           resumeText: cleaned,
           fileName: activeFileName,
-          report: nextReport,
+          report: finalReport,
           scanCount: nextCount,
           fileHash,
           scanKey: nextScanKey,
@@ -497,33 +586,22 @@ export default function UploadPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            overallScore: nextReport.overallScore,
+            overallScore: finalReport.overallScore,
             fileName: activeFileName,
             updatedAt: Date.now(),
           }),
         });
       }
 
-      // Persist first-ever scan as the immutable baseline
-      saveBaselineResumeScore(nextReport.overallScore);
+      // If fast-pass failed but deep succeeded, still apply score/IP rewards now.
+      applyScoreRewards(finalReport.overallScore);
 
-      const scanReward = awardResumeScanForUniqueFile(fileHash, cleaned.length);
-      if (scanReward.awarded) {
-        setIp(scanReward.ip);
-        setRewardFlash("+10 IP (Unique file scanned)");
-        window.setTimeout(() => setRewardFlash(""), 2200);
-      } else if (scanReward.reason) {
-        setRewardFlash(scanReward.reason);
-        window.setTimeout(() => setRewardFlash(""), 3000);
+      if (!deepRes.ok) {
+        setError("Fast scores loaded. Detailed feedback is temporarily delayed.");
       }
-
-      setHighScore(maybeSaveHighScore(nextReport.overallScore));
-
-      setScoreDelta(
-        previousScore === null ? null : nextReport.overallScore - previousScore
-      );
     } catch {
       setError("Unable to reach the audit service. Please try again.");
+      setDeepLoading(false);
     } finally {
       setIsScanning(false);
     }
@@ -575,6 +653,9 @@ export default function UploadPage() {
   const progressMeta = getProgressMeta(ip);
   const activeSwaps = report?.detailedSwaps.length ? report.detailedSwaps : [];
   const activeCleanUp = report?.cleanUp.length ? report.cleanUp : [];
+  const diagnosticsByMetric = new Map(
+    (report?.scoreDiagnostics || []).map((entry) => [entry.metric, entry])
+  );
   const recentImpactEntries = impactEntries.filter((entry) => entry.createdAt >= recentCutoffTs);
   const duplicateMap = new Map<string, number>();
   for (const entry of recentImpactEntries) {
@@ -761,17 +842,6 @@ export default function UploadPage() {
               </button>
             </div>
 
-            {report && report.overallScore < 70 && (
-              <div className={styles.canvasCtaRow}>
-                <p className={styles.canvasCtaText}>
-                  Scan is below battle-ready. Fix in Canvas with your current draft preloaded.
-                </p>
-                <button type="button" className={styles.canvasCtaBtn} onClick={openCanvasWithDraft}>
-                  Fix in Canvas
-                </button>
-              </div>
-            )}
-
             {isScanning && (
               <div className={styles.scanProgress} aria-live="polite">
                 <p className={styles.scanProgressLabel}>Reading your impact...</p>
@@ -830,18 +900,38 @@ export default function UploadPage() {
                   <div className={styles.metric}>
                     <p className={styles.metricLabel}>Clarity</p>
                     <p className={styles.metricValue}>{report.metrics.language}/10</p>
+                    {report.metrics.language < 8 && (
+                      <p className={styles.metricCriticalFlaw}>
+                        Critical Flaw: {diagnosticsByMetric.get("Clarity")?.critical_flaw || "Language is too vague and weakens recruiter confidence."}
+                      </p>
+                    )}
                   </div>
                   <div className={styles.metric}>
                     <p className={styles.metricLabel}>Story Flow</p>
                     <p className={styles.metricValue}>{report.metrics.structure}/10</p>
+                    {report.metrics.structure < 8 && (
+                      <p className={styles.metricCriticalFlaw}>
+                        Critical Flaw: {diagnosticsByMetric.get("Storyflow")?.critical_flaw || "Career progression is unclear and timeline context is missing."}
+                      </p>
+                    )}
                   </div>
                   <div className={styles.metric}>
                     <p className={styles.metricLabel}>Scanability</p>
                     <p className={styles.metricValue}>{report.metrics.layout}/10</p>
+                    {report.metrics.layout < 8 && (
+                      <p className={styles.metricCriticalFlaw}>
+                        Critical Flaw: {diagnosticsByMetric.get("Scanability")?.critical_flaw || "Dense formatting slows recruiter scan speed and hides achievements."}
+                      </p>
+                    )}
                   </div>
                   <div className={styles.metric}>
                     <p className={styles.metricLabel}>Proof Strength</p>
                     <p className={styles.metricValue}>{report.impactScore}/10</p>
+                    {report.impactScore < 8 && (
+                      <p className={styles.metricCriticalFlaw}>
+                        Critical Flaw: {diagnosticsByMetric.get("Strength")?.critical_flaw || "Bullets lack specific quantified outcomes and ownership."}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -850,6 +940,11 @@ export default function UploadPage() {
                   <span className={styles.gradeBadge}>{report.overallGrade}</span>
                 </p>
 
+                {deepLoading && (
+                  <p className={styles.deepLoadingHint}>Fast-pass scores ready. Loading deep feedback...</p>
+                )}
+
+                <div className={deepLoading ? styles.deepPending : styles.deepReady}>
                 <div className={styles.hcPanel}>
                   <div className={styles.hcHeader}>
                     <span className={styles.hcBadge}>HC</span>
@@ -1001,6 +1096,7 @@ export default function UploadPage() {
                       {report.logSuggestions || report.missingProof || "No Impact Log suggestions returned."}
                     </p>
                   </div>
+                </div>
                 </div>
               </div>
             )}

@@ -14,9 +14,8 @@ const A4_WIDTH = 794;
 const A4_HEIGHT = 1123;
 const LETTER_WIDTH = 816;
 const LETTER_HEIGHT = 1056;
-const SAFE_MARGIN = 48;
+const SAFE_MARGIN = 0;
 const TEMPLATE_ID = "hirely-canvas-v4";
-const WORKSPACE_BG = "#e5e5e5";
 const CENTER_GUIDE_TOLERANCE = 6;
 const OFF_PAGE_OPACITY = 0.4;
 
@@ -379,6 +378,7 @@ export default function CanvasPage() {
   const verticalGuideRef = useRef<any>(null);
   const horizontalGuideRef = useRef<any>(null);
   const ghostModeRef = useRef(false);
+  const canvasSizeRef = useRef({ width: A4_WIDTH, height: A4_HEIGHT });
   const uploadInputRef = useRef<HTMLInputElement | null>(null);
   const historyRef = useRef<string[]>([]);
   const futureRef = useRef<string[]>([]);
@@ -584,32 +584,33 @@ export default function CanvasPage() {
     const canvas = canvasRef.current;
     const safeZone = safeZoneRef.current;
     if (!canvas || !safeZone) return;
-    
-    // We are hiding the full rectangle perimeter here
-    safeZone.set({ visible: false }); 
+    const cWidth = Number(canvas.getWidth());
 
     let hasBleedRisk = false;
     canvas.getObjects().forEach((obj: any) => {
       if (obj.__uiGuide || obj.__auditNote) return;
       const bounds = obj.getBoundingRect();
-      // Only flags if it's literally falling off the white page
-      if (
-        bounds.left < 0 ||
-        bounds.top < 0 ||
-        bounds.left + bounds.width > Number(canvas.getWidth()) ||
-        bounds.top + bounds.height > Number(canvas.getHeight())
-      ) {
+      if (bounds.left < 0 || bounds.left + bounds.width > cWidth) {
         hasBleedRisk = true;
       }
     });
 
+    safeZone.set({
+      visible: showBleedLines || hasBleedRisk,
+      stroke: hasBleedRisk ? "#ef4444" : "rgba(239,68,68,0.72)",
+      strokeWidth: hasBleedRisk ? 2 : 1,
+      strokeDashArray: hasBleedRisk ? undefined : [6, 6],
+      shadow: hasBleedRisk ? "0 0 14px rgba(239,68,68,0.35)" : undefined,
+    });
     if (hasBleedRisk) {
-      setWorkspaceHintMessage("Careful! Some elements are moving off the page.");
+      showSuggestion("bleed-zone", "Careful! Elements are moving off the page width. Keep layers within the canvas edge.");
+      setWorkspaceHintMessage("Page edge breached. Keep left >= 0 and right <= canvas width.");
     } else {
+      clearSuggestion("bleed-zone");
       if (!ghostModeRef.current) setWorkspaceHintMessage("");
     }
     canvas.requestRenderAll();
-  }, [setWorkspaceHintMessage]);
+  }, [clearSuggestion, setWorkspaceHintMessage, showBleedLines, showSuggestion]);
 
   const animateGuideOpacity = useCallback((guide: any, targetOpacity: number) => {
     const canvas = canvasRef.current;
@@ -666,11 +667,7 @@ export default function CanvasPage() {
     const cWidth = Number(canvas.getWidth());
     const cHeight = Number(canvas.getHeight());
     const bounds = target.getBoundingRect();
-    const crossesSafeZone =
-      bounds.left < SAFE_MARGIN ||
-      bounds.top < SAFE_MARGIN ||
-      bounds.left + bounds.width > cWidth - SAFE_MARGIN ||
-      bounds.top + bounds.height > cHeight - SAFE_MARGIN;
+    const crossesSafeZone = bounds.left < 0 || bounds.left + bounds.width > cWidth;
     const fullyOffPage =
       bounds.left + bounds.width < 0 ||
       bounds.top + bounds.height < 0 ||
@@ -687,8 +684,8 @@ export default function CanvasPage() {
 
     if (crossesSafeZone) {
       target.set("shadow", "0 0 12px rgba(239,68,68,0.32)");
-      setWorkspaceHintMessage("Safety perimeter breached. Move this layer back inside the printable area.");
-      showSuggestion("safety-zone", "Objects crossing the safety perimeter are at print risk.");
+      setWorkspaceHintMessage("Page edge breached. Move this layer fully inside the page width.");
+      showSuggestion("safety-zone", "Element exceeds page width. Keep left >= 0 and right <= canvas width.");
     } else {
       target.set("shadow", undefined);
       clearSuggestion("safety-zone");
@@ -858,9 +855,14 @@ export default function CanvasPage() {
   const applyViewportZoom = useCallback((nextZoom: number, preset: ZoomPreset) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const clampedZoom = clampValue(nextZoom, 0.35, 2.2);
+    const clampedZoom = clampValue(nextZoom, 0.5, 2.2);
+    const baseWidth = canvasSizeRef.current.width;
+    const baseHeight = canvasSizeRef.current.height;
     canvas.setZoom(clampedZoom);
-    canvas.setDimensions({ width: `${Math.round(Number(canvas.getWidth()) * clampedZoom)}px`, height: `${Math.round(Number(canvas.getHeight()) * clampedZoom)}px` }, { cssOnly: true });
+    canvas.setDimensions({
+      width: `${Math.round(baseWidth * clampedZoom)}px`,
+      height: `${Math.round(baseHeight * clampedZoom)}px`,
+    }, { cssOnly: true });
     canvas.requestRenderAll();
     setZoomPreset(preset);
     setZoomPercent(Math.round(clampedZoom * 100));
@@ -870,9 +872,13 @@ export default function CanvasPage() {
     const canvas = canvasRef.current;
     const wrap = stageWrapRef.current;
     if (!canvas || !wrap) return;
-    const targetWidth = wrap.clientWidth - 140;
-    const targetHeight = wrap.clientHeight - 120;
-    const ratio = clampValue(Math.min(targetWidth / Number(canvas.getWidth()), targetHeight / Number(canvas.getHeight())), 0.42, 1.45);
+    const targetWidth = wrap.clientWidth - 96;
+    const targetHeight = wrap.clientHeight - 96;
+    const ratio = clampValue(
+      Math.min(targetWidth / canvasSizeRef.current.width, targetHeight / canvasSizeRef.current.height),
+      0.72,
+      1.45,
+    );
     applyViewportZoom(ratio, "fit");
   }, [applyViewportZoom]);
 
@@ -957,6 +963,7 @@ export default function CanvasPage() {
           : { width: A4_WIDTH, height: A4_HEIGHT };
 
     canvas.setDimensions({ width: size.width, height: size.height });
+    canvasSizeRef.current = { width: size.width, height: size.height };
     rebuildGuides(size.width, size.height);
     fitToScreen();
     evaluateBleedRisk();
@@ -1039,10 +1046,11 @@ export default function CanvasPage() {
     if (!fabric || !canvas) return;
 
     const Textbox = fabric.Textbox || fabric.fabric?.Textbox;
+    const fullWidth = Number(canvas.getWidth());
     const textbox = new Textbox(content, {
-      left: 96,
+      left: 0,
       top: 180 + canvas.getObjects().filter((obj: any) => !obj.__uiGuide).length * 12,
-      width: 620,
+      width: fullWidth,
       fontSize,
       fontFamily,
       fill: hexColor,
@@ -1214,19 +1222,19 @@ export default function CanvasPage() {
     };
 
     const headerHeight = template.name.includes("Cover Letter") ? 110 : 130;
-    addObj(new Rect({ left: 40, top: 40, width: width - 80, height: headerHeight, fill: "#ffffff", stroke: divider, strokeWidth: 1 }), "Header Frame", { locked: true });
-    addObj(new Textbox("YOUR NAME", { left: 56, top: 58, width: width - 200, fontSize: 30, fontWeight: "bold", fill: primary, fontFamily: "Inter" }), "Header Name", { column: "header", order: 1, spacing: 10 });
-    addObj(new Textbox("Title | email@example.com | +1 555 000 0000", { left: 56, top: 100, width: width - 200, fontSize: 12, fill: accent, fontFamily: "Inter" }), "Header Meta", { column: "header", order: 2, spacing: 22 });
+    addObj(new Rect({ left: 0, top: 40, width, height: headerHeight, fill: "#ffffff", stroke: divider, strokeWidth: 1 }), "Header Frame", { locked: true });
+    addObj(new Textbox("YOUR NAME", { left: 0, top: 58, width, fontSize: 30, fontWeight: "bold", fill: primary, fontFamily: "Inter" }), "Header Name", { column: "header", order: 1, spacing: 10 });
+    addObj(new Textbox("Title | email@example.com | +1 555 000 0000", { left: 0, top: 100, width, fontSize: 12, fill: accent, fontFamily: "Inter" }), "Header Meta", { column: "header", order: 2, spacing: 22 });
 
     if (template.name.includes("Portfolio") || template.name.includes("Brand") || template.name.includes("Bio")) {
       addObj(new Circle({ left: width - 170, top: 58, radius: 46, fill: "#f8fafc", stroke: accent, strokeWidth: 2 }), "Headshot Placeholder");
     }
 
     const isSingle = template.layoutType.includes("Single");
-    const leftWidth = isSingle ? width - 120 : (width - 130) * 0.38;
-    const rightWidth = isSingle ? width - 120 : (width - 130) * 0.58;
-    const leftX = 56;
-    const rightX = isSingle ? 56 : leftX + leftWidth + 24;
+    const leftWidth = isSingle ? width : (width - 24) * 0.38;
+    const rightWidth = isSingle ? width : (width - 24) * 0.62;
+    const leftX = 0;
+    const rightX = isSingle ? 0 : leftX + leftWidth + 24;
     const baseY = headerHeight + 64;
 
     addObj(new Textbox("Professional Summary", { left: leftX, top: baseY, width: leftWidth, fontSize: 14, fontWeight: "bold", fill: primary, fontFamily: "Inter" }), "Summary Title", { column: isSingle ? "main" : "left", order: 1, spacing: 8 });
@@ -1638,7 +1646,6 @@ export default function CanvasPage() {
     clearAuditNotes();
 
     const cWidth = Number(canvas.getWidth());
-    const cHeight = Number(canvas.getHeight());
 
     const objects = canvas.getObjects().filter((obj: any) => !obj.__uiGuide && !obj.__auditNote);
     const textObjects = objects.filter((obj: any) => obj.type === "textbox" || obj.type === "text" || obj.type === "i-text");
@@ -1647,12 +1654,8 @@ export default function CanvasPage() {
 
     const outsideObjects = objects.filter((obj: any) => {
       const b = obj.getBoundingRect();
-      const outside =
-        b.left < SAFE_MARGIN ||
-        b.top < SAFE_MARGIN ||
-        b.left + b.width > cWidth - SAFE_MARGIN ||
-        b.top + b.height > cHeight - SAFE_MARGIN;
-      if (outside) notes.push({ x: b.left, y: b.top, message: "Margins are uneven in this area." });
+      const outside = b.left < 0 || b.left + b.width > cWidth;
+      if (outside) notes.push({ x: b.left, y: b.top, message: "Element extends beyond page width." });
       return outside;
     });
 
@@ -1833,14 +1836,15 @@ export default function CanvasPage() {
         selection: true,
       });
       canvasRef.current = canvas;
+      canvasSizeRef.current = { width: A4_WIDTH, height: A4_HEIGHT };
 
       rebuildGuides(A4_WIDTH, A4_HEIGHT);
       historyBatchRef.current = true;
 
       const title = new Textbox("Your Name", {
-        left: 80,
+        left: 0,
         top: 80,
-        width: 300,
+        width: Number(canvas.getWidth()),
         fontSize: 28,
         fontWeight: "bold",
         fontFamily: "Inter",
@@ -1851,9 +1855,9 @@ export default function CanvasPage() {
       canvas.add(title);
 
       const summary = new Textbox("Professional Summary: Replace with your top value proposition.", {
-        left: 80,
+        left: 0,
         top: 140,
-        width: 620,
+        width: Number(canvas.getWidth()),
         fontSize: 13,
         fontFamily: "Inter",
         fill: "#111827",
@@ -1868,9 +1872,9 @@ export default function CanvasPage() {
           const parsed = JSON.parse(rawDraft) as { resumeText?: string };
           if (parsed.resumeText?.trim()) {
             const draftText = new Textbox(parsed.resumeText.trim(), {
-              left: 80,
+              left: 0,
               top: 220,
-              width: 620,
+              width: Number(canvas.getWidth()),
               fontSize: 12,
               fontFamily: "Inter",
               fill: "#111827",
@@ -2194,7 +2198,9 @@ export default function CanvasPage() {
   const objectControlsVisible = selectionKind !== "none";
 
   return (
-    <div style={{ minHeight: "100vh", background: WORKSPACE_BG, color: "#111827", padding: 12 }}>
+    <div className="lp-root lp-nudge-typography vi-nudge-typography lp-accelerator-theme" style={{ minHeight: "100vh", color: "#f8fafc", padding: 12 }}>
+      {/* Force Fabric.js canvas-container to stay centered, not position:absolute */}
+      <style>{`.canvas-container { margin: 0 auto !important; position: relative !important; float: none !important; display: block !important; }`}</style>
       <main style={{ maxWidth: 1680, margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <Link href="/upload" className="gh-back-link">Resume Optimizer</Link>
@@ -2519,56 +2525,53 @@ export default function CanvasPage() {
             <div />
           )}
 
-<section
+          <section
             ref={stageWrapRef}
             onDragOver={(event) => event.preventDefault()}
             onDrop={handleDrop}
             style={{
-              flex: 1, // Changed from minHeight to flex: 1 to fill space properly
-              overflow: "auto", // Ensure scrollbars appear if resume is larger than screen
-              background: "#e2e8f0", // A slightly cleaner "desk" grey
+              minHeight: "calc(100vh - 170px)",
+              border: "1px solid rgba(148,163,184,0.25)",
+              borderRadius: 20,
+              background: "linear-gradient(180deg, #d4d4d4, #e5e5e5)",
+              padding: 16,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "flex-start",
-              padding: "40px 20px", // More padding for that "breathing room"
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.75)",
             }}
           >
-            {/* Header / Info bar stays centered above the paper */}
-            <div style={{ width: "fit-content", minWidth: 600, display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <span style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Centered Artboard</span>
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <label style={{ fontSize: 12, color: "#4b5563", display: "inline-flex", gap: 4, alignItems: "center", cursor: "pointer" }}>
+            <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <span style={{ fontSize: 12, color: "#475569", fontWeight: 600 }}>Centered artboard · fixed aspect ratio · smart guides only appear when alignment matters</span>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <label style={{ fontSize: 12, color: "#4b5563", display: "inline-flex", gap: 4, alignItems: "center" }}>
                   <input type="checkbox" checked={showBleedLines} onChange={(event) => setShowBleedLines(event.target.checked)} /> Bleed
                 </label>
-                <label style={{ fontSize: 12, color: "#4b5563", display: "inline-flex", gap: 4, alignItems: "center", cursor: "pointer" }}>
+                <label style={{ fontSize: 12, color: "#4b5563", display: "inline-flex", gap: 4, alignItems: "center" }}>
                   <input type="checkbox" checked={snapLines} onChange={(event) => setSnapLines(event.target.checked)} /> Snap
                 </label>
-                <label style={{ fontSize: 12, color: "#4b5563", display: "inline-flex", gap: 4, alignItems: "center", cursor: "pointer" }}>
+                <label style={{ fontSize: 12, color: "#4b5563", display: "inline-flex", gap: 4, alignItems: "center" }}>
                   <input type="checkbox" checked={atsVision} onChange={(event) => { const enabled = event.target.checked; setAtsVision(enabled); setTimeout(() => refreshAtsVision(enabled), 0); }} /> ATS Ghost
                 </label>
               </div>
             </div>
 
-            {/* The Floating Paper Container */}
-            <div style={{ position: "relative", display: "inline-flex", flexDirection: "column", alignItems: "center" }}>
-              {workspaceHint && (
-                <div style={{ position: "absolute", top: -45, borderRadius: 8, background: "#1e293b", color: "#fff", padding: "6px 12px", fontSize: 11, boxShadow: "0 10px 15px rgba(0,0,0,0.1)", zIndex: 10 }}>
-                  {workspaceHint}
+            <div style={{ width: "100%", flex: 1, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 18, background: "radial-gradient(circle at top, rgba(255,255,255,0.45), rgba(212,212,212,0.2))", padding: 24 }}>
+              <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+                {workspaceHint && (
+                  <div style={{ borderRadius: 999, background: "rgba(15,23,42,0.88)", color: "#fff", padding: "8px 14px", fontSize: 12, boxShadow: "0 12px 26px rgba(15,23,42,0.18)" }}>
+                    {workspaceHint}
+                  </div>
+                )}
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: 22, borderRadius: 24, background: "rgba(255,255,255,0.32)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)" }}>
+                  <div style={{ background: "#ffffff", borderRadius: 6, boxShadow: "0 28px 48px rgba(15,23,42,0.18)", border: "1px solid rgba(15,23,42,0.08)", overflow: "hidden" }}>
+                    <canvas ref={canvasElRef} />
+                  </div>
                 </div>
-              )}
-              
-              <div style={{ 
-                background: "#ffffff", 
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)", // Deep shadow for "floating" effect
-                border: "1px solid rgba(0,0,0,0.05)", 
-                lineHeight: 0 // Removes ghost padding at bottom of canvas
-              }}>
-                <canvas ref={canvasElRef} />
               </div>
             </div>
-
-            {!ready && <p style={{ color: "#94a3b8", fontSize: 13, marginTop: 20 }}>Initializing vector engine...</p>}
+            {!ready && <p style={{ color: "#94a3b8", fontSize: 13, marginTop: 8 }}>Initializing vector engine...</p>}
           </section>
 
           {showRightRail ? (

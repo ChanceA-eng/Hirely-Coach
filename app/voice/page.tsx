@@ -74,7 +74,36 @@ function VoiceInterviewPageInner() {
   const [jobLink, setJobLink] = useState("");
   const [error, setError] = useState("");
   const [micStatus, setMicStatus] = useState<"idle" | "granted" | "denied">("idle");
+  const [scrapeStatus, setScrapeStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [scrapedLabel, setScrapedLabel] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const URL_RE = /^https?:\/\//i;
+
+  async function scrapeJobUrl(url: string) {
+    setScrapeStatus("loading");
+    try {
+      const res = await fetch("/api/scrape-job", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json() as { title?: string; company?: string };
+      const title = String(data.title || "").trim();
+      const company = String(data.company || "").trim();
+      if (title) {
+        const label = company ? `[${company}] – ${title}` : title;
+        setScrapedLabel(label);
+        if (!jobTitle.trim()) setJobTitle(title);
+        setScrapeStatus("done");
+      } else {
+        setScrapeStatus("error");
+      }
+    } catch {
+      setScrapeStatus("error");
+    }
+  }
 
   // Request mic permission on page load
   useEffect(() => {
@@ -91,41 +120,43 @@ function VoiceInterviewPageInner() {
 
   useEffect(() => {
     const savedResume = loadSavedResume();
-    if (savedResume) {
-      setResume(savedResume.text);
-      setFileName(savedResume.fileName);
-    }
-
     const draft = loadInterviewDraft();
-    if (draft) {
-      if (draft.resume) setResume(draft.resume);
-      if (draft.jobTitle) setJobTitle(draft.jobTitle);
-      if (draft.job) setJob(draft.job);
-      if (draft.jobLink) setJobLink(draft.jobLink);
-    }
-
     const mode = searchParams.get("mode");
     const sessionId = searchParams.get("sessionId");
 
-    if (mode === "retry" && sessionId) {
-      const session = findInterviewSession(sessionId, userId);
-      if (session) {
-        setResume(session.resume);
-        setJobTitle(session.jobTitle || "");
-        setJob(session.job);
-        setJobLink(sessionStorage.getItem("interview_job_link") || "");
-        setFileName("Restored from previous session");
+    queueMicrotask(() => {
+      if (savedResume) {
+        setResume(savedResume.text);
+        setFileName(savedResume.fileName);
       }
-      return;
-    }
 
-    if (mode === "new") {
-      setResume("");
-      setFileName("");
-      setJobTitle("");
-      setJob("");
-      setJobLink("");
-    }
+      if (draft) {
+        if (draft.resume) setResume(draft.resume);
+        if (draft.jobTitle) setJobTitle(draft.jobTitle);
+        if (draft.job) setJob(draft.job);
+        if (draft.jobLink) setJobLink(draft.jobLink);
+      }
+
+      if (mode === "retry" && sessionId) {
+        const session = findInterviewSession(sessionId, userId);
+        if (session) {
+          setResume(session.resume);
+          setJobTitle(session.jobTitle || "");
+          setJob(session.job);
+          setJobLink(sessionStorage.getItem("interview_job_link") || "");
+          setFileName("Restored from previous session");
+        }
+        return;
+      }
+
+      if (mode === "new") {
+        setResume("");
+        setFileName("");
+        setJobTitle("");
+        setJob("");
+        setJobLink("");
+      }
+    });
   }, [searchParams, userId]);
 
   async function syncKjFromResume(resumeText: string) {
@@ -402,12 +433,29 @@ function VoiceInterviewPageInner() {
               />
 
               <input
-                value={jobLink}
-                onChange={(e) => setJobLink(e.target.value)}
+                value={scrapedLabel || jobLink}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setJobLink(val);
+                  setScrapedLabel("");
+                  setScrapeStatus("idle");
+                  if (URL_RE.test(val.trim())) {
+                    void scrapeJobUrl(val.trim());
+                  }
+                }}
                 placeholder="Or paste job listing URL (LinkedIn, Indeed, company site)"
                 className="vi-textarea"
                 aria-label="Job listing URL"
               />
+              {scrapeStatus === "loading" && (
+                <p style={{ margin: "4px 0 0", fontSize: "0.78rem", color: "#10b981" }}>Analyzing job details…</p>
+              )}
+              {scrapeStatus === "done" && (
+                <p style={{ margin: "4px 0 0", fontSize: "0.78rem", color: "#10b981" }}>✓ {scrapedLabel}</p>
+              )}
+              {scrapeStatus === "error" && (
+                <p style={{ margin: "4px 0 0", fontSize: "0.78rem", color: "#f87171" }}>Could not read that URL. Paste the job description manually.</p>
+              )}
             </div>
           </div>
 

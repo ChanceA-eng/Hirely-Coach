@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
@@ -52,8 +52,8 @@ function markIpAwarded(courseId: string): void {
 
 /** Simple inline markdown renderer — bold (**text**), italic (*text*), newlines */
 function renderMarkdown(text: string) {
-  const annotateAbbreviations = (value: string, baseKey: string): (string | JSX.Element)[] => {
-    const parts: (string | JSX.Element)[] = [];
+  const annotateAbbreviations = (value: string, baseKey: string): ReactNode[] => {
+    const parts: ReactNode[] = [];
     const remaining = value;
     let idx = 0;
     const pattern = /\b(ATS|JD|KPI|ROI|HC)\b/g;
@@ -92,7 +92,7 @@ function renderMarkdown(text: string) {
 
   const lines = text.split("\n");
   return lines.map((line, li) => {
-    const parts: (string | JSX.Element)[] = [];
+    const parts: ReactNode[] = [];
     let remaining = line;
     let key = 0;
 

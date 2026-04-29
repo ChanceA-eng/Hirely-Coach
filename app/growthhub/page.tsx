@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -102,6 +103,21 @@ function extractWeakness(feedback: string): string {
   const text = idx >= 0 ? feedback.slice(idx) : "";
   const m = text.match(/\*\*([^*]+)\*\*/);
   return m ? m[1] : "";
+}
+
+function tierToProgressLevel(tier: number | null | undefined) {
+  if (!tier || tier < 1 || tier > LEVEL_ORDER.length) return null;
+  return LEVEL_ORDER[tier - 1];
+}
+
+function acceleratorLevelToProgressLevel(level: string | null | undefined) {
+  const normalized = String(level || "").trim().toLowerCase();
+  if (!normalized) return null;
+  if (normalized === "beginner") return "Novice";
+  if (normalized === "intermediate") return "Candidate";
+  if (normalized === "advanced") return "Executive";
+  if (normalized === "expert") return "Master";
+  return null;
 }
 
 // ─── Focus Modal ──────────────────────────────────────────────────────────
@@ -460,6 +476,16 @@ export default function GrowthHubPage() {
   const [certificateMessage, setCertificateMessage] = useState("");
   const [accountProgress, setAccountProgress] = useState<AccountInterviewProgress>(EMPTY_INTERVIEW_PROGRESS);
 
+  const metadata = (user?.publicMetadata ?? {}) as Record<string, unknown>;
+  const interviewOverride = (metadata.interviewAdminOverride ?? {}) as {
+    masterUnlock?: boolean;
+    forcedTier?: number;
+    forcedCourseLevel?: number;
+  };
+  const overrideByTier = tierToProgressLevel(interviewOverride.forcedCourseLevel ?? interviewOverride.forcedTier);
+  const overrideByAccelerator = acceleratorLevelToProgressLevel(String(metadata.acceleratorLevel ?? ""));
+  const forcedLevel = overrideByTier || overrideByAccelerator;
+
   useEffect(() => {
     let cancelled = false;
 
@@ -580,7 +606,10 @@ export default function GrowthHubPage() {
   const allCoursesComplete = completedCourseCount >= totalCourses;
   const certificateUnlocked = allCoursesComplete && xp > 10000;
   const gateSignals = buildCourseGateSignals(completedCourses, userId);
-  const { access, levelGateDetails } = getCourseLevelAccess(xp, gateSignals);
+  const { access, levelGateDetails } = getCourseLevelAccess(xp, gateSignals, {
+    forceUnlockAll: Boolean(interviewOverride.masterUnlock),
+    forcedLevel,
+  });
   const unlockedLevels = LEVEL_ORDER.filter((level) => access.get(level));
   const attainedLevel = unlockedLevels.length
     ? unlockedLevels[unlockedLevels.length - 1]

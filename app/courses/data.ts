@@ -1013,7 +1013,11 @@ export function buildCourseGateSignals(
 
 export function getCourseLevelAccess(
   userIp: number,
-  gateSignals: CourseGateSignals
+  gateSignals: CourseGateSignals,
+  overrides?: {
+    forceUnlockAll?: boolean;
+    forcedLevel?: ProgressTier["title"] | null;
+  }
 ): {
   access: Map<ProgressTier["title"], boolean>;
   candidateGateMet: boolean;
@@ -1035,7 +1039,29 @@ export function getCourseLevelAccess(
     Master: gateSignals.hasExportedPortfolio,
   };
 
+  if (overrides?.forceUnlockAll) {
+    for (const level of LEVEL_ORDER) {
+      access.set(level, true);
+      levelGateDetails.set(level, "Unlocked by admin testing override.");
+    }
+    return {
+      access,
+      candidateGateMet: true,
+      levelGateDetails,
+    };
+  }
+
+  const forcedLevelIndex = overrides?.forcedLevel ? LEVEL_ORDER.indexOf(overrides.forcedLevel) : -1;
+  if (forcedLevelIndex >= 0) {
+    for (let index = 0; index <= forcedLevelIndex; index += 1) {
+      const level = LEVEL_ORDER[index];
+      access.set(level, true);
+      levelGateDetails.set(level, "Unlocked by admin testing override.");
+    }
+  }
+
   for (const level of LEVEL_ORDER) {
+    if (access.get(level)) continue;
     const minIp = minIpByLevel.get(level) ?? 0;
     const ipMet = userIp >= minIp;
 

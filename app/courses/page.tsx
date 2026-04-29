@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { loadImpactEntries } from "../lib/impactLog";
 import { getProgressMeta, loadIP } from "../lib/progression";
 import type { ProgressTier } from "../lib/progression";
@@ -25,8 +25,24 @@ const LEVEL_SEQUENCE: ProgressTier["title"][] = [
   "Master",
 ];
 
+function tierToProgressLevel(tier: number | null | undefined): ProgressTier["title"] | null {
+  if (!tier || tier < 1 || tier > LEVEL_SEQUENCE.length) return null;
+  return LEVEL_SEQUENCE[tier - 1];
+}
+
+function acceleratorLevelToProgressLevel(level: string | null | undefined): ProgressTier["title"] | null {
+  const normalized = String(level || "").trim().toLowerCase();
+  if (!normalized) return null;
+  if (normalized === "beginner") return "Novice";
+  if (normalized === "intermediate") return "Candidate";
+  if (normalized === "advanced") return "Executive";
+  if (normalized === "expert") return "Master";
+  return null;
+}
+
 export default function AcademyPage() {
   const { userId } = useAuth();
+  const { user } = useUser();
   const [ip, setIp] = useState(0);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [keywordMatchScore, setKeywordMatchScore] = useState(0);
@@ -59,7 +75,19 @@ export default function AcademyPage() {
 
   const progressMeta = getProgressMeta(ip);
   const gateSignals = buildCourseGateSignals(completed, userId);
-  const { access, candidateGateMet, levelGateDetails } = getCourseLevelAccess(ip, gateSignals);
+  const metadata = (user?.publicMetadata ?? {}) as Record<string, unknown>;
+  const interviewOverride = (metadata.interviewAdminOverride ?? {}) as {
+    masterUnlock?: boolean;
+    forcedTier?: number;
+    forcedCourseLevel?: number;
+  };
+  const forcedLevel =
+    tierToProgressLevel(interviewOverride.forcedCourseLevel ?? interviewOverride.forcedTier) ||
+    acceleratorLevelToProgressLevel(String(metadata.acceleratorLevel ?? ""));
+  const { access, candidateGateMet, levelGateDetails } = getCourseLevelAccess(ip, gateSignals, {
+    forceUnlockAll: Boolean(interviewOverride.masterUnlock),
+    forcedLevel,
+  });
 
   return (
     <div className="lp-root">

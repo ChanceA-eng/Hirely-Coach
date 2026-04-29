@@ -378,7 +378,7 @@ export default function ProfileHubPage() {
       return Math.max(best, Number.isFinite(score) ? score : 0);
     }, 0);
     const tierTitle = getTierByIP(xp).title;
-    const verificationEntries = loadImpactEntries(userId);
+    const verificationEntries = loadImpactEntries(user?.id);
     const processLeadershipWins = verificationEntries.filter((entry) => {
       const text = `${entry.action} ${entry.proof} ${entry.result}`.toLowerCase();
       return /process\s*improvement|leadership/.test(text);

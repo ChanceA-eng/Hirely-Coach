@@ -34,6 +34,14 @@ export type CleanUpItem = {
 
 export type OverallGrade = "Needs Work" | "Good" | "Elite";
 
+export type ScoreDiagnosticMetric = "Clarity" | "Storyflow" | "Scanability" | "Strength";
+
+export type ScoreDiagnostic = {
+  metric: ScoreDiagnosticMetric;
+  score: number;
+  critical_flaw: string;
+};
+
 export type ResumeAuditReport = {
   overallScore: number;
   metrics: {
@@ -56,6 +64,7 @@ export type ResumeAuditReport = {
   thingsToRemove: RemovalItem[];
   missingProof: string;
   atsCompatibility: AtsCompatibility;
+  scoreDiagnostics: ScoreDiagnostic[];
 };
 
 export function cleanResumeText(rawText: string): string {
@@ -189,6 +198,59 @@ function normalizeCleanUp(value: unknown): CleanUpItem[] {
     .slice(0, 6);
 }
 
+function fallbackCriticalFlaw(metric: ScoreDiagnosticMetric): string {
+  if (metric === "Clarity") {
+    return "Unclear phrasing weakens readability and obscures the candidate's exact impact.";
+  }
+  if (metric === "Storyflow") {
+    return "Timeline progression feels disjointed, making career momentum harder to trust.";
+  }
+  if (metric === "Scanability") {
+    return "Dense text blocks reduce recruiter scan speed and bury key achievements.";
+  }
+  return "Bullets rely on passive language and understate ownership of results.";
+}
+
+function normalizeScoreDiagnostics(value: unknown, metrics: {
+  language: number;
+  structure: number;
+  layout: number;
+}, impactScore: number): ScoreDiagnostic[] {
+  const expected: Array<{ metric: ScoreDiagnosticMetric; score: number }> = [
+    { metric: "Clarity", score: metrics.language },
+    { metric: "Storyflow", score: metrics.structure },
+    { metric: "Scanability", score: metrics.layout },
+    { metric: "Strength", score: impactScore },
+  ];
+
+  const parsedRows = Array.isArray(value)
+    ? value
+        .map((entry) => {
+          const row = (entry ?? {}) as Record<string, unknown>;
+          const rawMetric = String(row.metric || "").trim() as ScoreDiagnosticMetric;
+          if (!expected.some((item) => item.metric === rawMetric)) return null;
+          return {
+            metric: rawMetric,
+            score: clampScore(row.score, 1, 10),
+            critical_flaw: String(row.critical_flaw || "").trim(),
+          };
+        })
+        .filter((row): row is ScoreDiagnostic => Boolean(row))
+    : [];
+
+  return expected.map((item) => {
+    const found = parsedRows.find((row) => row.metric === item.metric);
+    const score = found ? found.score : item.score;
+    return {
+      metric: item.metric,
+      score,
+      critical_flaw: score < 8
+        ? (found?.critical_flaw || fallbackCriticalFlaw(item.metric))
+        : (found?.critical_flaw || ""),
+    };
+  });
+}
+
 export function normalizeResumeAuditReport(payload: unknown): ResumeAuditReport {
   const source = (payload ?? {}) as Record<string, unknown>;
   const metrics = (source.metrics ?? {}) as Record<string, unknown>;
@@ -241,6 +303,8 @@ export function normalizeResumeAuditReport(payload: unknown): ResumeAuditReport 
     impactScore = Math.min(impactScore, 9);
   }
 
+  const scoreDiagnostics = normalizeScoreDiagnostics(source.scoreDiagnostics, normalizedMetrics, impactScore);
+
   return {
     overallScore,
     metrics: normalizedMetrics,
@@ -259,5 +323,6 @@ export function normalizeResumeAuditReport(payload: unknown): ResumeAuditReport 
     thingsToRemove,
     missingProof,
     atsCompatibility: normalizeAtsCompatibility(source.atsCompatibility),
+    scoreDiagnostics,
   };
 }

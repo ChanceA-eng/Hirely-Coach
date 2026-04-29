@@ -244,6 +244,7 @@ export default function DashboardClient() {
   const [founderNote, setFounderNote] = useState("");
   const [masterUnlock, setMasterUnlock] = useState(false);
   const [forcedTier, setForcedTier] = useState<number | "">("");
+  const [forcedCourseLevel, setForcedCourseLevel] = useState<number | "">("");
   const [impactPointsDelta, setImpactPointsDelta] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
@@ -383,9 +384,11 @@ export default function DashboardClient() {
     const override = (u.publicMetadata?.interviewAdminOverride ?? {}) as {
       masterUnlock?: boolean;
       forcedTier?: number | null;
+      forcedCourseLevel?: number | null;
     };
     setMasterUnlock(Boolean(override.masterUnlock));
     setForcedTier(typeof override.forcedTier === "number" ? override.forcedTier : "");
+    setForcedCourseLevel(typeof override.forcedCourseLevel === "number" ? override.forcedCourseLevel : "");
     setImpactPointsDelta(Number(u.publicMetadata?.adminImpactPointsDelta ?? 0));
     setSaveMsg("");
   }
@@ -470,6 +473,7 @@ export default function DashboardClient() {
           founderNote,
           masterUnlock,
           forcedTier: forcedTier === "" ? null : forcedTier,
+          forcedCourseLevel: forcedCourseLevel === "" ? null : forcedCourseLevel,
           impactPointsDelta,
         }),
       });
@@ -593,7 +597,12 @@ export default function DashboardClient() {
           </div>
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <span style={S.vaultBadge}>🔒 Vault Unlocked</span>
+          <span style={S.vaultBadge}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 5 }}>
+              <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
+            </svg>
+            Vault Unlocked
+          </span>
           <Link href="/" style={S.exitLink}>
             ← Exit to App
           </Link>
@@ -604,11 +613,43 @@ export default function DashboardClient() {
       <div style={S.tabBar}>
         {(
           [
-            { id: "overview", label: "📊  Overview" },
-            { id: "users", label: "👥  Users" },
-            { id: "refinery", label: "⚙️  Job Refinery" },
-            { id: "advanced", label: "🧠  Advanced Controls" },
-          ] as { id: Tab; label: string }[]
+            {
+              id: "overview",
+              label: "Overview",
+              icon: (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <rect x="2" y="2" width="9" height="9" rx="1" /><rect x="13" y="2" width="9" height="9" rx="1" /><rect x="2" y="13" width="9" height="9" rx="1" /><rect x="13" y="13" width="9" height="9" rx="1" />
+                </svg>
+              ),
+            },
+            {
+              id: "users",
+              label: "Users",
+              icon: (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" /><path d="M19 8v6M22 11h-6" />
+                </svg>
+              ),
+            },
+            {
+              id: "refinery",
+              label: "Job Refinery",
+              icon: (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="12" y1="18" x2="12" y2="12" /><polyline points="9 15 12 12 15 15" />
+                </svg>
+              ),
+            },
+            {
+              id: "advanced",
+              label: "Advanced Controls",
+              icon: (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <circle cx="12" cy="12" r="3" /><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12H4M20 12h2" />
+                </svg>
+              ),
+            },
+          ] as { id: Tab; label: string; icon: React.ReactNode }[]
         ).map((t) => (
           <button
             key={t.id}
@@ -623,8 +664,12 @@ export default function DashboardClient() {
             style={{
               ...S.tabBtn,
               ...(tab === t.id ? S.tabActive : {}),
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
             }}
           >
+            {t.icon}
             {t.label}
           </button>
         ))}
@@ -1715,6 +1760,18 @@ export default function DashboardClient() {
                             <option key={`forced-tier-${tier}`} value={tier}>Tier {tier}</option>
                           ))}
                         </select>
+                        <select
+                          value={forcedCourseLevel}
+                          onChange={(e) => setForcedCourseLevel(e.target.value ? Number(e.target.value) : "")}
+                          style={S.drawerInput}
+                        >
+                          <option value="">Course level jumper</option>
+                          {Array.from({ length: 7 }, (_, index) => index + 1).map((level) => (
+                            <option key={`forced-course-level-${level}`} value={level}>Level {level}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
                         <input
                           type="number"
                           value={impactPointsDelta}
@@ -1879,7 +1936,7 @@ const S: Record<string, React.CSSProperties> = {
   },
   tabActive: {
     color: "#e2e8f0",
-    borderBottomColor: "#10b981",
+    borderBottom: "2.5px solid #10b981",
     fontWeight: 700,
   },
 

@@ -48,6 +48,7 @@ export async function PATCH(request: Request) {
     founderNote?: string;
     masterUnlock?: boolean;
     forcedTier?: number | null;
+    forcedCourseLevel?: number | null;
     impactPointsDelta?: number;
     snapshotAction?: "save" | "restore";
   };
@@ -64,6 +65,10 @@ export async function PATCH(request: Request) {
   const forcedTier =
     typeof body.forcedTier === "number" && body.forcedTier >= 1 && body.forcedTier <= 7
       ? body.forcedTier
+      : null;
+  const forcedCourseLevel =
+    typeof body.forcedCourseLevel === "number" && body.forcedCourseLevel >= 1 && body.forcedCourseLevel <= 7
+      ? body.forcedCourseLevel
       : null;
   const fullTierSet = [1, 2, 3, 4, 5, 6, 7];
 
@@ -108,10 +113,11 @@ export async function PATCH(request: Request) {
       ...currentOverride,
       ...(body.masterUnlock !== undefined ? { masterUnlock: body.masterUnlock } : {}),
       ...(body.forcedTier !== undefined ? { forcedTier } : {}),
+      ...(body.forcedCourseLevel !== undefined ? { forcedCourseLevel } : {}),
       updatedAt: Date.now(),
     };
 
-    if (body.masterUnlock !== undefined || body.forcedTier !== undefined) {
+    if (body.masterUnlock !== undefined || body.forcedTier !== undefined || body.forcedCourseLevel !== undefined) {
       nextPublicMetadata.interviewAdminOverride = nextOverride;
     }
 

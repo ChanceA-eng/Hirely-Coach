@@ -143,7 +143,14 @@ Use exactly these keys and no additional keys:
       "powerSuggestion": "string"
     }
   ],
-  "atsCompatibility": "High/Medium/Low"
+  "atsCompatibility": "High/Medium/Low",
+  "scoreDiagnostics": [
+    {
+      "metric": "Clarity / Storyflow / Scanability / Strength",
+      "score": 0,
+      "critical_flaw": "Required whenever score is below 8"
+    }
+  ]
 }`;
 
 function tierIds(): StarrTierId[] {

@@ -337,8 +337,18 @@ export default function InterviewPage() {
   const jobRef = useRef("");
   const jobLinkRef = useRef("");
   const questionsRef = useRef<string[]>([]);
+  const NON_SUBSTANTIVE_RE = /^(?:\s*|mm+|mmm+|uh+|um+|hmm+|ah+|eh+|ok(?:ay)?|yeah|yep|nah|nope|right|noise|background|bird|birds|music|cough|laugh|static)$/i;
+  
+  function isSubstantiveTranscript(text: string) {
+    const normalized = String(text || "").replace(/\s+/g, " ").trim();
+    if (!normalized) return false;
+    if (NON_SUBSTANTIVE_RE.test(normalized)) return false;
+    return normalized.split(" ").length >= 4;
+  }
   const answersRef = useRef<string[]>([]);
   const answerCountRef = useRef(0);
+  const answerRetryRef = useRef<Record<number, number>>({});
+  const responseInProgressRef = useRef(false);
   const aiTranscriptBufferRef = useRef("");
   const feedbackTriggeredRef = useRef(false);
   const doGenerateFeedbackRef = useRef<() => Promise<void>>(async () => {});
@@ -708,6 +718,7 @@ export default function InterviewPage() {
         setAiSpeaking(true);
         setInterruptActive(false);
         setSilenceAnchorUntil(0);
+        responseInProgressRef.current = true;
         break;
       case "response.audio_transcript.delta": {
         aiTranscriptBufferRef.current += msg.delta || "";
@@ -720,6 +731,7 @@ export default function InterviewPage() {
       }
       case "response.audio.done":
         setAiSpeaking(false);
+        responseInProgressRef.current = false;
         if (selectedTierRef.current === 7 && runtimeBehaviorRef.current.multiPartSegments > 0) {
           setSegmentProgress(runtimeBehaviorRef.current.multiPartSegments);
         }
@@ -743,8 +755,47 @@ export default function InterviewPage() {
       case "conversation.item.input_audio_transcription.completed": {
         const transcript: string = msg.transcript || "";
         setUserTranscript(transcript);
+        const questionIndex = Math.min(answerCountRef.current, Math.max(questionsRef.current.length - 1, 0));
+        const retries = answerRetryRef.current[questionIndex] || 0;
+        const substantive = isSubstantiveTranscript(transcript);
+        
+        if (!substantive && retries < 1) {
+          answerRetryRef.current[questionIndex] = retries + 1;
+          const channel = dcRef.current;
+          if (channel?.readyState === "open") {
+            try {
+              // Cancel any active response before injecting system turn
+              if (responseInProgressRef.current) {
+                channel.send(JSON.stringify({ type: "response.cancel" }));
+                responseInProgressRef.current = false;
+              }
+              channel.send(JSON.stringify({
+                type: "conversation.item.create",
+                item: {
+                  type: "message",
+                  role: "system",
+                  content: [
+                    {
+                      type: "input_text",
+                      text: "Candidate response was non-substantive or noise. Re-ask the same question once, ask for a clear specific example, then wait silently.",
+                    },
+                  ],
+                },
+              }));
+              channel.send(JSON.stringify({ type: "response.create" }));
+            } catch {
+              // ignore realtime re-ask failures
+            }
+          }
+          break;
+        }
+        
+        answerRetryRef.current[questionIndex] = 0;
         answerCountRef.current += 1;
-        answersRef.current = [...answersRef.current, transcript];
+        answersRef.current = [
+          ...answersRef.current,
+          substantive ? transcript : "[insufficient response]",
+        ];
         if (answerCountRef.current >= questionsRef.current.length) {
           window.setTimeout(() => {
             void doGenerateFeedbackRef.current();
@@ -776,7 +827,7 @@ export default function InterviewPage() {
       const sessionRes = await fetch("/api/realtime-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questions, tier: selectedTier }),
+        body: JSON.stringify({ questions, tier: selectedTier, userName: user?.firstName?.trim() || "" }),
       });
 
       const sessionData = await sessionRes.json();
@@ -926,6 +977,8 @@ export default function InterviewPage() {
       questionsRef.current = list;
       answerCountRef.current = 0;
       answersRef.current = [];
+      answerRetryRef.current = {};
+      responseInProgressRef.current = false;
       setSegmentProgress(0);
       await startRealtimeSession(list, selectedTier);
     } catch {
