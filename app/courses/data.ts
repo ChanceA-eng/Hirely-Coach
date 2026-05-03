@@ -32,6 +32,7 @@ export type CourseEntry = {
   summary: string;
   readingMins: number;
   targetTool: string;
+  prerequisiteId?: string;
   prerequisiteCourseId?: string;
   completionGate?: {
     type: "resume-scan-min-score" | "creative-impact-win" | "negotiation-sim-min-score";
@@ -185,6 +186,7 @@ In the world of Hirely Coach, we focus on the **Impact-to-Action Ratio**: 80% of
     summary: "Use STAR as a strategy framework, not a script, and connect past wins to future business challenges.",
     readingMins: 8,
     targetTool: "The Simulator",
+    prerequisiteId: "star-101",
     prerequisiteCourseId: "star-101",
     content: {
       executiveBrief: `Most candidates use **Situation, Task, Action, Result (STAR)** as a shield; you will use it as a scalpel. The difference between a Novice STAR and an Apprentice STAR is the **Action-to-Strategy ratio**. You must prove not just what you did, but the strategic intent behind it.
@@ -507,6 +509,163 @@ Standard bullets explain responsibility. Impactful bullets prove achievement. Us
               label: "C",
               text: "Reduced customer churn by 12% in Quarter 3 by implementing a new automated feedback loop for high-priority accounts.",
               correct: true,
+            },
+          ],
+        },
+      ],
+    },
+  },
+  /* ─── PROFESSIONAL ─────────────────────────────────────────────────── */
+  {
+    id: "first-90-days",
+    title: "The First 90 Days",
+    level: "Professional",
+    track: "Career Strategy",
+    summary: "Turn your first three months in a new role into a credibility sprint by mastering stakeholder mapping, quick wins, and proactive feedback loops.",
+    readingMins: 12,
+    targetTool: "Impact Ledger",
+    content: {
+      executiveBrief: `The first three months of a new role are a **Credibility Sprint**. Your goal is not to "do your job," but to manage your reputation. You are under a microscope; every meeting and email is a data point the company uses to decide if they made a good hire. You must transition from learning to contributing surgically.`,
+      playbookItems: [
+        "**The Stakeholder Audit:** Map out your Influence Circle. Identify the Blocker (who can stop your projects), the Sponsor (who can promote you), and the Peer (who helps you execute).",
+        "**The Quick Win Selection:** Find a problem that is low-effort for you but high-pain for your manager. Solving a small, annoying friction point in Week 3 buys you 6 months of trust.",
+        "**The 30-60-90 Feedback Loop:** Don't wait for your review. Schedule 15-minute syncs at Day 30 and Day 60 specifically to ask: Am I focused on the highest-value priorities for the team right now?",
+      ],
+      quiz: [
+        {
+          scenario: "It's your second week. You notice a massive flaw in the team's data entry process. What is the most Professional way to handle it?",
+          options: [
+            {
+              label: "A",
+              text: "Point it out in the team meeting so everyone sees your expertise.",
+              correct: false,
+            },
+            {
+              label: "B",
+              text: "Keep your head down and do it the old way until you've been there 6 months.",
+              correct: false,
+            },
+            {
+              label: "C",
+              text: "Mention it privately to your manager as a curiosity: 'I noticed we use this process; is it designed this way for a specific compliance reason, or is there room for me to suggest an optimization?'",
+              correct: true,
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: "influence-without-authority",
+    title: "Influence Without Authority",
+    level: "Professional",
+    track: "Leadership",
+    summary: "Stop asking for favors and start creating alignment — get results from peers and stakeholders who don't report to you.",
+    readingMins: 11,
+    targetTool: "Impact Ledger",
+    content: {
+      executiveBrief: `In Level 4 roles, your success depends on people who do not report to you. Directing people is easy; influencing them is a skill. You must stop using **Ask** and start using **Alignment**. You aren't asking for a favor; you are showing them how helping you helps them win.`,
+      playbookItems: [
+        "**The Currency Exchange:** Identify what your colleagues value. Is it Time, Recognition, or Resource Ease? If a developer values Time, frame your request as: 'This change will save your team 4 hours of manual fixes next week.'",
+        "**The Social Proof Maneuver:** Before a big proposal, pre-wire the meeting. Talk to key stakeholders 1-on-1 to get their feedback privately. By the time the meeting starts, the decision is already made.",
+        "**The Collaborative Frame:** Use 'We' and 'Our.' Frame challenges as Company Hurdles rather than My Project's Problems.",
+      ],
+      quiz: [
+        {
+          scenario: "You need a designer to help with a project, but they are overloaded and you aren't their boss. How do you get them to say Yes?",
+          options: [
+            {
+              label: "A",
+              text: "Tell them it's an emergency and you really need the help.",
+              correct: false,
+            },
+            {
+              label: "B",
+              text: "Link the project to their own goals: 'I know you're focused on the new brand identity; this project is a high-visibility way to showcase that new style to the Board.'",
+              correct: true,
+            },
+            {
+              label: "C",
+              text: "Email their boss and complain that they are slowing down the company.",
+              correct: false,
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: "impact-ledger-mastery",
+    title: "The Impact Ledger Mastery",
+    level: "Professional",
+    track: "Career Strategy",
+    summary: "Treat your career like a business — log results not tasks so you always have the evidence to negotiate your next raise.",
+    readingMins: 10,
+    targetTool: "Impact Ledger",
+    content: {
+      executiveBrief: `Most professionals wait until their annual review to remember what they did all year. That is a Level 1 mistake. A Level 4 Professional treats their career like a business. If you don't track your ROI, you cannot negotiate your salary. Your **Impact Ledger** is your evidence locker.`,
+      playbookItems: [
+        "**Metric Transformation:** Never log a Task. Log a Result. Instead of 'I updated the client list,' write: 'Optimized client database, reducing retrieval time by 20% and saving the sales team 5 hours weekly.'",
+        "**The Win Frequency:** Set a Friday alarm. Spend 5 minutes logging one Win. If you can't find one, you haven't been Surgical with your time that week.",
+        "**The Evidence Folder:** Save Thank You emails from clients or praise from peers. These are External Validations for your Ledger.",
+      ],
+      quiz: [
+        {
+          scenario: "You are updating your Impact Ledger after a busy week. Which entry is Master Level?",
+          options: [
+            {
+              label: "A",
+              text: "Worked hard on the Q3 project and finished all my assignments on time.",
+              correct: false,
+            },
+            {
+              label: "B",
+              text: "Attended 5 strategy meetings and helped the team brainstorm new ideas.",
+              correct: false,
+            },
+            {
+              label: "C",
+              text: "Redesigned the Q3 reporting workflow, cutting 2 days off the delivery cycle and ensuring 100% data accuracy for the executive team.",
+              correct: true,
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: "professional-brand-visibility",
+    title: "Professional Brand & Visibility",
+    level: "Professional",
+    track: "Resume & Branding",
+    summary: "Doing great work is only half the job — learn how to ensure the right people know about it without bragging.",
+    readingMins: 10,
+    targetTool: "Impact Ledger",
+    content: {
+      executiveBrief: `In a large organization, doing good work is only **50% of the job**. The other 50% is ensuring the right people know you are doing good work. This isn't bragging — it is **Professional Visibility**. If you are invisible, you are replaceable.`,
+      playbookItems: [
+        "**The Internal Networker:** Schedule one Curiosity Coffee a month with someone in a different department. Ask: 'What is the biggest challenge your team is facing this quarter?'",
+        "**The Slack/Email Spotlight:** When you finish a project, send a brief update: 'Team, the [Project] is live. Huge thanks to [Peer] for the help. We are already seeing a [X%] improvement in [Metric].'",
+        "**The Skill-Gap Pivot:** Look at the job description for a Level 5 (Expert) role. Start performing one of those skills now. Act like a Level 5 to be promoted to a Level 5.",
+      ],
+      quiz: [
+        {
+          scenario: "You've just completed a major project ahead of schedule. What is the best way to handle the Visibility?",
+          options: [
+            {
+              label: "A",
+              text: "Quietly move to the next task; your boss will notice eventually.",
+              correct: false,
+            },
+            {
+              label: "B",
+              text: "Send a concise Project Completion email to the stakeholders, highlighting the positive impact on the company and thanking the team.",
+              correct: true,
+            },
+            {
+              label: "C",
+              text: "Tell everyone in the breakroom how much smarter you are than the previous person in your role.",
+              correct: false,
             },
           ],
         },
@@ -942,6 +1101,7 @@ export const LEVEL_ORDER: ProgressTier["title"][] = [
   "Novice",
   "Apprentice",
   "Candidate",
+  "Professional",
   "Expert",
   "Executive",
   "Advanced",
@@ -1013,11 +1173,7 @@ export function buildCourseGateSignals(
 
 export function getCourseLevelAccess(
   userIp: number,
-  gateSignals: CourseGateSignals,
-  overrides?: {
-    forceUnlockAll?: boolean;
-    forcedLevel?: ProgressTier["title"] | null;
-  }
+  gateSignals: CourseGateSignals
 ): {
   access: Map<ProgressTier["title"], boolean>;
   candidateGateMet: boolean;
@@ -1033,35 +1189,14 @@ export function getCourseLevelAccess(
     Novice: true,
     Apprentice: gateSignals.loggedWins >= 3,
     Candidate: gateSignals.bestBehavioralSimulationScore >= 80,
+    Professional: gateSignals.loggedWins >= 5,
     Expert: gateSignals.processImprovementWinsVerified >= 1,
     Executive: gateSignals.leadershipCourseCompleted,
     Advanced: gateSignals.salaryNegotiationSimulationScore >= 90,
     Master: gateSignals.hasExportedPortfolio,
   };
 
-  if (overrides?.forceUnlockAll) {
-    for (const level of LEVEL_ORDER) {
-      access.set(level, true);
-      levelGateDetails.set(level, "Unlocked by admin testing override.");
-    }
-    return {
-      access,
-      candidateGateMet: true,
-      levelGateDetails,
-    };
-  }
-
-  const forcedLevelIndex = overrides?.forcedLevel ? LEVEL_ORDER.indexOf(overrides.forcedLevel) : -1;
-  if (forcedLevelIndex >= 0) {
-    for (let index = 0; index <= forcedLevelIndex; index += 1) {
-      const level = LEVEL_ORDER[index];
-      access.set(level, true);
-      levelGateDetails.set(level, "Unlocked by admin testing override.");
-    }
-  }
-
   for (const level of LEVEL_ORDER) {
-    if (access.get(level)) continue;
     const minIp = minIpByLevel.get(level) ?? 0;
     const ipMet = userIp >= minIp;
 

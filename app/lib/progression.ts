@@ -1,11 +1,19 @@
 export type ProgressTier = {
-  title: "Novice" | "Apprentice" | "Candidate" | "Expert" | "Executive" | "Advanced" | "Master";
+  title: "Novice" | "Apprentice" | "Candidate" | "Professional" | "Expert" | "Executive" | "Advanced" | "Master";
   minIp: number;
 };
 
 export type StreakState = {
   streakDays: number;
   lastActiveDay: string;
+};
+
+export type InterviewAdminOverride = {
+  masterUnlock?: boolean;
+  forcedTier?: number | null;
+  forcedCourseLevel?: number | null;
+  promotionSupportUnlock?: boolean;
+  updatedAt?: number;
 };
 
 /** Hard gate that must be satisfied alongside the IP threshold to earn a gated title. */
@@ -26,6 +34,10 @@ export const HARD_GATES: Partial<Record<ProgressTier["title"], HardGate>> = {
   Candidate: {
     requirement: "Score 80+ on a Behavioral Simulation",
     promotionMessage: "Promotion Pending: Reach 80+ on a Behavioral Simulation for Candidate.",
+  },
+  Professional: {
+    requirement: "Log 5 wins in the Impact Ledger",
+    promotionMessage: "Promotion Pending: Log 5 Impact Ledger wins to advance to Professional.",
   },
   Expert: {
     requirement: "Log 1 Process Improvement win verified by HC",
@@ -59,14 +71,17 @@ const IP_REBALANCE_KEY = "hirely.ipRebalance.v1";
 const HIGHEST_RESUME_SCORE_KEY = "hirely.optimizer.highscore.v1";
 
 export const LEVELS: ProgressTier[] = [
-  { title: "Novice", minIp: 0 },
-  { title: "Apprentice", minIp: 250 },
-  { title: "Candidate", minIp: 750 },
-  { title: "Expert", minIp: 1500 },
-  { title: "Executive", minIp: 3000 },
-  { title: "Advanced", minIp: 5000 },
-  { title: "Master", minIp: 10000 },
+  { title: "Novice",        minIp: 0 },
+  { title: "Apprentice",    minIp: 250 },
+  { title: "Candidate",     minIp: 750 },
+  { title: "Professional",  minIp: 1100 },
+  { title: "Expert",        minIp: 1750 },
+  { title: "Executive",     minIp: 3500 },
+  { title: "Advanced",      minIp: 6000 },
+  { title: "Master",        minIp: 12000 },
 ];
+
+export const PROMOTION_SUPPORT_MIN_TIER: ProgressTier["title"] = "Executive";
 
 function isBrowser() {
   return typeof window !== "undefined";
@@ -154,6 +169,64 @@ export function getTierByIP(ip: number): ProgressTier {
   return tier;
 }
 
+function clampTierOrdinal(value: unknown): number | null {
+  const numeric = Math.floor(Number(value));
+  if (!Number.isFinite(numeric) || numeric < 1 || numeric > LEVELS.length) {
+    return null;
+  }
+  return numeric;
+}
+
+function getTierOrdinal(title: ProgressTier["title"]): number {
+  return LEVELS.findIndex((level) => level.title === title) + 1;
+}
+
+export function getInterviewAdminOverride(input: unknown): InterviewAdminOverride {
+  const row = (input ?? {}) as Record<string, unknown>;
+  const source = typeof row.interviewAdminOverride === "object" && row.interviewAdminOverride
+    ? (row.interviewAdminOverride as Record<string, unknown>)
+    : row;
+
+  return {
+    masterUnlock: Boolean(source.masterUnlock),
+    forcedTier: clampTierOrdinal(source.forcedTier),
+    forcedCourseLevel: clampTierOrdinal(source.forcedCourseLevel),
+    promotionSupportUnlock: Boolean(source.promotionSupportUnlock),
+    updatedAt: Number.isFinite(Number(source.updatedAt)) ? Number(source.updatedAt) : undefined,
+  };
+}
+
+export function getEffectiveTierByIP(ip: number, metadata?: unknown): ProgressTier {
+  const override = getInterviewAdminOverride(metadata);
+  if (override.forcedTier) {
+    return LEVELS[override.forcedTier - 1];
+  }
+  return getTierByIP(ip);
+}
+
+export function canAccessPromotionSupport(ip: number, metadata?: unknown): boolean {
+  const override = getInterviewAdminOverride(metadata);
+  if (override.promotionSupportUnlock) {
+    return true;
+  }
+  return getTierOrdinal(getEffectiveTierByIP(ip, metadata).title) >= getTierOrdinal(PROMOTION_SUPPORT_MIN_TIER);
+}
+
+export function getPromotionSupportAccess(ip: number, metadata?: unknown) {
+  const override = getInterviewAdminOverride(metadata);
+  const unlocked = canAccessPromotionSupport(ip, metadata);
+
+  return {
+    unlocked,
+    requiredTier: PROMOTION_SUPPORT_MIN_TIER,
+    detail: unlocked
+      ? override.promotionSupportUnlock
+        ? "Unlocked by admin override."
+        : `Unlocked at ${PROMOTION_SUPPORT_MIN_TIER} tier.`
+      : `Promotion Support unlocks at ${PROMOTION_SUPPORT_MIN_TIER} tier. Reach 3,000 IP to open the Performance Portfolio tools.`,
+  };
+}
+
 export function getProgressMeta(ip: number) {
   const safeIp = Math.max(0, Math.floor(ip));
   const tier = getTierByIP(safeIp);
@@ -190,7 +263,7 @@ export function isApprenticeUnlocked(ip: number): boolean {
 }
 
 export function isExecutiveUnlocked(ip: number): boolean {
-  return ip >= 3000;
+  return ip >= 3500;
 }
 
 // ─── Gate checkers (UI passes in the required counts) ────────────────────────

@@ -20,7 +20,7 @@ import {
 import { getProgressMeta, loadIP } from "../lib/progression";
 import "./page.css";
 
-// ─── XP storage ─────────────────────────────────────────────────────────────
+// ─── IP storage ─────────────────────────────────────────────────────────────
 const SKILL_XP_KEY = "hirelyCoachSkillXP";
 
 type SkillXP = { logic: number; storytelling: number; delivery: number };
@@ -75,7 +75,7 @@ const COACH_TIPS: Record<string, string[]> = {
   default: [
     "Your Actions were strong — let's sharpen those Results to win the recruiter over!",
     "Strong structure unlocks confidence. Keep practicing!",
-    "Every module you complete earns XP and a sharper story.",
+    "Every module you complete earns IP and a sharper story.",
   ],
 };
 
@@ -239,7 +239,7 @@ export default function TrainingHubPage() {
           </Link>
         )}
 
-        {/* ── GLOBAL XP BAR ── */}
+        {/* ── GLOBAL IP BAR ── */}
         <section className="xp-banner glass-card">
           <div className="xp-banner-left">
             <span className="xp-level-badge">IP</span>
@@ -318,7 +318,7 @@ export default function TrainingHubPage() {
                   </div>
                   <p className="th-card-desc">{card.desc}</p>
                   <div className="th-card-meta">
-                    <span className={`th-xp-reward th-xp-reward--${card.id}`}>+{CORE_MODULE_XP[card.id]} XP</span>
+                    <span className={`th-xp-reward th-xp-reward--${card.id}`}>+{CORE_MODULE_XP[card.id]} IP</span>
                     <span className="th-difficulty">{card.difficulty}</span>
                   </div>
                   <div className="th-skill-bar-wrap">
@@ -351,10 +351,10 @@ export default function TrainingHubPage() {
             <div className="starr-cta-left">
               <h2 className="th-section-title" style={{ marginBottom: 8 }}>Advanced Challenge Tier</h2>
               <p className="th-sub" style={{ margin: 0 }}>
-                Complete all core modules to reach {REQUIRED_CORE_XP} XP and unlock harder game variants.
+                Complete all core modules to reach {REQUIRED_CORE_XP} IP and unlock harder game variants.
               </p>
               <p className="th-sub" style={{ marginTop: 8 }}>
-                Progress: {coreXP} / {REQUIRED_CORE_XP} XP · {coreCompleted ? "All core modules complete" : "Core modules pending"}
+                Progress: {coreXP} / {REQUIRED_CORE_XP} IP · {coreCompleted ? "All core modules complete" : "Core modules pending"}
               </p>
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>

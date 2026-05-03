@@ -249,7 +249,13 @@ function stripLowSignalSections(rawText: string): string {
   return text;
 }
 
-function buildCacheKey(phase: AuditPhase, scanKey: string, resumeText: string, impactEntries: ImpactEntry[]): string {
+function buildCacheKey(
+  phase: AuditPhase,
+  scanKey: string,
+  resumeText: string,
+  impactEntries: ImpactEntry[],
+  targetJobDescription: string
+): string {
   if (scanKey) return `${phase}:${scanKey}`;
   const impactSig = fnvHash(
     JSON.stringify(
@@ -263,7 +269,7 @@ function buildCacheKey(phase: AuditPhase, scanKey: string, resumeText: string, i
         .sort((left, right) => left.createdAt - right.createdAt)
     )
   );
-  return `${phase}:${fnvHash(resumeText)}:${impactSig}`;
+  return `${phase}:${fnvHash(`${resumeText}\n${targetJobDescription}`)}:${impactSig}`;
 }
 
 function readCached<T>(key: string): T | null {
@@ -304,6 +310,7 @@ export async function POST(req: Request) {
     const phase = ((url.searchParams.get("phase") || body?.phase || "deep").toLowerCase() === "fast" ? "fast" : "deep") as AuditPhase;
     const resumeText = cleanResumeText(String(body?.resumeText ?? ""));
     const scanKey = String(body?.scanKey || "").trim();
+    const targetJobDescription = String(body?.targetJobDescription || "").trim();
     const impactEntries = Array.isArray(body?.impactEntries)
       ? (body.impactEntries as ImpactEntry[])
       : [];
@@ -319,7 +326,7 @@ export async function POST(req: Request) {
     }
 
     const modelReadyText = stripLowSignalSections(resumeText);
-    const cacheKey = buildCacheKey(phase, scanKey, modelReadyText, impactEntries);
+    const cacheKey = buildCacheKey(phase, scanKey, modelReadyText, impactEntries, targetJobDescription);
     const cached = readCached<Record<string, unknown>>(cacheKey);
     if (cached) {
       return Response.json({ ...cached, cached: true, phase });
@@ -350,7 +357,7 @@ export async function POST(req: Request) {
         ...(phase === "fast" ? [{ role: "system" as const, content: FAST_PASS_INSTRUCTIONS }] : []),
         {
           role: "user",
-          content: `Resume Text:\n\n${modelReadyText}\n\nImpact Log:\n\n${formatImpactEntries(impactEntries, phase === "fast" ? 3 : 10)}`,
+          content: `Resume Text:\n\n${modelReadyText}\n\nTarget Job Description:\n\n${targetJobDescription || "Not provided."}\n\nImpact Log:\n\n${formatImpactEntries(impactEntries, phase === "fast" ? 3 : 10)}`,
         },
       ],
       response_format: {

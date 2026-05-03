@@ -200,6 +200,16 @@ export default function FeedbackPage() {
           syncInterviewProgress(snapshot).catch(() => {
             // Non-blocking: local save already completed.
           });
+          void fetch("/api/interview/complete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              starrScore,
+              questionCount: payload.questions.length,
+            }),
+          }).catch(() => {
+            // Non-blocking: interview data is already saved locally.
+          });
         }
 
         window.sessionStorage.removeItem("hirelyCoachFeedbackPayload");

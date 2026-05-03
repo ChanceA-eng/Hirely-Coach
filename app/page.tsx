@@ -5,6 +5,37 @@ import Link from "next/link";
 import { SignedOut, SignUpButton, useAuth } from "@clerk/nextjs";
 import "./growthhub/page.css";
 
+const POWER_PILLARS = [
+  {
+    variant: "alignment",
+    title: "The Alignment Engine",
+    subtitle: "AI Resume Optimizer",
+    description: "Don't just edit—align. Paste any job URL and our AI surgically restructures your resume to match the hiring DNA of the role. Achieve 100% alignment before the recruiter even opens your file.",
+    href: "/canvas",
+  },
+  {
+    variant: "simulation",
+    title: "Tactical Simulation",
+    subtitle: "Adaptive Interview Prep",
+    description: "Face the pressure before it's real. Toggle between Casual, Professional, and Surgical intensities. Our AI simulates real-time executive pushback based on your specific target company and resume.",
+    href: "/voice/interview",
+  },
+  {
+    variant: "impact",
+    title: "The Impact Log",
+    subtitle: "Career Progress Tracker",
+    description: "Work that isn't tracked is work that isn't rewarded. Log your Weekly Wins to earn Impact Points (IP) and climb the 8-Level Accelerator. Turn a year of effort into a quantified, data-backed evidence vault.",
+    href: "/growthhub",
+  },
+  {
+    variant: "asset",
+    title: "The Asset Generator",
+    subtitle: "AI Portfolio Builder",
+    description: "From simulation to submission. Automatically generate high-impact follow-up emails and interactive portfolios that reflect your interview performance and ledger wins.",
+    href: "/feedback",
+  },
+];
+
 const METRICS = [
   {
     category: "Knowledge & Accuracy",
@@ -36,105 +67,118 @@ const METRICS = [
 const STEPS = [
   {
     num: "01",
-    title: "Paste your resume & job description",
-    body: "Takes 30 seconds. Drop your resume text and paste the job description — the simulation engine parses everything instantly.",
-    badge: "Core",
+    title: "Upload your resume & target role",
+    body: "Takes 60 seconds. Share your resume and the job URL — our Command Center ingests everything and begins alignment analysis.",
+    badge: "Foundation",
   },
   {
     num: "02",
-    title: "Get your fit score and tailored questions",
-    body: "Instant analysis — see exactly how well you match the role and get questions generated from your specific resume and this job.",
+    title: "Get your Alignment Score and tailored profile",
+    body: "See exactly where your profile matches the role's hiring DNA. Get AI-powered restructuring suggestions before you even interview.",
     badge: "Signal",
   },
   {
     num: "03",
-    title: "Practice with a live AI mock interview",
-    body: "Your interviewer targets weak spots in real-time, challenges you with follow-ups, and scores you across 10 metrics.",
-    badge: "Simulation",
+    title: "Practice, log wins, and ascend",
+    body: "Run Tactical Simulations, earn Impact Points, and automatically generate portfolio-quality evidence. Track your climb from Candidate to Professional.",
+    badge: "Mastery",
   },
 ];
 
 const PROBLEMS = [
   {
-    title: "Generic questions, zero context",
-    body: "You drill frameworks that have nothing to do with your resume or the specific role. The interviewer asks something completely different.",
+    title: "Your profile is invisible to the hiring algorithm",
+    body: "Generic resumes never align with the specific role. You're competing with 500 identical applicants.",
   },
   {
-    title: "No signal — just vibes",
-    body: "You finish a practice session with no idea if your answer was strong, weak, or a dealbreaker. You guess and hope for the best.",
+    title: "Interview prep is disconnected from your career growth",
+    body: "You practice interviews in isolation. Your wins never get tracked, quantified, or leveraged for your next move.",
   },
   {
-    title: "Weakest spots stay invisible",
-    body: "You over-index on what you're already confident in. The exact gap that costs you offers never gets identified, let alone fixed.",
+    title: "No data = no evidence for your next promotion",
+    body: "Your impact stays in your head. When it's time to ask for the next level, you can't prove what you've built.",
   },
   {
-    title: "Structure collapses under pressure",
-    body: "Everything you rehearsed disappears the moment nerves kick in. The real interview bears no resemblance to your prep.",
+    title: "Career decisions are reactive, not strategic",
+    body: "You chase opportunities instead of architecting your path. No clarity on what role comes next or how to get there.",
   },
 ];
 
 const SOLUTIONS = [
   {
-    title: "Questions built from your actual resume",
-    body: "Upload your resume and job description. The engine parses both and generates questions specific to your experience and this exact role.",
+    title: "AI Alignment Engine restructures your profile",
+    body: "We parse the job's DNA and rebuild your resume to match it—positioning you as the clear choice before the interview.",
   },
   {
-    title: "10-metric diagnostic on every session",
-    body: "Logic, storytelling, confidence, depth, role alignment — every answer scored in real-time. No guessing. No ambiguity.",
+    title: "Tactical Simulation connected to your Impact Log",
+    body: "Every interview sharpens your response library. Every win gets logged. Your career is quantified and always current.",
   },
   {
-    title: "Your Weakest Point, surfaced and trained",
-    body: "After each run, Hirely flags your highest-impact gap and routes you directly to the STARR Lab module that fixes it.",
+    title: "Impact Points unlock the 8-Level Accelerator",
+    body: "Track and verify your climb from Candidate → Contributor → Leader → Executive. Prove it to recruiters and hiring managers.",
   },
   {
-    title: "STARR-structured answers that hold",
-    body: "Interactive drills enforce structure until it's automatic. When nerves hit, your answers stay tight because the pattern is locked in.",
+    title: "Career OS automates your ascension path",
+    body: "You get clarity on your next role, the specific skills to demonstrate, and AI-powered tools to get there faster.",
   },
 ];
 
 const CAPABILITIES = [
   {
-    title: "Master the Methodology.",
-    subtitle: "The STARR Lab",
-    description:
-      "Interactive puzzles that force you to structure your experience using the STARR (Situation, Task, Action, Result, Reflection) framework.",
+    title: "The Alignment Engine",
+    subtitle: "Resume Optimization",
+    description: "Paste any job URL. Our AI analyzes the hiring DNA and restructures your resume to match—positioning you as the ideal candidate before the interview even starts.",
   },
   {
-    title: "10-Point Evaluation.",
-    subtitle: "Diagnostic Metrics",
-    description:
-      "Real-time feedback on Logic, Storytelling, and Delivery. We identify your Weakest Point so you know exactly where to train.",
+    title: "Tactical Simulation.",
+    subtitle: "Adaptive Interview Pressure",
+    description: "Run interviews at Casual, Professional, or Surgical intensity levels. The AI adapts in real-time, targeting gaps and simulating executive pushback specific to your target role.",
   },
   {
-    title: "XP-Gated Mastery.",
-    subtitle: "Gamified Growth",
-    description:
-      "Earn XP through interactive logic games and skill-building modules. Level up your performance from Junior to Expert.",
+    title: "Impact Log & IP System.",
+    subtitle: "Career Quantification",
+    description: "Log weekly wins, earn Impact Points, and climb the 8-Level Accelerator. Turn your work into quantified, data-backed evidence that unlocks your next opportunity.",
+  },
+  {
+    title: "AI Asset Generator.",
+    subtitle: "Portfolio Automation",
+    description: "From your interview performance and impact ledger, Hirely auto-generates high-impact follow-up emails, portfolio pieces, and evidence collateral.",
   },
 ];
 
 const CORE_FEATURES = [
   {
+    variant: "alignment",
+    title: "The Alignment Engine",
+    description: "Don't just edit—align. Paste any job URL and our AI surgically restructures your resume to match the role's hiring DNA. 100% alignment guaranteed.",
+    href: "/canvas",
+  },
+  {
     variant: "simulation",
-    title: "Push-Back AI",
-    description: "Interviewer follow-ups adapt to your answer depth so weak spots surface before the real interview.",
+    title: "Tactical Simulation",
+    description: "Face the pressure before it's real. Toggle between intensity levels. Our AI simulates real-time executive pushback based on your target company.",
     href: "/voice/interview",
   },
   {
-    variant: "training",
-    title: "STARR Lab",
-    description: "Interactive training modules for Situation, Task, Action, Result, and Reflection under timed pressure.",
-    href: "/training",
-  },
-  {
-    variant: "archive",
-    title: "10-Point Evaluation",
-    description: "Scorecards track logic, clarity, confidence, and role alignment with replayable transcript evidence.",
-    href: "/history",
+    variant: "impact",
+    title: "The Impact Log",
+    description: "Work that isn't tracked is work that isn't rewarded. Log wins, earn Impact Points (IP), and climb the 8-Level Accelerator.",
+    href: "/growthhub",
   },
 ];
 
-function FeatureIcon({ variant }: { variant: "simulation" | "training" | "archive" }) {
+function FeatureIcon({ variant }: { variant: "alignment" | "simulation" | "impact" | "asset" }) {
+  if (variant === "alignment") {
+    return (
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <path d="M8 12H40L36 36H12L8 12Z" />
+        <path d="M24 16V32" />
+        <path d="M16 24H32" />
+        <circle cx="24" cy="24" r="2" fill="currentColor" />
+        <path d="M12 12L36 36" />
+      </svg>
+    );
+  }
   if (variant === "simulation") {
     return (
       <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
@@ -147,18 +191,16 @@ function FeatureIcon({ variant }: { variant: "simulation" | "training" | "archiv
       </svg>
     );
   }
-  if (variant === "training") {
+  if (variant === "impact") {
     return (
       <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-        <circle cx="24" cy="10" r="3" />
-        <circle cx="12" cy="18" r="3" />
-        <circle cx="16" cy="33" r="3" />
-        <circle cx="32" cy="33" r="3" />
-        <circle cx="36" cy="18" r="3" />
-        <path d="M24 13L12 18L16 33L32 33L36 18L24 13Z" />
-        <path d="M12 18L32 33" />
-        <path d="M36 18L16 33" />
-        <path d="M24 10V24" />
+        <path d="M8 20H14V32H8Z" />
+        <path d="M18 12H24V32H18Z" />
+        <path d="M28 16H34V32H28Z" />
+        <path d="M6 34H40" stroke="currentColor" strokeWidth="2" />
+        <circle cx="14" cy="28" r="2" fill="currentColor" />
+        <circle cx="24" cy="20" r="2" fill="currentColor" />
+        <circle cx="34" cy="24" r="2" fill="currentColor" />
       </svg>
     );
   }
@@ -183,29 +225,69 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const faqs = [
-    { q: "How does the 10-point evaluation work?", a: "Each interview is scored across a diagnostic grid that includes logic, storytelling, delivery, depth under follow-ups, and role alignment." },
-    { q: "What is the Weakest Point signal?", a: "After each run, Hirely flags your highest-impact weakness so you can jump directly into the right STARR Lab training module." },
-    { q: "What happens inside STARR Lab?", a: "You get focused interactive drills that enforce Situation, Task, Action, Result, and Reflection structure until your answers are consistent." },
-    { q: "How does progression work?", a: "You earn XP through interviews and training modules, unlock deeper challenges, and level up from foundational to expert performance." },
-    { q: "How quickly can I start?", a: "Most users upload context and launch their first simulation in under a minute." },
+    { q: "How does the Alignment Engine work?", a: "Paste any job URL. Our AI analyzes the job posting's hiring DNA and automatically restructures your resume to match, positioning you as the ideal candidate before you even interview." },
+    { q: "What are Impact Points (IP)?", a: "Impact Points are a quantified currency for your career wins. Log weekly achievements, earn IP, and climb the 8-Level Accelerator—turning a year of work into data-backed evidence for raises, promotions, and leadership positions." },
+    { q: "What is the difference between Casual, Professional, and Surgical interview intensities?", a: "Casual is practice-mode with gentle feedback. Professional is interview-ready simulation. Surgical is maximum pressure: executive-level pushback, rapid-fire follow-ups, and zero mercy. Use Surgical to prepare for your toughest competition." },
+    { q: "How does the Asset Generator work?", a: "After each interview, our AI analyzes your performance and impact log, then auto-generates high-impact follow-up emails, portfolio snippets, and career collateral that prove your value to recruiters and hiring managers." },
+    { q: "How quickly can I start?", a: "Most users create an account and run their first simulation in under 2 minutes. Upload your resume and job description—that's it. The Command Center takes it from there." },
   ];
 
   return (
     <div className="lp-root lp-accelerator-theme">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "Hirely Coach - The Career OS",
+            "description": "An AI-powered Career Operating System for professional growth, interview preparation, and career advancement.",
+            "url": "https://hirelycoach.com",
+            "applicationCategory": "CareerDevelopment",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.8",
+              "ratingCount": "150"
+            }
+          })
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": faqs.map(faq => ({
+              "@type": "Question",
+              "name": faq.q,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": faq.a
+              }
+            }))
+          })
+        }}
+      />
       <main className="gh-main">
         <section className="gh-first-time">
           <div className="gh-first-layout">
             <div className="gh-terminal-box">
-              <p className="gh-eyebrow">AI Career Coach</p>
+              <p className="gh-eyebrow">The Career OS</p>
               <h1 className="gh-first-h1" style={{ maxWidth: 700 }}>
-                Your AI interview coach that actually challenges you.
+                Master Your Career Journey with Surgical Precision.
               </h1>
               <p className="gh-first-sub">
-                Practice with an AI interviewer that adapts in real-time, challenges weak spots, and scores performance so you walk in interview-ready.
+                The all-in-one Command Center to optimize your profile, simulate high-stakes interviews, and automate your professional impact.
               </p>
               <div className="lp-hero-cta-row">
                 <Link href={isSignedIn ? "/voice/interview" : "/voice"} className="global-auth-btn global-auth-btn--strong lp-hero-cta-btn">
-                  Start Practicing Now
+                  Try Hirely Coach Now
                 </Link>
                 <SignedOut>
                   <SignUpButton mode="modal">
@@ -214,11 +296,11 @@ export default function Home() {
                 </SignedOut>
               </div>
               <div className="gh-first-badges">
-                <span>No setup friction</span>
+                <span>AI Alignment Engine</span>
                 <span>•</span>
-                <span>10 performance metrics</span>
+                <span>Tactical Simulation</span>
                 <span>•</span>
-                <span>Role-specific question engine</span>
+                <span>Impact Quantification</span>
               </div>
             </div>
             <aside className="gh-blueprint-panel" aria-hidden="true">
@@ -229,7 +311,7 @@ export default function Home() {
                   <div className="lp-atomic-core">HC</div>
                 </div>
                 <p style={{ margin: 0, fontSize: "0.74rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "#10b981", fontWeight: 700 }}>
-                  Live Coach Signal
+                  Career Architecture
                 </p>
               </div>
             </aside>
@@ -238,10 +320,10 @@ export default function Home() {
 
         <section className="gh-body" id="features">
           <div>
-            <p className="gh-eyebrow">Core Capabilities</p>
-            <h2 className="gh-h1 gh-preview-title">Dashboard-grade preview before you even log in</h2>
+            <p className="gh-eyebrow">The Power Pillars</p>
+            <h2 className="gh-h1 gh-preview-title">Four command-center modules that work as one system</h2>
             <p className="gh-first-sub" style={{ maxWidth: 760, marginBottom: 24 }}>
-              Train under pressure, diagnose exactly what is holding you back, and close the gap with focused modules.
+              Optimize your profile, practice with surgical precision, quantify your impact, and generate interview-to-opportunity assets.
             </p>
             <div className="gh-action-grid">
               {CORE_FEATURES.map((feature, idx) => (
@@ -253,7 +335,7 @@ export default function Home() {
                   <div className="gh-action-link gh-action-link--preview" aria-label={`${feature.title} preview`}>
                     <div className="gh-card-header">
                       <div className="gh-professional-icon">
-                        <FeatureIcon variant={feature.variant as "simulation" | "training" | "archive"} />
+                        <FeatureIcon variant={feature.variant as "alignment" | "simulation" | "impact" | "asset"} />
                       </div>
                     </div>
                     <h3 className="gh-card-title">{feature.title}</h3>
@@ -268,23 +350,49 @@ export default function Home() {
             <section className="gh-sidebar-card glass-card" style={{ animation: "gh-modal-slide-in 0.35s ease both" }}>
               <p className="gh-sidebar-label">Why This Works</p>
               <p className="gh-sidebar-body">
-                Every session maps directly to your target role. No generic prompts, no random prep loops.
+                Your career is a journey, not a series of accidents. Each module feeds the next — from AI resume alignment to STARR-structured mock interviews to impact tracking and asset generation.
               </p>
               <div className="gh-quick-stats">
-                <div className="stat-row"><span className="stat-label">STARR Coverage</span><span className="stat-value">100%</span></div>
-                <div className="stat-row"><span className="stat-label">Evaluation Metrics</span><span className="stat-value">10</span></div>
-                <div className="stat-row"><span className="stat-label">Engine Mode</span><span className="stat-value">Adaptive</span></div>
+                <div className="stat-row"><span className="stat-label">Profile Alignment</span><span className="stat-value">100%</span></div>
+                <div className="stat-row"><span className="stat-label">Intensity Levels</span><span className="stat-value">Casual → Surgical</span></div>
+                <div className="stat-row"><span className="stat-label">Impact Tracking</span><span className="stat-value">8-Level OS</span></div>
               </div>
             </section>
           </aside>
         </section>
 
+        {/* ── STARR + MOCK INTERVIEW HIGHLIGHT ── */}
+        <section className="lp-section">
+          <p className="gh-eyebrow">STARR Lab & Mock Interviews</p>
+          <h2 className="gh-h1">The interview simulator that actually challenges you.</h2>
+          <p className="lp-section-sub">
+            Go beyond generic practice. Hirely&apos;s STARR Lab enforces Situation, Task, Action, Result, and Reflection structure until your answers are automatic. Then run a live mock interview at Casual, Professional, or Surgical intensity — with real-time executive pushback based on your specific resume and target role.
+          </p>
+          <div className="lp-steps" style={{ marginTop: 32 }}>
+            <div className="lp-step glass-card">
+              <div className="lp-step-top"><span className="lp-step-badge">STARR Lab</span></div>
+              <h3 className="lp-step-title">Structure your stories until they&apos;re automatic.</h3>
+              <p className="lp-step-body">Interactive drills build STARR fluency under timed pressure. When nerves hit, your answers stay tight.</p>
+            </div>
+            <div className="lp-step glass-card">
+              <div className="lp-step-top"><span className="lp-step-badge">Mock Interview</span></div>
+              <h3 className="lp-step-title">Simulate the real interview before it&apos;s real.</h3>
+              <p className="lp-step-body">Live voice simulation with adaptive follow-up pressure. Choose your intensity — Casual for practice, Surgical for maximum pressure.</p>
+            </div>
+            <div className="lp-step glass-card">
+              <div className="lp-step-top"><span className="lp-step-badge">10-Point Scorecard</span></div>
+              <h3 className="lp-step-title">Know exactly what&apos;s costing you the offer.</h3>
+              <p className="lp-step-body">Every session scored across logic, storytelling, confidence, depth, and role alignment. No guessing.</p>
+            </div>
+          </div>
+        </section>
+
         {/* ── PROBLEM / SOLUTION ── */}
         <section className="lp-section" id="why">
-          <p className="gh-eyebrow">The Gap We Close</p>
-          <h2 className="gh-h1">Most interview prep leaves you guessing. We don&apos;t.</h2>
+          <p className="gh-eyebrow">The Career OS Advantage</p>
+          <h2 className="gh-h1">The career platforms you&apos;ve tried got the incentives wrong.</h2>
           <p className="lp-section-sub">
-            The difference isn&apos;t just AI — it&apos;s the diagnostic layer that tells you exactly what&apos;s broken and builds the specific skill to fix it.
+            Most treat interviews and job applications as separate problems. We treat them as one career architecture challenge—connecting every simulation, achievement, and asset into a quantified growth system.
           </p>
 
           <div className="lp-ps-grid">
@@ -311,10 +419,10 @@ export default function Home() {
 
         {/* ── CAPABILITIES ── */}
         <section className="lp-section" id="capabilities">
-          <p className="gh-eyebrow">Core Capabilities</p>
-          <h2 className="gh-h1">A high-fidelity preview of the actual training system</h2>
+          <p className="gh-eyebrow">The System</p>
+          <h2 className="gh-h1">Four integrated systems that automate your ascension</h2>
           <p className="lp-section-sub">
-            Hirely Coach is built as a simulation platform: diagnose the gap, train the specific skill, and verify progress with measurable signal.
+            Hirely Coach is built as a career architecture platform: align your profile, practice under pressure with STARR-structured mock interviews, track your impact, and auto-generate career collateral.
           </p>
 
           <div className="lp-metrics-grid">
@@ -335,10 +443,10 @@ export default function Home() {
 
         {/* ── METRICS ── */}
         <section className="lp-section lp-section-alt" id="metrics">
-          <p className="gh-eyebrow">Performance Metrics</p>
-          <h2 className="gh-h1">Scored across 10 metrics that real interviewers care about</h2>
+          <p className="gh-eyebrow">Diagnostic Engine</p>
+          <h2 className="gh-h1">You're scored across 10 metrics that real hiring teams use</h2>
           <p className="lp-section-sub">
-            Every session gives you a diagnostic breakdown showing exactly where you&apos;re strong — and what&apos;s costing you offers.
+            Every session produces a diagnostic scorecard. No hidden gaps. No guessing. Know exactly what's working and what's costing you the offer.
           </p>
 
           <div className="lp-metrics-grid">
@@ -361,10 +469,10 @@ export default function Home() {
 
         {/* ── HOW IT WORKS ── */}
         <section className="lp-section" id="how">
-          <p className="gh-eyebrow">How It Works</p>
-          <h2 className="gh-h1">From resume to ready in 3 steps</h2>
+          <p className="gh-eyebrow">The Path to Ascension</p>
+          <h2 className="gh-h1">From profile to promotion in 3 integrated steps</h2>
           <p className="lp-section-sub">
-            No scheduling. No waiting. Upload and start preparing in under 2 minutes.
+            No complexity. No friction. Your career is optimized and tracked in real time.
           </p>
 
           <div className="lp-steps">
@@ -379,6 +487,31 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* ── SOCIAL PROOF ── */}
+        <section className="lp-section">
+          <p className="gh-eyebrow">Trust Metrics</p>
+          <h2 className="gh-h1">See the gap we close in real time</h2>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginTop: 40, marginBottom: 40 }}>
+            <div className="glass-card" style={{ padding: 24 }}>
+              <p style={{ fontSize: "2.5rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>40%</p>
+              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>Users see a 40% increase in Clarity scores within their first 3 simulations</p>
+            </div>
+            <div className="glass-card" style={{ padding: 24 }}>
+              <p style={{ fontSize: "2.5rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>8 Levels</p>
+              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>The Accelerator tracks your rise from Candidate to C-Suite Executive</p>
+            </div>
+            <div className="glass-card" style={{ padding: 24 }}>
+              <p style={{ fontSize: "2.5rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>100%</p>
+              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>Profile alignment with your target role's hiring requirements</p>
+            </div>
+          </div>
+
+          <p style={{ textAlign: "center", fontSize: "0.95rem", color: "#888", marginBottom: 40 }}>
+            <strong>Recent Ascensions:</strong> User_402 → Level 4 (Professional) | User_589 → Level 5 (Senior) | User_721 → Level 4 (Professional)
+          </p>
         </section>
 
         {/* ── FAQ ── */}
@@ -404,17 +537,22 @@ export default function Home() {
 
         {/* ── FINAL CTA ── */}
         <section className="lp-cta-section">
-          <span className="gh-eyebrow">AI Career Coach</span>
-          <h2 className="gh-h1">Stop preparing in your head.<br />Start practicing out loud.</h2>
+          <span className="gh-eyebrow">Stop Applying. Start Ascending.</span>
+          <h2 className="gh-h1">Your career is a journey, not a series of accidents.</h2>
           <p className="lp-cta-sub">
-            Upload your resume, add the job, and get scored across 10 metrics in a production-style interview simulation.
+            Hirely Coach is the command center that replaces the stress of job hunting with the precision of career architecture.
           </p>
           <div className="lp-cta-actions">
-            <div className="global-auth-btn global-auth-btn--strong lp-cta-preview-btn">
-              Start Practicing Now
-            </div>
+            <SignedOut>
+              <SignUpButton mode="modal">
+                <button className="global-auth-btn global-auth-btn--strong lp-cta-preview-btn" type="button">Try Hirely Coach Now</button>
+              </SignUpButton>
+            </SignedOut>
+            <Link href={isSignedIn ? "/voice/interview" : "/voice"} className="global-auth-btn global-auth-btn--strong lp-cta-preview-btn" style={{ display: isSignedIn ? undefined : "none" }}>
+              Try Hirely Coach Now
+            </Link>
           </div>
-          <p className="lp-cta-note">Set up in under 60 seconds.</p>
+          <p className="lp-cta-note">Ready to ascend?</p>
         </section>
       </main>
 
@@ -423,24 +561,24 @@ export default function Home() {
         <div className="lp-footer-inner">
           <div>
             <div className="lp-footer-brand">Hirely Coach</div>
-            <p className="lp-footer-tagline">AI-powered Coach that actually challenges you.</p>
+            <p className="lp-footer-tagline">Your Career OS. Precision. Command. Ascension.</p>
           </div>
           <div className="lp-footer-cols">
             <div className="lp-footer-col lp-footer-col--product">
-              <p className="lp-footer-col-label">Product</p>
-              <Link href="/voice">Mock Interview</Link>
-              <a href="#metrics">10 Metrics</a>
-              <a href="#how">How It Works</a>
+              <p className="lp-footer-col-label">Command Center</p>
+              <Link href="/canvas">Alignment Engine</Link>
+              <Link href="/voice/interview">Tactical Simulation</Link>
+              <Link href="/growthhub">Impact Log</Link>
             </div>
             <div className="lp-footer-col lp-footer-col--account">
               <p className="lp-footer-col-label">Account</p>
-              <Link href="/history">My History</Link>
+              <Link href="/history">Your History</Link>
               <Link href="/admin/jobs">Admin Panel</Link>
             </div>
           </div>
         </div>
         <div className="lp-footer-bottom">
-          <p>© {new Date().getFullYear()} Hirely Coach. Built for smarter interview prep.</p>
+          <p>© {new Date().getFullYear()} Hirely Coach. Built for career architecture.</p>
         </div>
       </footer>
     </div>

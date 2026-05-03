@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { loadImpactEntries } from "../lib/impactLog";
 import { getProgressMeta, loadIP } from "../lib/progression";
 import type { ProgressTier } from "../lib/progression";
@@ -19,30 +19,15 @@ const LEVEL_SEQUENCE: ProgressTier["title"][] = [
   "Novice",
   "Apprentice",
   "Candidate",
+  "Professional",
   "Expert",
   "Executive",
   "Advanced",
   "Master",
 ];
 
-function tierToProgressLevel(tier: number | null | undefined): ProgressTier["title"] | null {
-  if (!tier || tier < 1 || tier > LEVEL_SEQUENCE.length) return null;
-  return LEVEL_SEQUENCE[tier - 1];
-}
-
-function acceleratorLevelToProgressLevel(level: string | null | undefined): ProgressTier["title"] | null {
-  const normalized = String(level || "").trim().toLowerCase();
-  if (!normalized) return null;
-  if (normalized === "beginner") return "Novice";
-  if (normalized === "intermediate") return "Candidate";
-  if (normalized === "advanced") return "Executive";
-  if (normalized === "expert") return "Master";
-  return null;
-}
-
 export default function AcademyPage() {
   const { userId } = useAuth();
-  const { user } = useUser();
   const [ip, setIp] = useState(0);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [keywordMatchScore, setKeywordMatchScore] = useState(0);
@@ -75,19 +60,7 @@ export default function AcademyPage() {
 
   const progressMeta = getProgressMeta(ip);
   const gateSignals = buildCourseGateSignals(completed, userId);
-  const metadata = (user?.publicMetadata ?? {}) as Record<string, unknown>;
-  const interviewOverride = (metadata.interviewAdminOverride ?? {}) as {
-    masterUnlock?: boolean;
-    forcedTier?: number;
-    forcedCourseLevel?: number;
-  };
-  const forcedLevel =
-    tierToProgressLevel(interviewOverride.forcedCourseLevel ?? interviewOverride.forcedTier) ||
-    acceleratorLevelToProgressLevel(String(metadata.acceleratorLevel ?? ""));
-  const { access, candidateGateMet, levelGateDetails } = getCourseLevelAccess(ip, gateSignals, {
-    forceUnlockAll: Boolean(interviewOverride.masterUnlock),
-    forcedLevel,
-  });
+  const { access, candidateGateMet, levelGateDetails } = getCourseLevelAccess(ip, gateSignals);
 
   return (
     <div className="lp-root">
@@ -97,16 +70,16 @@ export default function AcademyPage() {
         </Link>
 
         {/* ── IP Banner ── */}
-        <section className="xp-banner glass-card" style={{ marginBottom: 28 }}>
+        <section className="xp-banner glass-card ac-xp-banner">
           <div className="xp-banner-left">
             <span className="xp-level-badge">IP</span>
             <div>
               <div className="xp-title">{progressMeta.tier.title}</div>
               <div className="xp-sub">
-                {ip} Impact Points (IP) total
+                {ip} IP total
                 {progressMeta.nextTier
-                  ? ` · ${progressMeta.remainingToNext} Impact Points (IP) to ${progressMeta.nextTier.title}`
-                  : " · Expert tier reached"}
+                  ? ` · ${progressMeta.remainingToNext} IP to ${progressMeta.nextTier.title}`
+                  : " · Master tier reached"}
               </div>
             </div>
           </div>
@@ -143,23 +116,33 @@ export default function AcademyPage() {
           const isUnlocked = access.get(level) ?? false;
           const completedInLevel = courses.filter((course) => completed.has(course.id)).length;
           const levelProgressPct = courses.length ? Math.round((completedInLevel / courses.length) * 100) : 0;
+          const levelGateLabel = isUnlocked
+            ? "Unlocked"
+            : levelGateDetails.get(level) || `Reach ${level} and required IP to unlock.`;
           return (
             <div key={level}>
               {groupIdx > 0 && <div className="ac-divider" />}
-              <div className="ac-level-group">
-                <div className="ac-level-heading">
-                  <span className="ac-level-label">Level</span>
-                  <span className={`ac-level-badge${isUnlocked ? " ac-level-badge--unlocked" : ""}`}>
-                    {isUnlocked ? "✓" : "🔒"} {level}
-                  </span>
-                </div>
-                <div className="ac-level-progress" aria-label={`${level} completion progress`}>
-                  <div className="ac-level-progress-head">
-                    <span>Lessons completed</span>
-                    <span>{completedInLevel}/{courses.length}</span>
+              <section className={`ac-level-group ac-level-group--${level.toLowerCase()}`}>
+                <div className="ac-level-shell glass-card">
+                  <span className="ac-level-orb" aria-hidden="true" />
+                  <div className="ac-level-heading">
+                    <div>
+                      <span className="ac-level-label">Level Track</span>
+                      <h2 className="ac-level-title">{level}</h2>
+                    </div>
+                    <span className={`ac-level-badge${isUnlocked ? " ac-level-badge--unlocked" : ""}`}>
+                      {isUnlocked ? "✓" : "🔒"} {isUnlocked ? "Open" : "Locked"}
+                    </span>
                   </div>
-                  <div className="ac-level-progress-track">
-                    <span className="ac-level-progress-fill" style={{ width: `${levelProgressPct}%` }} />
+                  <p className="ac-level-copy">{levelGateLabel}</p>
+                  <div className="ac-level-progress" aria-label={`${level} completion progress`}>
+                    <div className="ac-level-progress-head">
+                      <span>Lessons completed</span>
+                      <span>{completedInLevel}/{courses.length}</span>
+                    </div>
+                    <div className="ac-level-progress-track">
+                      <span className="ac-level-progress-fill" style={{ width: `${levelProgressPct}%` }} />
+                    </div>
                   </div>
                 </div>
 
@@ -246,7 +229,7 @@ export default function AcademyPage() {
                     );
                   })}
                 </div>
-              </div>
+              </section>
             </div>
           );
         })}

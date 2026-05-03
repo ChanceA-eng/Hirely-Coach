@@ -22,7 +22,7 @@ function coerceProgress(value: unknown): AccountInterviewProgress {
     latestTopWeakness: typeof data.latestTopWeakness === "string" ? data.latestTopWeakness : "",
     latestStarrScore: typeof data.latestStarrScore === "number" ? data.latestStarrScore : 0,
     completedTiers: Array.isArray(data.completedTiers)
-      ? data.completedTiers.filter((tier): tier is number => typeof tier === "number" && tier >= 1 && tier <= 7)
+      ? data.completedTiers.filter((tier): tier is number => typeof tier === "number" && tier >= 1 && tier <= 8)
       : [],
     highestCompletedTier:
       typeof data.highestCompletedTier === "number" ? data.highestCompletedTier : 0,
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   const current = coerceProgress(user.publicMetadata?.interviewProgress);
   const incoming = progressFromSnapshot(body.snapshot);
   const incomingTier =
-    typeof body.completedTier === "number" && body.completedTier >= 1 && body.completedTier <= 7
+    typeof body.completedTier === "number" && body.completedTier >= 1 && body.completedTier <= 8
       ? body.completedTier
       : null;
   const completedSet = new Set<number>(current.completedTiers);

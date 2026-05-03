@@ -11,6 +11,7 @@ import {
   clearInterviewDraft,
   loadInterviewDraft,
   loadSavedResume,
+  loadTargetJobPacket,
   saveInterviewDraft,
   saveSavedResume,
 } from "../lib/resumeStorage";
@@ -27,6 +28,15 @@ type PdfJsLib = {
   getDocument: (source: { data: ArrayBuffer }) => { promise: Promise<PdfDocument> };
 };
 type PdfJsWindow = Window & typeof globalThis & { pdfjsLib?: PdfJsLib; pdfjs?: PdfJsLib };
+type InterviewSetupState = {
+  currentResumeName?: string;
+  currentResumeText?: string;
+  currentResumeUrl?: string;
+  targetJobTitle?: string;
+  targetJobDescription?: string;
+  targetJobLink?: string;
+  targetJobHeader?: string;
+};
 
 function ResumeIcon() {
   return (
@@ -80,6 +90,19 @@ function VoiceInterviewPageInner() {
 
   const URL_RE = /^https?:\/\//i;
 
+  async function saveInterviewSetupState(payload: InterviewSetupState) {
+    if (!userId) return;
+    try {
+      await fetch("/api/user/interview-setup-state", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      // Non-blocking save
+    }
+  }
+
   async function scrapeJobUrl(url: string) {
     setScrapeStatus("loading");
     try {
@@ -89,13 +112,34 @@ function VoiceInterviewPageInner() {
         body: JSON.stringify({ url }),
       });
       if (!res.ok) throw new Error();
-      const data = await res.json() as { title?: string; company?: string };
+      const data = await res.json() as { title?: string; company?: string; full_description?: string };
       const title = String(data.title || "").trim();
       const company = String(data.company || "").trim();
+      const fullDesc = String(data.full_description || "").trim();
       if (title) {
-        const label = company ? `[${company}] – ${title}` : title;
+        const label = company ? `${title} @ ${company}` : title;
         setScrapedLabel(label);
-        if (!jobTitle.trim()) setJobTitle(title);
+        setJobTitle(title);
+        if (fullDesc) setJob(fullDesc);
+        await saveInterviewSetupState({
+          targetJobTitle: title,
+          targetJobDescription: fullDesc,
+          targetJobLink: url,
+          targetJobHeader: label,
+        });
+        if (userId) {
+          void fetch("/api/user/notification-state", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              event: "job-ready",
+              jobTitle: title,
+              company,
+            }),
+          }).catch(() => {
+            // Non-blocking notification enrichment
+          });
+        }
         setScrapeStatus("done");
       } else {
         setScrapeStatus("error");
@@ -121,6 +165,7 @@ function VoiceInterviewPageInner() {
   useEffect(() => {
     const savedResume = loadSavedResume();
     const draft = loadInterviewDraft();
+    const targetJobPacket = loadTargetJobPacket();
     const mode = searchParams.get("mode");
     const sessionId = searchParams.get("sessionId");
 
@@ -135,6 +180,11 @@ function VoiceInterviewPageInner() {
         if (draft.jobTitle) setJobTitle(draft.jobTitle);
         if (draft.job) setJob(draft.job);
         if (draft.jobLink) setJobLink(draft.jobLink);
+      } else if (targetJobPacket) {
+        setJobTitle(targetJobPacket.title);
+        setJob(targetJobPacket.fullDescription || targetJobPacket.description);
+        setJobLink(targetJobPacket.jobUrl || "");
+        setScrapedLabel(targetJobPacket.company ? `${targetJobPacket.title} @ ${targetJobPacket.company}` : targetJobPacket.title);
       }
 
       if (mode === "retry" && sessionId) {
@@ -149,15 +199,37 @@ function VoiceInterviewPageInner() {
         return;
       }
 
-      if (mode === "new") {
-        setResume("");
-        setFileName("");
-        setJobTitle("");
-        setJob("");
-        setJobLink("");
-      }
+      if (mode === "new") return;
     });
   }, [searchParams, userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    void (async () => {
+      try {
+        const res = await fetch("/api/user/interview-setup-state", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as InterviewSetupState;
+
+        if (data.currentResumeText?.trim()) {
+          setResume(data.currentResumeText);
+          setFileName(data.currentResumeName?.trim() || "Saved resume");
+        }
+
+        if (data.targetJobTitle?.trim()) setJobTitle(data.targetJobTitle.trim());
+        if (data.targetJobDescription?.trim()) setJob(data.targetJobDescription);
+        if (data.targetJobLink?.trim()) setJobLink(data.targetJobLink.trim());
+        if (data.targetJobHeader?.trim()) {
+          setScrapedLabel(data.targetJobHeader.trim());
+        } else if (data.targetJobTitle?.trim()) {
+          setScrapedLabel(data.targetJobTitle.trim());
+        }
+      } catch {
+        // Non-blocking hydration
+      }
+    })();
+  }, [userId]);
 
   async function syncKjFromResume(resumeText: string) {
     try {
@@ -265,6 +337,10 @@ function VoiceInterviewPageInner() {
       setFileName(file.name);
       setError("");
       saveSavedResume({ text, fileName: file.name });
+      await saveInterviewSetupState({
+        currentResumeName: file.name,
+        currentResumeText: text,
+      });
       await syncKjFromResume(text);
     } catch {
       setError("Unable to read the file. Please try a different file.");
@@ -273,7 +349,7 @@ function VoiceInterviewPageInner() {
 
   const startInterview = () => {
     const normalizedLink = jobLink.trim();
-    const normalizedJobTitle = jobTitle.trim() || (normalizedLink ? "Role from listing" : "");
+    const normalizedJobTitle = jobTitle.trim() || scrapedLabel || (normalizedLink ? "Role from listing" : "");
 
     if (!resume.trim() || !normalizedJobTitle || (!job.trim() && !normalizedLink)) {
       setError("Please provide your resume and either a job description or job link. A job title is only required when no link is provided.");
@@ -289,6 +365,14 @@ function VoiceInterviewPageInner() {
       job: jobPayload,
       jobLink: normalizedLink,
     });
+    void saveInterviewSetupState({
+      currentResumeName: fileName || "Saved resume",
+      currentResumeText: resume,
+      targetJobTitle: normalizedJobTitle,
+      targetJobDescription: normalizedJob,
+      targetJobLink: normalizedLink,
+      targetJobHeader: normalizedJobTitle,
+    });
     router.push("/voice/interview");
   };
 
@@ -298,6 +382,8 @@ function VoiceInterviewPageInner() {
     setJobTitle("");
     setJob("");
     setJobLink("");
+    setScrapedLabel("");
+    setScrapeStatus("idle");
     setError("");
     clearInterviewDraft();
     if (fileInputRef.current) {
@@ -358,6 +444,11 @@ function VoiceInterviewPageInner() {
             <p className="gh-eyebrow vi-setup-overline">Upload</p>
             <h2 className="gh-h1 vi-setup-heading">UPLOAD YOUR RESUME &amp; JOB TARGET</h2>
             <p className="lp-section-sub vi-setup-sub">Takes 30 seconds. No account needed.</p>
+            {(scrapedLabel || jobTitle.trim()) && (
+              <p className="vi-upload-sub" style={{ marginTop: 8, marginBottom: 14 }}>
+                Active target: <strong>{scrapedLabel || jobTitle.trim()}</strong>
+              </p>
+            )}
 
             <div className="vi-cards">
             {/* Resume upload card */}
@@ -383,10 +474,10 @@ function VoiceInterviewPageInner() {
 
               {fileName ? (
                 <div className="vi-file-loaded">
-                  <span className="vi-file-name">{fileName}</span>
+                  <span className="vi-file-name">Current Resume: {fileName}</span>
                   <button
                     className="vi-replace-btn"
-                    onClick={() => { setResume(""); setFileName(""); fileInputRef.current!.value = ""; fileInputRef.current?.click(); }}
+                    onClick={() => fileInputRef.current?.click()}
                   >
                     Replace
                   </button>
@@ -415,12 +506,15 @@ function VoiceInterviewPageInner() {
                 <button type="button" className="vi-clear-all-btn" onClick={clearAll}>
                   Clear All
                 </button>
-                {jobTitle.trim() && (job.trim().length > 40 || jobLink.trim().length > 8) && <span className="vi-card-badge">✓ Added</span>}
+                {(scrapedLabel || jobTitle.trim()) && <span className="vi-card-badge">✓ Loaded</span>}
               </div>
 
               <input
                 value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
+                onChange={(e) => {
+                  setJobTitle(e.target.value);
+                  setScrapedLabel("");
+                }}
                 placeholder="Job Title (required only if no link is provided)"
                 className="vi-textarea"
               />
@@ -433,7 +527,7 @@ function VoiceInterviewPageInner() {
               />
 
               <input
-                value={scrapedLabel || jobLink}
+                value={jobLink}
                 onChange={(e) => {
                   const val = e.target.value;
                   setJobLink(val);

@@ -11,6 +11,8 @@ type ParsedJob = {
   salaryMin: number;
   salaryMax: number;
   description: string;
+  full_description: string;
+  job_url: string;
   tags: string[];
   category: string;
   alignmentReason: string;
@@ -78,16 +80,21 @@ function parseCSV(text: string): ParsedJob[] {
     const title = get(c, "title", "job_title", "position", "role");
     const company = get(c, "company", "employer", "organization");
     const location = get(c, "location", "city", "place");
-    const desc = get(c, "description", "desc", "job_description", "summary");
+    const fullDesc = get(c, "full_description", "job_description", "description", "desc", "summary");
+    const desc = fullDesc.slice(0, 260);
+    const jobUrl = get(c, "job_url", "url", "link", "posting_url");
     const salRaw = get(c, "salary", "compensation", "pay");
     const sal = parseInt(salRaw.replace(/[^0-9]/g, ""), 10) || 0;
-    const tags = autoTag(desc + " " + title);
+    const tags = autoTag(fullDesc + " " + title);
     return {
       id: `csv-${Date.now()}-${i}`,
       title, company, location,
       salaryMin: sal,
       salaryMax: sal ? Math.round(sal * 1.2) : 0,
-      description: desc, tags,
+      description: desc,
+      full_description: fullDesc,
+      job_url: jobUrl,
+      tags,
       category: inferCategory(title),
       alignmentReason: `Strong fit for candidates with ${tags.slice(0, 2).join(" and ")} experience.`,
       scaryQuestions: [
@@ -115,7 +122,9 @@ export default function AdminJobsClient() {
   }
 
   useEffect(() => {
-    fetchStats();
+    queueMicrotask(() => {
+      void fetchStats();
+    });
   }, []);
 
   function processFile(file: File) {
@@ -224,7 +233,7 @@ export default function AdminJobsClient() {
         {pageStatus === "idle" && (
           <div style={S.hintBox}>
             <span style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Required: </span>
-            {["Title", "Company", "Location", "Description"].map(c => (
+            {["Title", "Company", "Location", "Full_Description"].map(c => (
               <code key={c} style={S.codeChip}>{c}</code>
             ))}
           </div>
@@ -254,6 +263,7 @@ export default function AdminJobsClient() {
                   <div style={{ minWidth: 0 }}>
                     <p style={{ margin: "0 0 2px", fontWeight: 600, fontSize: "0.88rem", color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{job.title}</p>
                     <p style={{ margin: 0, color: "#6b7280", fontSize: "0.76rem" }}>{job.company} · {job.location}</p>
+                    <p style={{ margin: "4px 0 0", color: "#6b7280", fontSize: "0.72rem" }}>{job.full_description ? `${job.full_description.slice(0, 110)}${job.full_description.length > 110 ? "..." : ""}` : "Missing full description"}</p>
                   </div>
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end", flexShrink: 0 }}>
                     {job.tags.slice(0, 2).map(t => (<span key={t} style={S.tag}>{t}</span>))}

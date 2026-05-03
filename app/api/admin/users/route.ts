@@ -49,6 +49,7 @@ export async function PATCH(request: Request) {
     masterUnlock?: boolean;
     forcedTier?: number | null;
     forcedCourseLevel?: number | null;
+    promotionSupportUnlock?: boolean;
     impactPointsDelta?: number;
     snapshotAction?: "save" | "restore";
   };
@@ -63,14 +64,14 @@ export async function PATCH(request: Request) {
   const currentPrivateMetadata = (user.privateMetadata ?? {}) as Record<string, unknown>;
   const currentProgress = (currentPublicMetadata.interviewProgress ?? {}) as Record<string, unknown>;
   const forcedTier =
-    typeof body.forcedTier === "number" && body.forcedTier >= 1 && body.forcedTier <= 7
+    typeof body.forcedTier === "number" && body.forcedTier >= 1 && body.forcedTier <= 8
       ? body.forcedTier
       : null;
   const forcedCourseLevel =
-    typeof body.forcedCourseLevel === "number" && body.forcedCourseLevel >= 1 && body.forcedCourseLevel <= 7
+    typeof body.forcedCourseLevel === "number" && body.forcedCourseLevel >= 1 && body.forcedCourseLevel <= 8
       ? body.forcedCourseLevel
       : null;
-  const fullTierSet = [1, 2, 3, 4, 5, 6, 7];
+  const fullTierSet = [1, 2, 3, 4, 5, 6, 7, 8];
 
   const snapshot = currentPrivateMetadata.adminCommandSnapshot as Record<string, unknown> | undefined;
 
@@ -114,10 +115,16 @@ export async function PATCH(request: Request) {
       ...(body.masterUnlock !== undefined ? { masterUnlock: body.masterUnlock } : {}),
       ...(body.forcedTier !== undefined ? { forcedTier } : {}),
       ...(body.forcedCourseLevel !== undefined ? { forcedCourseLevel } : {}),
+      ...(body.promotionSupportUnlock !== undefined ? { promotionSupportUnlock: body.promotionSupportUnlock } : {}),
       updatedAt: Date.now(),
     };
 
-    if (body.masterUnlock !== undefined || body.forcedTier !== undefined || body.forcedCourseLevel !== undefined) {
+    if (
+      body.masterUnlock !== undefined ||
+      body.forcedTier !== undefined ||
+      body.forcedCourseLevel !== undefined ||
+      body.promotionSupportUnlock !== undefined
+    ) {
       nextPublicMetadata.interviewAdminOverride = nextOverride;
     }
 
@@ -126,7 +133,7 @@ export async function PATCH(request: Request) {
         ...currentProgress,
         hasCompletedInterview: true,
         completedTiers: fullTierSet,
-        highestCompletedTier: 7,
+        highestCompletedTier: 8,
       };
     } else if (forcedTier) {
       const unlockedTiers = fullTierSet.slice(0, forcedTier);

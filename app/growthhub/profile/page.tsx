@@ -122,6 +122,7 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
 export default function ProfileHubPage() {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
+  const userId = user?.id ?? null;
 
   const [activeTab, setActiveTab] = useState<Tab>("identity");
   const [hydrated, setHydrated] = useState(false);
@@ -378,7 +379,7 @@ export default function ProfileHubPage() {
       return Math.max(best, Number.isFinite(score) ? score : 0);
     }, 0);
     const tierTitle = getTierByIP(xp).title;
-    const verificationEntries = loadImpactEntries(user?.id);
+    const verificationEntries = loadImpactEntries(userId);
     const processLeadershipWins = verificationEntries.filter((entry) => {
       const text = `${entry.action} ${entry.proof} ${entry.result}`.toLowerCase();
       return /process\s*improvement|leadership/.test(text);

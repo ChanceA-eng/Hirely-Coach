@@ -10,6 +10,8 @@ type JobEntry = {
   salaryMin: number;
   salaryMax: number;
   description: string;
+  full_description?: string;
+  job_url?: string;
   tags: string[];
   category: string;
   alignmentReason: string;

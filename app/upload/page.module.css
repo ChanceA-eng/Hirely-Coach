@@ -428,29 +428,6 @@
   color: #f8fafc;
 }
 
-.metricCriticalFlaw {
-  margin: 8px 0 0;
-  font-size: 0.74rem;
-  line-height: 1.35;
-  color: #fecaca;
-}
-
-.deepLoadingHint {
-  margin: 8px 0 0;
-  font-size: 0.82rem;
-  color: #86efac;
-}
-
-.deepPending {
-  opacity: 0.45;
-  transition: opacity 220ms ease;
-}
-
-.deepReady {
-  opacity: 1;
-  transition: opacity 260ms ease;
-}
-
 .ats {
   margin: 0;
   font-size: 0.92rem;

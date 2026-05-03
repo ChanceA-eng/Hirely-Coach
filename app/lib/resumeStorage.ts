@@ -10,8 +10,24 @@ export type InterviewDraft = {
   jobLink: string;
 };
 
+export type TargetJobPacket = {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  salary: string;
+  description: string;
+  fullDescription: string;
+  jobUrl: string;
+  tags: string[];
+  matchScore: number;
+  coachSummary: string;
+  updatedAt: number;
+};
+
 const SAVED_RESUME_KEY = "hirelySavedResume";
 const INTERVIEW_DRAFT_KEY = "hirelyInterviewDraft";
+const TARGET_JOB_PACKET_KEY = "hirelyTargetJobPacket";
 
 function isBrowser() {
   return typeof window !== "undefined";
@@ -45,6 +61,52 @@ export function saveSavedResume(resume: SavedResume) {
 export function clearSavedResume() {
   if (!isBrowser()) return;
   window.localStorage.removeItem(SAVED_RESUME_KEY);
+}
+
+export function loadTargetJobPacket(): TargetJobPacket | null {
+  if (!isBrowser()) return null;
+
+  const sessionPacket = window.sessionStorage.getItem(TARGET_JOB_PACKET_KEY);
+  const raw = sessionPacket || window.localStorage.getItem(TARGET_JOB_PACKET_KEY);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<TargetJobPacket>;
+    if (!parsed.id || !parsed.title) return null;
+    return {
+      id: parsed.id,
+      title: parsed.title,
+      company: parsed.company || "",
+      location: parsed.location || "",
+      salary: parsed.salary || "",
+      description: parsed.description || "",
+      fullDescription: parsed.fullDescription || parsed.description || "",
+      jobUrl: parsed.jobUrl || "",
+      tags: Array.isArray(parsed.tags) ? parsed.tags.map((tag) => String(tag || "")).filter(Boolean) : [],
+      matchScore: Number(parsed.matchScore || 0),
+      coachSummary: parsed.coachSummary || "",
+      updatedAt: Number(parsed.updatedAt || Date.now()),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function saveTargetJobPacket(packet: TargetJobPacket) {
+  if (!isBrowser()) return;
+  const serialized = JSON.stringify(packet);
+  window.sessionStorage.setItem(TARGET_JOB_PACKET_KEY, serialized);
+  try {
+    window.localStorage.setItem(TARGET_JOB_PACKET_KEY, serialized);
+  } catch {
+    // ignore storage failures
+  }
+}
+
+export function clearTargetJobPacket() {
+  if (!isBrowser()) return;
+  window.sessionStorage.removeItem(TARGET_JOB_PACKET_KEY);
+  window.localStorage.removeItem(TARGET_JOB_PACKET_KEY);
 }
 
 export function loadInterviewDraft(): InterviewDraft | null {

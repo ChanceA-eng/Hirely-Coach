@@ -13,6 +13,7 @@ import { loadAccountInterviewProgress, syncInterviewProgress } from "../../lib/i
 import {
   getAllStarrTierConfigs,
   isTierUnlocked,
+  getIntensityLabel,
   type StarrTierId,
 } from "../../lib/hirelySupremacy";
 import styles from "./page.module.css";
@@ -101,7 +102,7 @@ function loadLocalCompletedTiers(userId: string | null | undefined): StarrTierId
     const parsed = JSON.parse(raw) as number[];
     return parsed
       .filter((tier): tier is StarrTierId =>
-        tier === 1 || tier === 2 || tier === 3 || tier === 4 || tier === 5 || tier === 6 || tier === 7
+        tier === 1 || tier === 2 || tier === 3 || tier === 4 || tier === 5 || tier === 6 || tier === 7 || tier === 8
       )
       .sort((a, b) => a - b);
   } catch {
@@ -120,7 +121,7 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function getDefaultRuntimeBehavior(tier: StarrTierId): TierRuntimeBehavior {
-  if (tier === 4) {
+  if (tier === 5) {
     return {
       silenceAnchorMs: 2000,
       interruptThresholdSeconds: 45,
@@ -128,7 +129,7 @@ function getDefaultRuntimeBehavior(tier: StarrTierId): TierRuntimeBehavior {
     };
   }
 
-  if (tier === 6) {
+  if (tier === 7) {
     return {
       silenceAnchorMs: 8000,
       interruptThresholdSeconds: 45,
@@ -136,7 +137,7 @@ function getDefaultRuntimeBehavior(tier: StarrTierId): TierRuntimeBehavior {
     };
   }
 
-  if (tier === 7) {
+  if (tier === 8) {
     return {
       silenceAnchorMs: 2000,
       interruptThresholdSeconds: 45,
@@ -358,7 +359,7 @@ export default function InterviewPage() {
   const interruptTriggeredRef = useRef(false);
 
   const speakerName = user?.firstName?.trim() || "You";
-  const isTierSeven = selectedTier === 7;
+  const isTierEight = selectedTier === 8;
 
   const ensureAudioContext = useCallback(async () => {
     if (typeof window === "undefined") return null;
@@ -547,6 +548,16 @@ export default function InterviewPage() {
         syncInterviewProgress(snapshot, { completedTier: selectedTierRef.current }).catch(() => {
           // Non-blocking: local save already completed.
         });
+        void fetch("/api/interview/complete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            starrScore,
+            questionCount: questionsRef.current.length,
+          }),
+        }).catch(() => {
+          // Non-blocking: interview data is already saved locally.
+        });
       }
     } catch {
       setError("Unable to generate feedback.");
@@ -585,7 +596,7 @@ export default function InterviewPage() {
 
         const merged = [...new Set([...(accountProgress.completedTiers as StarrTierId[]), ...localTiers])]
           .filter((tier): tier is StarrTierId =>
-            tier === 1 || tier === 2 || tier === 3 || tier === 4 || tier === 5 || tier === 6 || tier === 7
+            tier === 1 || tier === 2 || tier === 3 || tier === 4 || tier === 5 || tier === 6 || tier === 7 || tier === 8
           )
           .sort((a, b) => a - b);
 
@@ -662,7 +673,7 @@ export default function InterviewPage() {
   }, [aiSpeaking, interruptActive, silenceAnchorUntil, status, userSpeaking]);
 
   useEffect(() => {
-    if (status !== "interview" || selectedTierRef.current !== 4 || !userSpeaking) return undefined;
+    if (status !== "interview" || selectedTierRef.current !== 5 || !userSpeaking) return undefined;
     if (interruptTriggeredRef.current) return undefined;
 
     const elapsed = userSpeechStartRef.current ? Date.now() - userSpeechStartRef.current : 0;
@@ -722,7 +733,7 @@ export default function InterviewPage() {
         break;
       case "response.audio_transcript.delta": {
         aiTranscriptBufferRef.current += msg.delta || "";
-        if (selectedTierRef.current === 7) {
+        if (selectedTierRef.current === 8) {
           const maxSegments = runtimeBehaviorRef.current.multiPartSegments;
           const transcriptSegments = (aiTranscriptBufferRef.current.match(/\?/g) || []).length;
           setSegmentProgress(clamp(Math.max(transcriptSegments, aiTranscriptBufferRef.current.trim() ? 1 : 0), 0, maxSegments));
@@ -732,7 +743,7 @@ export default function InterviewPage() {
       case "response.audio.done":
         setAiSpeaking(false);
         responseInProgressRef.current = false;
-        if (selectedTierRef.current === 7 && runtimeBehaviorRef.current.multiPartSegments > 0) {
+        if (selectedTierRef.current === 8 && runtimeBehaviorRef.current.multiPartSegments > 0) {
           setSegmentProgress(runtimeBehaviorRef.current.multiPartSegments);
         }
         aiTranscriptBufferRef.current = "";
@@ -748,7 +759,7 @@ export default function InterviewPage() {
         break;
       case "input_audio_buffer.speech_stopped":
         setUserSpeaking(false);
-        if (selectedTierRef.current === 6) {
+        if (selectedTierRef.current === 7) {
           setSilenceAnchorUntil(getNowMs() + runtimeBehaviorRef.current.silenceAnchorMs);
         }
         break;
@@ -1063,32 +1074,63 @@ export default function InterviewPage() {
               {!tierProgressReady && (
                 <p className={styles.selectionSubtext}>Loading your tier unlock progress...</p>
               )}
-              <div className={styles.levelCards}>
-                {tierConfigs.map((item) => {
-                  const unlocked = isTierUnlocked(completedTiers, item.tier);
-                  const completed = completedTiers.includes(item.tier);
-
+          <div className={styles.levelCards}>
+                {(["Casual", "Professional", "Surgical"] as const).map((intensityGroup) => {
+                  const groupItems = tierConfigs.filter((item) => getIntensityLabel(item.tier).label === intensityGroup);
+                  const groupColor = getIntensityLabel(groupItems[0]?.tier ?? 1).color;
                   return (
-                    <div
-                      key={item.tier}
-                      className={`${styles.atomicCard} glass-card${!unlocked ? ` ${styles.lockedCard}` : ""}`}
-                      onClick={() => unlocked && void handleSelectTier(item.tier)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(event) => event.key === "Enter" && unlocked && void handleSelectTier(item.tier)}
-                      aria-disabled={!unlocked}
-                    >
-                      <div className={styles.atomicIconWrapper}>
-                        <div className={`${styles.atomicIcon} ${styles.medium}`} />
-                      </div>
-                      <h3 className={styles.atomicTitle}>Tier {item.tier}: {item.title}</h3>
-                      <div className={styles.atomicDetails}>
-                        <span style={{ color: completed ? "#34d399" : "#10b981", fontWeight: 700, fontSize: "0.92rem" }}>
-                          {completed ? "Completed" : unlocked ? "Unlocked" : "Locked"}
+                    <div key={intensityGroup} style={{ gridColumn: "1 / -1" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                        <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: groupColor, padding: "2px 10px", borderRadius: 4, border: `1px solid ${groupColor}40`, background: `${groupColor}12` }}>
+                          {intensityGroup}
                         </span>
-                        <p style={{ color: "#94a3b8", fontSize: "0.82rem", marginTop: 6 }}>
-                          {item.scenarioTitle} • {item.persona}
-                        </p>
+                        <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                          {intensityGroup === "Casual" && "Tiers 1–3 — Build confidence, structure, and team-fit signals"}
+                          {intensityGroup === "Professional" && "Tier 4 — Mid-career ownership & growth mindset — unlock via Admin Controls"}
+                          {intensityGroup === "Surgical" && "Tiers 5–8 — Operational pressure, strategy, executive pushback"}
+                        </span>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12, marginBottom: 24 }}>
+                        {groupItems.map((item) => {
+                          const unlocked = isTierUnlocked(completedTiers, item.tier);
+                          const completed = completedTiers.includes(item.tier);
+                          const intensity = getIntensityLabel(item.tier);
+
+                          return (
+                            <div
+                              key={item.tier}
+                              className={`${styles.atomicCard} glass-card${!unlocked ? ` ${styles.lockedCard}` : ""}`}
+                              onClick={() => unlocked && void handleSelectTier(item.tier)}
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(event) => event.key === "Enter" && unlocked && void handleSelectTier(item.tier)}
+                              aria-disabled={!unlocked}
+                            >
+                              <div className={styles.atomicIconWrapper}>
+                                <div className={`${styles.atomicIcon} ${styles.medium}`} />
+                              </div>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                                <span style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: intensity.color }}>
+                                  {intensity.label}
+                                </span>
+                              </div>
+                              <h3 className={styles.atomicTitle}>Tier {item.tier}: {item.title}</h3>
+                              <div className={styles.atomicDetails}>
+                                <span style={{ color: completed ? "#34d399" : unlocked ? "#10b981" : "#6b7280", fontWeight: 700, fontSize: "0.88rem" }}>
+                                  {completed ? "✓ Completed" : unlocked ? "Unlocked" : "🔒 Locked"}
+                                </span>
+                                <p style={{ color: "#94a3b8", fontSize: "0.78rem", marginTop: 4 }}>
+                                  {item.scenarioTitle} · {item.persona}
+                                </p>
+                                {!unlocked && item.tier === 4 && (
+                                  <p style={{ color: "#f59e0b", fontSize: "0.73rem", marginTop: 4 }}>
+                                    Unlockable via Admin Controls
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -1116,8 +1158,8 @@ export default function InterviewPage() {
                   level={aiLevel}
                   resting={nowMs < silenceAnchorUntil || (!aiSpeaking && aiLevel < AI_ACTIVITY_THRESHOLD)}
                   accent={interruptActive ? "alert" : "coach"}
-                  segments={isTierSeven ? runtimeBehavior.multiPartSegments : 0}
-                  segmentProgress={isTierSeven ? segmentProgress : 0}
+                  segments={isTierEight ? runtimeBehavior.multiPartSegments : 0}
+                  segmentProgress={isTierEight ? segmentProgress : 0}
                 />
                 <SignalNudge
                   label={speakerName}

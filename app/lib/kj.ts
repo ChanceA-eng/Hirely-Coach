@@ -13,6 +13,10 @@ export type JobRecord = {
   location: string;
   salary: string;
   description: string;
+  full_description?: string;
+  job_url?: string;
+  alignmentReason?: string;
+  scaryQuestions?: string[];
   tags?: string[];
 };
 
@@ -190,7 +194,7 @@ export function filterJobsByKj(
 
   return jobs
     .map((job) => {
-      const description = job.description ?? "";
+      const description = job.full_description ?? job.description ?? "";
       const titleLower = job.title.toLowerCase();
       const locationLower = job.location.toLowerCase();
       const queryHit = !query || `${job.title} ${job.company} ${job.location}`.toLowerCase().includes(query);
@@ -207,6 +211,8 @@ export function filterJobsByKj(
 
       return {
         ...job,
+        description: job.description || description.slice(0, 240),
+        full_description: description,
         tags: job.tags?.length ? job.tags : autoTagDescription(description),
         matchScore: score,
         queryHit,

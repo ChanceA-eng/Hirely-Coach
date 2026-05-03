@@ -12,6 +12,7 @@ const NAV = [
   { href: "/voice?mode=new", label: "Mock Interview" },
   { href: "/training", label: "Accelerator" },
   { href: "/history", label: "History" },
+  { href: "/help", label: "?" },
 ];
 
 const UTILITY_NAV = [
@@ -215,11 +216,39 @@ export default function Header() {
               {NAV.map(({ href, label }) => {
                 const base = href.split("?")[0];
                 const active = pathname === base || pathname.startsWith(base + "/");
+                const isHelp = label === "?";
                 return (
                   <Link
                     key={href}
                     href={href}
-                    style={active ? { color: "#10b981" } : undefined}
+                    aria-label={isHelp ? "Help Center" : undefined}
+                    title={isHelp ? "Help Center" : undefined}
+                    style={
+                      isHelp
+                        ? {
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 28,
+                            height: 28,
+                            borderRadius: "50%",
+                            background: active
+                              ? "rgba(16,185,129,0.18)"
+                              : "rgba(255,255,255,0.06)",
+                            border: active
+                              ? "1px solid rgba(16,185,129,0.45)"
+                              : "1px solid rgba(255,255,255,0.1)",
+                            color: active ? "#10b981" : "#94a3b8",
+                            fontSize: "0.78rem",
+                            fontWeight: 800,
+                            lineHeight: 1,
+                            textDecoration: "none",
+                            flexShrink: 0,
+                          }
+                        : active
+                        ? { color: "#10b981" }
+                        : undefined
+                    }
                   >
                     {label}
                   </Link>

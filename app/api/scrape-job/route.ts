@@ -20,7 +20,6 @@ export async function POST(req: Request) {
     }
 
     // Fetch the page with a short timeout and a browser-like UA
-    let pageText = "";
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 8000);
@@ -50,33 +49,36 @@ export async function POST(req: Request) {
         .replace(/<[^>]+>/g, " ")
         .replace(/\s+/g, " ")
         .trim()
-        .slice(0, 2000);
+        .slice(0, 12000);
 
-      pageText = [ogSiteName, ogTitle, titleTag, bodySnippet].filter(Boolean).join("\n").slice(0, 3000);
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "user",
+            content: `I am providing a job listing URL. Please extract only the Job Title and the Company Name.\n\nFormat:\nTitle: [Job Title]\nCompany: [Company Name]\n\nNote: Do not return the URL. Return a clean, professional title that can be used as a header (e.g., 'Software Engineer').\n\nReturn ONLY valid JSON in this exact shape: {"title":"...","company":"..."}.\n\nURL + Page Context:\n${[url, ogSiteName, ogTitle, titleTag, bodySnippet].filter(Boolean).join("\n").slice(0, 12000)}`,
+          },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 240,
+      });
+
+      const raw = completion.choices[0].message.content || "{}";
+      const parsed = JSON.parse(raw) as { title?: string; company?: string };
+
+      const title = String(parsed.title || "").trim() || "Unknown Role";
+      const company = String(parsed.company || "").trim() || "Unknown Company";
+      const description = bodySnippet.slice(0, 4000);
+
+      return Response.json({
+        title,
+        company,
+        description,
+        full_description: description,
+      });
     } catch {
       return Response.json({ error: "Unable to fetch that URL. The site may block automated requests." }, { status: 422 });
     }
-
-    // Ask the LLM to extract job title and company cleanly
-    const completion = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: `Extract the Job Title and Company from the text below. If the title field contains a URL or is unclear, find the actual job title from the content. Return ONLY valid JSON: {"title": "...", "company": "..."}\n\nText:\n${pageText}`,
-        },
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 80,
-    });
-
-    const raw = completion.choices[0].message.content || "{}";
-    const parsed = JSON.parse(raw) as { title?: string; company?: string };
-
-    const title = String(parsed.title || "").trim() || "Unknown Role";
-    const company = String(parsed.company || "").trim() || "Unknown Company";
-
-    return Response.json({ title, company });
   } catch (err) {
     return Response.json(
       { error: "Server error", details: (err as Error).message },

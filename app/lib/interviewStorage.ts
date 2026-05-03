@@ -43,14 +43,19 @@ export type TrainingProgress = {
   completedModules: TrainingModuleId[];
 };
 
-export const CORE_MODULE_XP: Record<TrainingModuleId, number> = {
+export const CORE_MODULE_IP: Record<TrainingModuleId, number> = {
   logic: 700,
   storytelling: 650,
   delivery: 650,
 };
 
-export const REQUIRED_CORE_XP = CORE_MODULE_XP.logic + CORE_MODULE_XP.storytelling + CORE_MODULE_XP.delivery;
-export const XP_PER_LEVEL = 2000;
+export const REQUIRED_CORE_IP = CORE_MODULE_IP.logic + CORE_MODULE_IP.storytelling + CORE_MODULE_IP.delivery;
+export const IP_PER_LEVEL = 2000;
+
+// Backward-compatible aliases
+export const CORE_MODULE_XP = CORE_MODULE_IP;
+export const REQUIRED_CORE_XP = REQUIRED_CORE_IP;
+export const XP_PER_LEVEL = IP_PER_LEVEL;
 
 const GUEST_STORAGE_KEY = "hirelyCoachInterviewHistory";
 const GUEST_GROWTHHUB_KEY = "hirelyCoachGrowthHub";
@@ -71,10 +76,93 @@ function safeParse(value: string | null) {
   }
 }
 
+const URL_RE = /https?:\/\/[^\s]+/i;
+
+function looksLikeUrl(value: string): boolean {
+  const v = value.trim().toLowerCase();
+  if (!v) return false;
+  return v.includes("http") || v.includes("searchjobs") || URL_RE.test(v);
+}
+
+function extractSessionUrl(session: InterviewSession): string {
+  const title = String(session.jobTitle || "").trim();
+  if (URL_RE.test(title)) {
+    return title.match(URL_RE)?.[0] || "";
+  }
+
+  const jobText = String(session.job || "");
+  const url = jobText.match(URL_RE)?.[0] || "";
+  return url;
+}
+
 export function loadInterviewHistory(userId?: string | null): InterviewSession[] {
   if (typeof window === "undefined") return [];
   const raw = window.localStorage.getItem(getHistoryKey(userId));
   return safeParse(raw);
+}
+
+export async function backfillLegacySessionTitles(userId?: string | null): Promise<number> {
+  if (typeof window === "undefined") return 0;
+
+  const history = loadInterviewHistory(userId);
+  if (!history.length) return 0;
+
+  const updated = [...history];
+  let changed = 0;
+
+  for (let i = 0; i < updated.length; i += 1) {
+    const session = updated[i];
+    const currentTitle = String(session.jobTitle || "").trim();
+    if (currentTitle && !looksLikeUrl(currentTitle)) continue;
+
+    const sourceUrl = extractSessionUrl(session);
+    if (!sourceUrl) continue;
+
+    try {
+      const res = await fetch("/api/scrape-job", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: sourceUrl }),
+      });
+      if (!res.ok) continue;
+
+      const data = (await res.json()) as { title?: string; company?: string };
+      const title = String(data.title || "").trim();
+      const company = String(data.company || "").trim();
+      const cleanTitle = company ? `${title} @ ${company}` : title;
+
+      if (!cleanTitle || looksLikeUrl(cleanTitle)) continue;
+
+      updated[i] = {
+        ...session,
+        jobTitle: cleanTitle,
+      };
+      changed += 1;
+    } catch {
+      // continue with next session
+    }
+  }
+
+  if (changed > 0) {
+    window.localStorage.setItem(getHistoryKey(userId), JSON.stringify(updated.slice(0, 20)));
+
+    const snapshot = loadGrowthHubSnapshot(userId);
+    if (snapshot) {
+      const matched = updated.find((session) => session.id === snapshot.sessionId);
+      const matchedTitle = String(matched?.jobTitle || "").trim();
+      if (matchedTitle && !looksLikeUrl(matchedTitle)) {
+        saveGrowthHubSnapshot(
+          {
+            ...snapshot,
+            jobTitle: matchedTitle,
+          },
+          userId
+        );
+      }
+    }
+  }
+
+  return changed;
 }
 
 export function findInterviewSession(sessionId: string, userId?: string | null) {

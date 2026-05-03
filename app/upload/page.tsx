@@ -254,6 +254,23 @@ export default function UploadPage() {
     () => Date.now() - 90 * 24 * 60 * 60 * 1000
   );
 
+  async function saveResumeToInterviewProfile(text: string, name: string) {
+    if (!userId || !text.trim()) return;
+    try {
+      await fetch("/api/user/interview-setup-state", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentResumeName: name || "Saved resume",
+          currentResumeText: text,
+          currentResumeUrl: "",
+        }),
+      });
+    } catch {
+      // Non-blocking save
+    }
+  }
+
   const refreshImpactEntries = useCallback(async () => {
     const cutoffTs = Date.now() - 90 * 24 * 60 * 60 * 1000;
     setRecentCutoffTs(cutoffTs);
@@ -433,6 +450,7 @@ export default function UploadPage() {
       setScoreDelta(null);
       if (userId && cleaned) {
         saveSavedResume({ text: cleaned, fileName: file.name });
+        await saveResumeToInterviewProfile(cleaned, file.name);
       }
       await scanResume(cleaned, file.name);
     } catch {
@@ -562,6 +580,7 @@ export default function UploadPage() {
       setResumeText(cleaned);
       if (userId && cleaned) {
         saveSavedResume({ text: cleaned, fileName: activeFileName || "Saved resume" });
+        await saveResumeToInterviewProfile(cleaned, activeFileName || "Saved resume");
       }
       setLastScanKey(nextScanKey);
       setScanProgress(100);
@@ -625,6 +644,17 @@ export default function UploadPage() {
 
   const removePrefilledResume = () => {
     clearSavedResume();
+    if (userId) {
+      void fetch("/api/user/interview-setup-state", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentResumeName: "",
+          currentResumeText: "",
+          currentResumeUrl: "",
+        }),
+      });
+    }
     clearPersistedOptimizerState(userId);
     setResumeText("");
     setFileName("");

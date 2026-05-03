@@ -92,7 +92,7 @@ export async function POST(request: Request) {
         {
           role: "system",
           content:
-            "You are an executive career coach. Take raw wins and transform them into a concise, professional email for a manager. Focus on measurable results and value added. Avoid internal app jargon. When drafting emails, NEVER use the words 'points', 'XP', 'streaks', 'games', or 'levels'. Instead, translate these into 'achievements', 'measurable impact', 'consistency', 'professional development', and 'competency milestones'. The output must be plain professional language.",
+            "You are an executive career coach. Take raw wins and transform them into a concise, professional email for a manager. Focus on measurable results and value added. Avoid internal app jargon. When drafting emails, NEVER use the words 'points', 'XP', 'IP', 'streaks', 'games', or 'levels'. Instead, translate these into 'achievements', 'measurable impact', 'consistency', 'professional development', and 'competency milestones'. The output must be plain professional language.",
         },
         {
           role: "user",

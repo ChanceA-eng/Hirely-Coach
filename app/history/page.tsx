@@ -3,23 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import {
+  backfillLegacySessionTitles,
   clearInterviewHistory,
   loadInterviewHistory,
-  loadTrainingProgress,
   type InterviewSession,
 } from "../lib/interviewStorage";
+import { getPromotionSupportAccess, getTierByIP, loadIP, loadStreakState } from "../lib/progression";
 import { loadImpactEntries, type ImpactEntry } from "../lib/impactLog";
-import {
-  awardFirstPortfolioExport,
-  getProgressMeta,
-  getTierByIP,
-  loadBaselineResumeScore,
-  loadHighestResumeScore,
-  loadIP,
-  loadStreakState,
-} from "../lib/progression";
 
 // ─── Markdown renderer ────────────────────────────────────────────────────────
 function formatFeedbackHtml(md: string): string {
@@ -33,33 +25,27 @@ function formatFeedbackHtml(md: string): string {
 
 // ─── Level helpers ────────────────────────────────────────────────────────────
 function sessionLevel(session: InterviewSession): string {
-  const fromLevel = session.level?.match(/tier-(\d)/i)?.[1];
-  const tierFromLevel = fromLevel ? Number(fromLevel) : 0;
-  if (tierFromLevel >= 1 && tierFromLevel <= 7) return `Tier ${tierFromLevel}`;
-
+  if (session.level) return session.level;
   const n = session.questions.length;
-  if (n <= 3) return "Tier 1";
-  if (n === 4) return "Tier 2";
-  if (n === 5) return "Tier 3";
-  if (n === 6) return "Tier 4";
-  if (n === 7) return "Tier 5";
-  if (n === 8) return "Tier 6";
-  return "Tier 7";
+  if (n <= 3) return "Quick";
+  if (n <= 6) return "Medium";
+  return "Intensive";
 }
 
 function levelClass(level: string) {
-  const tier = Number(level.match(/tier\s*(\d)/i)?.[1] || "1");
-  if (tier <= 2) return "level-badge--quick";
-  if (tier <= 5) return "level-badge--medium";
+  const l = level.toLowerCase();
+  if (l === "quick") return "level-badge--quick";
+  if (l === "medium") return "level-badge--medium";
   return "level-badge--intensive";
 }
 
 function sessionJobTitle(session: InterviewSession): string {
-  return (
-    session.jobTitle?.trim() ||
-    session.job.trim().split("\n")[0]?.trim().slice(0, 60) ||
-    "Interview Session"
-  );
+  const stored = session.jobTitle?.trim();
+  // Don't use raw URLs as display titles
+  if (stored && !/^https?:\/\//i.test(stored)) return stored;
+  const firstLine = session.job.trim().split("\n")[0]?.trim().slice(0, 60);
+  if (firstLine && !/^https?:\/\//i.test(firstLine)) return firstLine;
+  return "Target Job";
 }
 
 function scoreColor(score: number) {
@@ -113,23 +99,16 @@ function formatLedgerDate(timestamp: number) {
   });
 }
 
-type EmailMode = "pulse" | "promotion" | "recap";
-type EmailTone = "casual" | "formal";
-
-function impactStrength(entry: ImpactEntry): number {
-  const text = `${entry.action} ${entry.proof} ${entry.result}`.toLowerCase();
-  const numbers = (text.match(/\d+/g) || []).length;
-  const outcomeWords = ["increased", "reduced", "saved", "improved", "launched", "delivered", "grew"];
-  const outcomeHits = outcomeWords.reduce((sum, word) => sum + (text.includes(word) ? 1 : 0), 0);
-  const lengthSignal = Math.min(40, Math.round((entry.result.length + entry.proof.length) / 10));
-  return numbers * 10 + outcomeHits * 8 + lengthSignal;
-}
-
-function topImpactWins(entries: ImpactEntry[], count = 5): ImpactEntry[] {
-  return [...entries]
-    .sort((a, b) => impactStrength(b) - impactStrength(a))
-    .slice(0, count);
-}
+type PromotionSupportData = {
+  portfolioSummary: string;
+  topImpact: string;
+  revenueGrowth: string[];
+  efficiency: string[];
+  leadership: string[];
+  emailSubject: string;
+  emailBody: string;
+  verifiedCount: number;
+};
 
 // ─── Session card ─────────────────────────────────────────────────────────────
 function SessionCard({
@@ -263,39 +242,44 @@ function SessionCard({
 export default function HistoryPage() {
   const router = useRouter();
   const { userId } = useAuth();
+  const { user } = useUser();
   const [history, setHistory] = useState<InterviewSession[]>([]);
   const [impactEntries, setImpactEntries] = useState<ImpactEntry[]>([]);
   const [lens, setLens] = useState<ArchiveLens>("sessions");
   const [ledgerRange, setLedgerRange] = useState<LedgerRange>("90d");
   const [selectedWeekKey, setSelectedWeekKey] = useState<string | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
-  const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  const [ip, setIp] = useState(0);
-  const [exportMessage, setExportMessage] = useState("");
-  const [emailMode, setEmailMode] = useState<EmailMode>("pulse");
-  const [emailTone, setEmailTone] = useState<EmailTone>("formal");
-  const [emailDraft, setEmailDraft] = useState("");
-  const [emailSubject, setEmailSubject] = useState("");
-  const [isDraftingEmail, setIsDraftingEmail] = useState(false);
+  const [totalIp, setTotalIp] = useState(0);
+  const [managerName, setManagerName] = useState("");
+  const [promotionSupport, setPromotionSupport] = useState<PromotionSupportData | null>(null);
+  const [promotionLoading, setPromotionLoading] = useState(false);
+  const [promotionMessage, setPromotionMessage] = useState("");
 
   useEffect(() => {
     queueMicrotask(() => {
       setHistory(loadInterviewHistory(userId));
       setImpactEntries(loadImpactEntries(userId));
-      setIp(loadIP());
+      setTotalIp(loadIP());
       setHydrated(true);
     });
   }, [userId]);
 
   useEffect(() => {
-    function onFocus() {
-      setIp(loadIP());
-      setImpactEntries(loadImpactEntries(userId));
-    }
+    let cancelled = false;
 
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
+    void (async () => {
+      const changed = await backfillLegacySessionTitles(userId);
+      if (!cancelled && changed > 0) {
+        queueMicrotask(() => {
+          setHistory(loadInterviewHistory(userId));
+        });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
 
   const filteredImpactEntries = useMemo(() => {
@@ -357,170 +341,107 @@ export default function HistoryPage() {
   }, [selectedWeekEntries, selectedEntryId]);
 
   const selectedEntry = selectedWeekEntries.find((entry) => entry.id === selectedEntryId) || null;
-  const progressMeta = getProgressMeta(ip);
-  const filteredTopWins = topImpactWins(filteredImpactEntries, 5);
-  const selectedWins = filteredImpactEntries.filter((entry) => selectedEntryIds.includes(entry.id));
-
-  const baselineResumeScore = loadBaselineResumeScore();
-  const highestResumeScore = loadHighestResumeScore();
-  const resumeDelta = baselineResumeScore
-    ? Math.max(0, highestResumeScore - baselineResumeScore)
-    : 0;
-  const trainingCompleted = loadTrainingProgress(userId).completedModules.length;
+  const userRank = getTierByIP(totalIp).title;
+  const promotionSupportAccess = getPromotionSupportAccess(totalIp, user?.publicMetadata);
+  const promotionSupportUnlocked = promotionSupportAccess.unlocked;
   const streakDays = loadStreakState().streakDays;
+  const userName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Hirely Coach Professional";
 
-  function toggleEntrySelection(entryId: string) {
-    setSelectedEntryIds((prev) =>
-      prev.includes(entryId)
-        ? prev.filter((id) => id !== entryId)
-        : [...prev, entryId].slice(0, 5)
-    );
-  }
-
-  async function generatePortfolioPdf() {
-    if (filteredImpactEntries.length === 0) {
-      setExportMessage("No wins in this range yet.");
+  async function generatePromotionSupport() {
+    if (!promotionSupportUnlocked) {
+      setPromotionMessage(promotionSupportAccess.detail);
       return;
     }
 
-    const { jsPDF } = await import("jspdf");
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const navy = [15, 23, 42] as const;
-    const slate = [71, 85, 105] as const;
-
-    let y = 60;
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...navy);
-    doc.setFontSize(20);
-    doc.text("Hirely Coach Performance Portfolio", 48, y);
-
-    y += 20;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...slate);
-    doc.text(`Date Range: ${ledgerRange.toUpperCase()} · Generated ${new Date().toLocaleDateString()}`, 48, y);
-
-    y += 26;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(...navy);
-    doc.text("Highlight Reel (Top 5 Impact Wins)", 48, y);
-    y += 14;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-
-    for (const win of filteredTopWins) {
-      const line = `${formatLedgerDate(win.createdAt)} | ${win.action} -> ${win.result}`;
-      const lines = doc.splitTextToSize(line, 500);
-      doc.text(lines, 56, y);
-      y += lines.length * 12 + 4;
-      if (y > 720) {
-        doc.addPage();
-        y = 60;
-      }
-    }
-
-    y += 10;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(...navy);
-    doc.text("Growth Metrics", 48, y);
-    y += 16;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...slate);
-    doc.text(`Resume Score: ${baselineResumeScore ?? 0} -> ${highestResumeScore} (${resumeDelta >= 0 ? "+" : ""}${resumeDelta})`, 56, y);
-    y += 16;
-    doc.text(`Skill Mastery: ${trainingCompleted} certifications completed`, 56, y);
-    y += 16;
-    doc.text(`Professional Tier: ${getTierByIP(ip).title}`, 56, y);
-    y += 16;
-    doc.text(`Consistency: ${streakDays}-day streak`, 56, y);
-
-    y += 18;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(...navy);
-    doc.text("Detailed Ledger", 48, y);
-    y += 14;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9.5);
-    for (const entry of [...filteredImpactEntries].sort((a, b) => a.createdAt - b.createdAt)) {
-      const actionLine = `Action: ${entry.action}`;
-      const proofLine = `Proof: ${entry.proof}`;
-      const resultLine = `Result: ${entry.result}`;
-      const dateLine = formatLedgerDate(entry.createdAt);
-      const block = [dateLine, actionLine, proofLine, resultLine, ""];
-
-      for (const text of block) {
-        const lines = doc.splitTextToSize(text, 500);
-        doc.text(lines, 56, y);
-        y += lines.length * 11;
-      }
-
-      if (y > 730) {
-        doc.addPage();
-        y = 60;
-      }
-    }
-
-    doc.save(`hirely-performance-portfolio-${Date.now()}.pdf`);
-    const reward = awardFirstPortfolioExport();
-    if (reward.awarded) {
-      setIp(reward.ip);
-      setExportMessage("Portfolio exported. +25 IP for first export.");
-    } else {
-      setExportMessage("Portfolio exported.");
-    }
-  }
-
-  async function draftManagerEmail() {
-    if (selectedWins.length < 3) {
-      setExportMessage("Select 3 to 5 wins to draft a manager update.");
-      return;
-    }
-
-    setIsDraftingEmail(true);
+    setPromotionLoading(true);
+    setPromotionMessage("");
     try {
-      const res = await fetch("/api/impact-ledger/email-draft", {
+      const res = await fetch("/api/impact-ledger/promotion-support", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          wins: selectedWins,
-          mode: emailMode,
-          tone: emailTone,
-          levelTitle: getTierByIP(ip).title,
-          certificationsCompleted: trainingCompleted,
-        }),
+        body: JSON.stringify({ managerName, totalIp }),
       });
-      const data = (await res.json()) as { subject?: string; body?: string; error?: string };
-      if (!res.ok || !data.body) {
-        setExportMessage(data.error || "Could not generate draft email.");
+      const data = (await res.json()) as PromotionSupportData & { error?: string };
+      if (!res.ok) {
+        setPromotionSupport(null);
+        setPromotionMessage(data.error || "Could not generate promotion support.");
         return;
       }
-      setEmailSubject(data.subject || "Professional Update");
-      setEmailDraft(data.body);
-      setExportMessage("Draft generated.");
+      setPromotionSupport(data);
+      setPromotionMessage("Promotion support generated.");
     } catch {
-      setExportMessage("Could not generate draft email.");
+      setPromotionMessage("Could not generate promotion support.");
     } finally {
-      setIsDraftingEmail(false);
+      setPromotionLoading(false);
     }
   }
 
-  function copyDraft() {
-    if (!emailDraft) return;
-    navigator.clipboard.writeText(`Subject: ${emailSubject}\n\n${emailDraft}`);
-    setExportMessage("Draft copied to clipboard.");
+  async function copyPromotionSupport() {
+    if (!promotionSupport) return;
+    const payload = [
+      `Executive Impact Summary: ${userName}`,
+      `Key Milestone: Successfully reached ${userRank} Rank in the Hirely Performance System.`,
+      `Top Impact: ${promotionSupport.topImpact}`,
+      `Consistency: Maintained a ${streakDays}-day high-performance streak with ${totalIp} total points earned.`,
+      "",
+      promotionSupport.emailSubject,
+      "",
+      promotionSupport.emailBody,
+    ].join("\n");
+
+    await navigator.clipboard.writeText(payload);
+    setPromotionMessage("Promotion support copied to clipboard.");
   }
 
-  function openInMail() {
-    if (!emailDraft) return;
-    const subject = encodeURIComponent(emailSubject || "Professional Update");
-    const body = encodeURIComponent(emailDraft);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  async function downloadPromotionSupportPdf() {
+    if (!promotionSupport) return;
+    const { jsPDF } = await import("jspdf");
+    const pdf = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 44;
+    let y = 52;
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(18);
+    pdf.text(`Executive Impact Summary: ${userName}`, margin, y);
+    y += 24;
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+    pdf.text(`Key Milestone: Successfully reached ${userRank} Rank in the Hirely Performance System.`, margin, y);
+    y += 16;
+    pdf.text(`Consistency: Maintained a ${streakDays}-day high-performance streak with ${totalIp} total points earned.`, margin, y);
+    y += 24;
+
+    const sections = [
+      ["Portfolio Summary", [promotionSupport.portfolioSummary]],
+      ["Revenue / Growth", promotionSupport.revenueGrowth],
+      ["Efficiency", promotionSupport.efficiency],
+      ["Leadership", promotionSupport.leadership],
+      ["Promotion Email Subject", [promotionSupport.emailSubject]],
+      ["Promotion Email", [promotionSupport.emailBody]],
+    ] as const;
+
+    for (const [title, lines] of sections) {
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(12);
+      pdf.text(title, margin, y);
+      y += 14;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      for (const line of lines) {
+        const chunks = pdf.splitTextToSize(title === "Promotion Email" ? line : `• ${line}`, pageWidth - margin * 2);
+        pdf.text(chunks, margin, y);
+        y += chunks.length * 12 + 6;
+        if (y > 760) {
+          pdf.addPage();
+          y = 52;
+        }
+      }
+      y += 8;
+    }
+
+    pdf.save(`hirely-promotion-support-${Date.now()}.pdf`);
+    setPromotionMessage("Promotion support downloaded as PDF.");
   }
 
   const handleClear = () => {
@@ -580,34 +501,6 @@ export default function HistoryPage() {
           </button>
         </div>
 
-        {lens === "ledger" && (
-          <div className="glass-card anim-fade-up anim-fade-up--d1" style={{ padding: "12px 16px", marginBottom: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-              <strong style={{ color: "#f8fafc", fontSize: "0.86rem" }}>
-                Ledger Mastery
-              </strong>
-              <span style={{ color: "#cbd5e1", fontSize: "0.82rem" }}>
-                Wins Logged: {impactEntries.length} • {ip} IP • {progressMeta.tier.title}
-              </span>
-            </div>
-            <div style={{ marginTop: 8, height: 7, borderRadius: 999, overflow: "hidden", background: "rgba(255,255,255,0.1)" }}>
-              <span
-                style={{
-                  display: "block",
-                  width: `${progressMeta.progressPct}%`,
-                  height: "100%",
-                  background: "linear-gradient(90deg, #10b981, #34d399)",
-                }}
-              />
-            </div>
-            <p style={{ margin: "8px 0 0", color: "#94a3b8", fontSize: "0.76rem" }}>
-              {progressMeta.nextTier
-                ? `${progressMeta.remainingToNext} IP to ${progressMeta.nextTier.title}`
-                : "Master tier achieved"}
-            </p>
-          </div>
-        )}
-
         {/* ── Action bar ── */}
         {lens === "sessions" ? (
           <div
@@ -646,68 +539,113 @@ export default function HistoryPage() {
             </button>
           </div>
         ) : (
-          <div className="glass-card anim-fade-up anim-fade-up--d1 archive-ledger-topbar">
-            <div className="archive-range-toggle">
-              <button
-                type="button"
-                className={`archive-range-btn ${ledgerRange === "90d" ? "is-active" : ""}`}
-                onClick={() => setLedgerRange("90d")}
-              >
-                Last 90 Days
-              </button>
-              <button
-                type="button"
-                className={`archive-range-btn ${ledgerRange === "6m" ? "is-active" : ""}`}
-                onClick={() => setLedgerRange("6m")}
-              >
-                6 Months
-              </button>
-              <button
-                type="button"
-                className={`archive-range-btn ${ledgerRange === "1y" ? "is-active" : ""}`}
-                onClick={() => setLedgerRange("1y")}
-              >
-                1 Year
-              </button>
-            </div>
-            <div className="archive-ledger-actions">
-              <select
-                className="archive-input"
-                value={emailMode}
-                onChange={(event) => setEmailMode(event.target.value as EmailMode)}
-              >
-                <option value="pulse">Weekly/Monthly Pulse</option>
-                <option value="promotion">Promotion/Raise Request</option>
-                <option value="recap">Project Recap</option>
-              </select>
-              <select
-                className="archive-input"
-                value={emailTone}
-                onChange={(event) => setEmailTone(event.target.value as EmailTone)}
-              >
-                <option value="casual">Casual / Brief</option>
-                <option value="formal">Formal / Detailed</option>
-              </select>
-              <button className="lp-btn-primary" type="button" onClick={generatePortfolioPdf}>
-                Generate Performance Portfolio
-              </button>
-              <button
-                className="lp-btn-ghost"
-                type="button"
-                onClick={draftManagerEmail}
-                disabled={isDraftingEmail}
-              >
-                {isDraftingEmail ? "Drafting…" : "Draft Update for Manager"}
-              </button>
+          <>
+            <div className="glass-card anim-fade-up anim-fade-up--d1 archive-ledger-topbar">
+              <div className="archive-range-toggle">
+                <button
+                  type="button"
+                  className={`archive-range-btn ${ledgerRange === "90d" ? "is-active" : ""}`}
+                  onClick={() => setLedgerRange("90d")}
+                >
+                  Last 90 Days
+                </button>
+                <button
+                  type="button"
+                  className={`archive-range-btn ${ledgerRange === "6m" ? "is-active" : ""}`}
+                  onClick={() => setLedgerRange("6m")}
+                >
+                  6 Months
+                </button>
+                <button
+                  type="button"
+                  className={`archive-range-btn ${ledgerRange === "1y" ? "is-active" : ""}`}
+                  onClick={() => setLedgerRange("1y")}
+                >
+                  1 Year
+                </button>
+              </div>
               <button className="lp-btn-ghost" type="button" onClick={() => router.push("/growthhub")}>
                 GrowthHub
               </button>
             </div>
-          </div>
-        )}
 
-        {lens === "ledger" && exportMessage && (
-          <div className="archive-export-msg">{exportMessage}</div>
+            <section className="glass-card anim-fade-up anim-fade-up--d2 archive-promo-shell">
+              <div className="archive-promo-head">
+                <div>
+                  <p className="archive-promo-label">Promotion Support</p>
+                  <h2 className="archive-promo-title">Performance Portfolio and Promotion Email</h2>
+                  <p className="archive-promo-sub">
+                    Generate an executive-ready portfolio and promotion request from your verified impact wins.
+                  </p>
+                </div>
+                <span className={`archive-promo-rank${promotionSupportUnlocked ? " is-open" : ""}`}>
+                  {userRank}
+                </span>
+              </div>
+
+              {promotionSupportUnlocked ? (
+                <>
+                  <div className="archive-promo-controls">
+                    <input
+                      className="archive-input"
+                      type="text"
+                      value={managerName}
+                      onChange={(event) => setManagerName(event.target.value)}
+                      placeholder="Manager name (optional)"
+                    />
+                    <button className="lp-btn-primary" type="button" onClick={generatePromotionSupport} disabled={promotionLoading}>
+                      {promotionLoading ? "Generating..." : "Generate Promotion Support"}
+                    </button>
+                    <button className="lp-btn-ghost" type="button" onClick={copyPromotionSupport} disabled={!promotionSupport}>
+                      Copy to Clipboard
+                    </button>
+                    <button className="lp-btn-ghost" type="button" onClick={downloadPromotionSupportPdf} disabled={!promotionSupport}>
+                      Download as PDF
+                    </button>
+                  </div>
+
+                  {promotionMessage && <p className="archive-export-msg">{promotionMessage}</p>}
+
+                  {promotionSupport && (
+                    <div className="archive-promo-grid">
+                      <div className="archive-promo-panel">
+                        <p className="archive-promo-panel-label">The Portfolio</p>
+                        <h3 className="archive-promo-panel-title">Executive Impact Summary: {userName}</h3>
+                        <p className="archive-promo-copy">Key Milestone: Successfully reached {userRank} Rank in the Hirely Performance System.</p>
+                        <p className="archive-promo-copy">Top Impact: {promotionSupport.topImpact}</p>
+                        <p className="archive-promo-copy">Consistency: Maintained a {streakDays}-day high-performance streak with {totalIp} total points earned.</p>
+                        <p className="archive-promo-section">Portfolio Summary</p>
+                        <p className="archive-promo-copy">{promotionSupport.portfolioSummary}</p>
+                        <p className="archive-promo-section">Revenue / Growth</p>
+                        <ul className="archive-promo-list">
+                          {promotionSupport.revenueGrowth.map((item) => <li key={item}>{item}</li>)}
+                        </ul>
+                        <p className="archive-promo-section">Efficiency</p>
+                        <ul className="archive-promo-list">
+                          {promotionSupport.efficiency.map((item) => <li key={item}>{item}</li>)}
+                        </ul>
+                        <p className="archive-promo-section">Leadership</p>
+                        <ul className="archive-promo-list">
+                          {promotionSupport.leadership.map((item) => <li key={item}>{item}</li>)}
+                        </ul>
+                      </div>
+
+                      <div className="archive-promo-panel">
+                        <p className="archive-promo-panel-label">The Draft Email</p>
+                        <h3 className="archive-promo-panel-title">Subject: {promotionSupport.emailSubject}</h3>
+                        <p className="archive-promo-copy archive-promo-copy--email">{promotionSupport.emailBody}</p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="archive-promo-locked">
+                  <p className="archive-promo-locked-title">Locked</p>
+                  <p className="archive-promo-copy">{promotionSupportAccess.detail}</p>
+                </div>
+              )}
+            </section>
+          </>
         )}
 
         {/* ── Session list ── */}
@@ -764,27 +702,15 @@ export default function HistoryPage() {
                       <p className="archive-ledger-empty">No wins recorded for this week.</p>
                     ) : (
                       selectedWeekEntries.map((entry) => (
-                        <div
+                        <button
                           key={entry.id}
+                          type="button"
                           className={`archive-ledger-entry ${selectedEntryId === entry.id ? "is-active" : ""}`}
+                          onClick={() => setSelectedEntryId(entry.id)}
                         >
-                          <label className="archive-ledger-pick">
-                            <input
-                              type="checkbox"
-                              checked={selectedEntryIds.includes(entry.id)}
-                              onChange={() => toggleEntrySelection(entry.id)}
-                            />
-                            <span>Select</span>
-                          </label>
-                          <button
-                            type="button"
-                            className="archive-ledger-entry-btn"
-                            onClick={() => setSelectedEntryId(entry.id)}
-                          >
-                            <span>{formatLedgerDate(entry.createdAt)}</span>
-                            <strong>{entry.action.slice(0, 64)}</strong>
-                          </button>
-                        </div>
+                          <span>{formatLedgerDate(entry.createdAt)}</span>
+                          <strong>{entry.action.slice(0, 64)}</strong>
+                        </button>
                       ))
                     )}
                   </div>
@@ -802,18 +728,6 @@ export default function HistoryPage() {
                         <p className="archive-ledger-label">Result</p>
                         <p className="archive-ledger-copy">{selectedEntry.result}</p>
                       </>
-                    )}
-
-                    {emailDraft && (
-                      <div className="archive-email-preview">
-                        <p className="archive-ledger-label">Drafted Email Preview</p>
-                        <p className="archive-ledger-copy"><strong>Subject:</strong> {emailSubject}</p>
-                        <pre className="archive-email-copy">{emailDraft}</pre>
-                        <div className="archive-email-actions">
-                          <button type="button" className="lp-btn-ghost" onClick={copyDraft}>Copy to Clipboard</button>
-                          <button type="button" className="lp-btn-primary" onClick={openInMail}>Open in Mail</button>
-                        </div>
-                      </div>
                     )}
                   </div>
                 </div>

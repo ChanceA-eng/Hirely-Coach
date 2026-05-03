@@ -62,7 +62,7 @@ export type CanvasPreflightResult = {
   suggestions: string[];
 };
 
-export type StarrTierId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export type StarrTierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export type StarrTierConfig = {
   tier: StarrTierId;
@@ -144,6 +144,17 @@ const STARR_TIER_CONFIG: Record<StarrTierId, StarrTierConfig> = {
   },
   4: {
     tier: 4,
+    title: "Professional",
+    scenarioTitle: "The Mid-Game Check-In",
+    persona: "The Growth-Focused Director",
+    questionCount: 5,
+    focusSkill: "Career momentum, growth mindset, and mid-career ownership",
+    systemPrompt: "Probe ownership of career growth, systems thinking at mid-level, and measurable wins across roles.",
+    temperature: 0.52,
+    presencePenalty: 0.06,
+  },
+  5: {
+    tier: 5,
     title: "Expert",
     scenarioTitle: "The Efficiency Auditor",
     persona: "The Process-Driven Director",
@@ -153,8 +164,8 @@ const STARR_TIER_CONFIG: Record<StarrTierId, StarrTierConfig> = {
     temperature: 0.5,
     presencePenalty: 0.08,
   },
-  5: {
-    tier: 5,
+  6: {
+    tier: 6,
     title: "Executive",
     scenarioTitle: "The Strategy Session",
     persona: "The VP of Operations",
@@ -164,8 +175,8 @@ const STARR_TIER_CONFIG: Record<StarrTierId, StarrTierConfig> = {
     temperature: 0.45,
     presencePenalty: 0.06,
   },
-  6: {
-    tier: 6,
+  7: {
+    tier: 7,
     title: "Advanced",
     scenarioTitle: "The Stone-Cold CFO",
     persona: "The Financial Gatekeeper",
@@ -175,8 +186,8 @@ const STARR_TIER_CONFIG: Record<StarrTierId, StarrTierConfig> = {
     temperature: 0.35,
     presencePenalty: 0,
   },
-  7: {
-    tier: 7,
+  8: {
+    tier: 8,
     title: "Master",
     scenarioTitle: "The Visionary Board",
     persona: "The Legacy Founder",
@@ -368,7 +379,7 @@ export function coerceStarrTierId(value: unknown): StarrTierId {
 }
 
 export function getAllStarrTierConfigs(): StarrTierConfig[] {
-  return [1, 2, 3, 4, 5, 6, 7].map((tier) => STARR_TIER_CONFIG[tier as StarrTierId]);
+  return [1, 2, 3, 4, 5, 6, 7, 8].map((tier) => STARR_TIER_CONFIG[tier as StarrTierId]);
 }
 
 export function getStarrTierConfig(tier: StarrTierId): StarrTierConfig {
@@ -378,6 +389,12 @@ export function getStarrTierConfig(tier: StarrTierId): StarrTierConfig {
 export function isTierUnlocked(completedTiers: StarrTierId[], tier: StarrTierId): boolean {
   if (tier === 1) return true;
   return completedTiers.includes((tier - 1) as StarrTierId);
+}
+
+export function getIntensityLabel(tier: StarrTierId): { label: string; color: string } {
+  if (tier <= 3) return { label: "Casual", color: "#10b981" };
+  if (tier === 4) return { label: "Professional", color: "#f59e0b" };
+  return { label: "Surgical", color: "#ef4444" };
 }
 
 export function getNextUnlockTier(completedTiers: StarrTierId[]): StarrTierId | null {
