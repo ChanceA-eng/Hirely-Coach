@@ -327,10 +327,10 @@ function VoiceInterviewPageInner() {
       ) {
         text = await readDOCXFile(file);
       } else if (file.type === "application/msword") {
-        setError("DOC files are not supported. Please convert to DOCX.");
+        setError("Oops! We can't open .DOC files yet. Save it as .DOCX first and try again!");
         return;
       } else {
-        setError("Unsupported file type. Please upload PDF, DOCX, or TXT.");
+        setError("Hmm, we can only read PDF, DOCX, or TXT files. Try uploading one of those!");
         return;
       }
       setResume(text);
@@ -343,7 +343,7 @@ function VoiceInterviewPageInner() {
       });
       await syncKjFromResume(text);
     } catch {
-      setError("Unable to read the file. Please try a different file.");
+      setError("Oops! We had trouble opening that file. Could you try a different one?");
     }
   };
 
@@ -352,7 +352,7 @@ function VoiceInterviewPageInner() {
     const normalizedJobTitle = jobTitle.trim() || scrapedLabel || (normalizedLink ? "Role from listing" : "");
 
     if (!resume.trim() || !normalizedJobTitle || (!job.trim() && !normalizedLink)) {
-      setError("Please provide your resume and either a job description or job link. A job title is only required when no link is provided.");
+      setError("We need your resume and a job description (or link) to get started. Add those and try again!");
       return;
     }
 
@@ -522,7 +522,7 @@ function VoiceInterviewPageInner() {
               <textarea
                 value={job}
                 onChange={(e) => setJob(e.target.value)}
-                placeholder="Paste the job description here (optional if you provide a link below)"
+                placeholder="Example: I am applying for a Sales Manager role at a big tech company. The job requires 5+ years of experience..."
                 className="vi-textarea vi-textarea--fill"
               />
 
@@ -548,7 +548,7 @@ function VoiceInterviewPageInner() {
                 <p style={{ margin: "4px 0 0", fontSize: "0.78rem", color: "#10b981" }}>✓ {scrapedLabel}</p>
               )}
               {scrapeStatus === "error" && (
-                <p style={{ margin: "4px 0 0", fontSize: "0.78rem", color: "#f87171" }}>Could not read that URL. Paste the job description manually.</p>
+                <p style={{ margin: "4px 0 0", fontSize: "0.78rem", color: "#f87171" }}>Oops! We couldn\'t read that URL. Paste the job description below instead.</p>
               )}
             </div>
           </div>

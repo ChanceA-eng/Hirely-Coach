@@ -395,7 +395,8 @@ export default function HistoryPage() {
 
   async function downloadPromotionSupportPdf() {
     if (!promotionSupport) return;
-    const { jsPDF } = await import("jspdf");
+    const jsPDFModule = await import("jspdf");
+    const jsPDF = jsPDFModule.default ?? jsPDFModule.jsPDF;
     const pdf = new jsPDF({ unit: "pt", format: "a4" });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const margin = 44;

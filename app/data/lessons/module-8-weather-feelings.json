@@ -1,0 +1,157 @@
+{
+  "module": 8,
+  "title": "Hali ya Hewa na Hisia",
+  "title_sw": "Weather and Feelings",
+  "description": "Learn weather vocabulary and how to express emotions in everyday conversation.",
+  "description_sw": "Jifunze maneno ya hali ya hewa na jinsi ya kuelezea hisia katika mazungumzo ya kawaida.",
+  "sofia_intro": "Today we learn how to describe the weather and express how we feel. This helps you start conversations with anyone, anywhere!",
+  "sofia_intro_sw": "Leo tutajifunza jinsi ya kuelezea hali ya hewa na jinsi unavyojisikia. Hii itakusaidia kuanzisha mazungumzo na watu wapya kila siku!",
+  "lessons": [
+    {
+      "id": "8-1",
+      "type": "vocabulary_grid",
+      "title": "Weather Vocabulary",
+      "title_sw": "Hali ya Hewa",
+      "sofia_hint": "Click each weather word to hear it. These are common small-talk topics!",
+      "sofia_hint_sw": "Bonyeza kila neno la hali ya hewa kulisikia. Hii ni mazungumzo ya kawaida!",
+      "words": [
+        { "word": "Sun", "sw": "Jua", "emoji": "☀️", "example": "The sun is bright.", "audio_url": "/audio/sun.mp3" },
+        { "word": "Rain", "sw": "Mvua", "emoji": "🌧️", "example": "It is raining today.", "audio_url": "/audio/rain.mp3" },
+        { "word": "Wind", "sw": "Upepo", "emoji": "💨", "example": "The wind is strong.", "audio_url": "/audio/wind.mp3" },
+        { "word": "Cloud", "sw": "Wingu", "emoji": "☁️", "example": "The clouds are grey.", "audio_url": "/audio/cloud.mp3" },
+        { "word": "Hot", "sw": "Joto", "emoji": "🔥", "example": "It is very hot today.", "audio_url": "/audio/hot.mp3" },
+        { "word": "Cold", "sw": "Baridi", "emoji": "❄️", "example": "The water is cold.", "audio_url": "/audio/cold.mp3" },
+        { "word": "Sunny", "sw": "Jua linangʻaa", "emoji": "🌞", "example": "It is sunny outside.", "audio_url": "/audio/sunny.mp3" },
+        { "word": "Rainy", "sw": "Kuna mvua", "emoji": "🌧️", "example": "The rainy season is here.", "audio_url": "/audio/rainy.mp3" }
+      ]
+    },
+    {
+      "id": "8-2",
+      "type": "vocabulary_grid",
+      "title": "Feelings and Emotions",
+      "title_sw": "Hisia na Hisia za Moyo",
+      "sofia_hint": "Click each emotion word to hear it. Express yourself!",
+      "sofia_hint_sw": "Bonyeza kila neno la hisia kulisikia. Jieleze!",
+      "words": [
+        { "word": "Happy", "sw": "Furaha", "emoji": "😊", "example": "I am very happy.", "audio_url": "/audio/happy.mp3" },
+        { "word": "Sad", "sw": "Huzuni", "emoji": "😢", "example": "She is sad today.", "audio_url": "/audio/sad.mp3" },
+        { "word": "Hungry", "sw": "Njaa", "emoji": "😋", "example": "I am very hungry.", "audio_url": "/audio/hungry.mp3" },
+        { "word": "Thirsty", "sw": "Kiu", "emoji": "😧", "example": "I am thirsty. Can I have water?", "audio_url": "/audio/thirsty.mp3" },
+        { "word": "Tired", "sw": "Choka", "emoji": "😴", "example": "I am very tired.", "audio_url": "/audio/tired.mp3" },
+        { "word": "Excited", "sw": "Furahi sana", "emoji": "🤩", "example": "I am excited about the project.", "audio_url": "/audio/excited.mp3" },
+        { "word": "Stressed", "sw": "Mkazo", "emoji": "😰", "example": "I feel stressed today.", "audio_url": "/audio/stressed.mp3" },
+        { "word": "Calm", "sw": "Tulivu", "emoji": "😌", "example": "Take a breath. Be calm.", "audio_url": "/audio/calm.mp3" }
+      ]
+    },
+    {
+      "id": "8-3",
+      "type": "multiple_choice",
+      "title": "Weather and Feelings Quiz",
+      "title_sw": "Mchezo wa Hali ya Hewa na Hisia",
+      "sofia_hint": "Choose the correct word to complete each sentence.",
+      "sofia_hint_sw": "Chagua neno sahihi kukamilisha kila sentensi.",
+      "questions": [
+        {
+          "prompt": "It is ________ today. (Kuna jua leo)",
+          "prompt_sw": "It is ________ today. (Kuna jua leo)",
+          "options": ["Sunny", "Rainy", "Windy", "Cloudy"],
+          "options_sw": ["Sunny", "Rainy", "Windy", "Cloudy"],
+          "correct": 0
+        },
+        {
+          "prompt": "I am ________. (Nina njaa)",
+          "prompt_sw": "I am ________. (Nina njaa)",
+          "options": ["Thirsty", "Hungry", "Tired", "Happy"],
+          "options_sw": ["Thirsty", "Hungry", "Tired", "Happy"],
+          "correct": 1
+        },
+        {
+          "prompt": "The water is ________. (Maji ni ya baridi)",
+          "prompt_sw": "The water is ________. (Maji ni ya baridi)",
+          "options": ["Hot", "Warm", "Cold", "Soft"],
+          "options_sw": ["Hot", "Warm", "Cold", "Soft"],
+          "correct": 2
+        },
+        {
+          "prompt": "I am ________ about the new job. (Nina furahi kuhusu kazi mpya)",
+          "prompt_sw": "I am ________ about the new job. (Nina furahi kuhusu kazi mpya)",
+          "options": ["Sad", "Excited", "Tired", "Calm"],
+          "options_sw": ["Sad", "Excited", "Tired", "Calm"],
+          "correct": 1
+        },
+        {
+          "prompt": "'Wind' means: (Neno 'Wind' linamaanisha:)",
+          "prompt_sw": "'Wind' means: (Neno 'Wind' linamaanisha:)",
+          "options": ["Upepo", "Wingu", "Jua", "Mvua"],
+          "options_sw": ["Upepo", "Wingu", "Jua", "Mvua"],
+          "correct": 0
+        },
+        {
+          "prompt": "Which emotion is the opposite of 'Happy'? (Hisia ipi ni kinyume cha 'Happy'?)",
+          "prompt_sw": "Which emotion is the opposite of 'Happy'? (Hisia ipi ni kinyume cha 'Happy'?)",
+          "options": ["Excited", "Sad", "Calm", "Stressed"],
+          "options_sw": ["Excited", "Sad", "Calm", "Stressed"],
+          "correct": 1
+        },
+        {
+          "prompt": "The clouds are ________ today. (Mingu ni matope leo)",
+          "prompt_sw": "The clouds are ________ today. (Mingu ni matope leo)",
+          "options": ["Sunny", "Rainy", "Cold", "Grey"],
+          "options_sw": ["Sunny", "Rainy", "Cold", "Grey"],
+          "correct": 3
+        },
+        {
+          "prompt": "I am ________ because I did not sleep. (Nimechoka kwa sababu sikufa)",
+          "prompt_sw": "I am ________ because I did not sleep. (Nimechoka kwa sababu sikufa)",
+          "options": ["Happy", "Hungry", "Tired", "Calm"],
+          "options_sw": ["Happy", "Hungry", "Tired", "Calm"],
+          "correct": 2
+        }
+      ]
+    },
+    {
+      "id": "8-4",
+      "type": "multiple_choice",
+      "title": "Module 8 Final Assessment",
+      "title_sw": "Tathmini ya Mwisho ya Moduli 8",
+      "is_graduation_gate": false,
+      "questions": [
+        {
+          "prompt": "Which word describes a sunny day? (Neno gani linaelezea siku yenye jua?)",
+          "prompt_sw": "Which word describes a sunny day? (Neno gani linaelezea siku yenye jua?)",
+          "options": ["Rain", "Wind", "Sunny", "Cold"],
+          "options_sw": ["Rain", "Wind", "Sunny", "Cold"],
+          "correct": 2
+        },
+        {
+          "prompt": "'I am tired and hungry' means: (Kauli 'I am tired and hungry' inamaanisha:)",
+          "prompt_sw": "'I am tired and hungry' means: (Kauli 'I am tired and hungry' inamaanisha:)",
+          "options": ["Nimechoka na nina njaa", "Niko na furaha", "Nimechoka na niko na kiu", "Nina mkazo"],
+          "options_sw": ["Nimechoka na nina njaa", "Niko na furaha", "Nimechoka na niko na kiu", "Nina mkazo"],
+          "correct": 0
+        },
+        {
+          "prompt": "What is the best response to 'How do you feel?' (Jibu bora la 'How do you feel?' ni lipi?)",
+          "prompt_sw": "What is the best response to 'How do you feel?' (Jibu bora la 'How do you feel?' ni lipi?)",
+          "options": ["I am a student", "I am happy", "I like food", "I have a book"],
+          "options_sw": ["I am a student", "I am happy", "I like food", "I have a book"],
+          "correct": 1
+        },
+        {
+          "prompt": "'Huzuni' in English is: ('Huzuni' kwa Kiingereza ni:)",
+          "prompt_sw": "'Huzuni' in English is: ('Huzuni' kwa Kiingereza ni:)",
+          "options": ["Happy", "Sad", "Excited", "Calm"],
+          "options_sw": ["Happy", "Sad", "Excited", "Calm"],
+          "correct": 1
+        },
+        {
+          "prompt": "You can say 'It is ________ and rainy' (Unaweza kusema 'It is ________ and rainy')",
+          "prompt_sw": "You can say 'It is ________ and rainy' (Unaweza kusema 'It is ________ and rainy')",
+          "options": ["Sun", "Hot", "Cold", "Wind"],
+          "options_sw": ["Sun", "Hot", "Cold", "Wind"],
+          "correct": 2
+        }
+      ]
+    }
+  ]
+}

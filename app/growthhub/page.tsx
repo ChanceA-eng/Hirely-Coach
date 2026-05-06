@@ -30,12 +30,9 @@ import {
   HARD_GATES,
   LEVELS,
   getProgressMeta,
-  loadHighestResumeScore,
   loadIP,
   loadStreakState,
 } from "../lib/progression";
-import type { NotificationRecord } from "../lib/notifications";
-import NotificationItem from "../components/NotificationItem";
 import {
   buildCourseGateSignals,
   COURSE_CATALOG,
@@ -177,7 +174,7 @@ const PROFESSIONAL_TITLES: Record<(typeof LEVEL_ORDER)[number], string> = {
   Novice: "Associate",
   Apprentice: "Specialist",
   Candidate: "Elite Prospect",
-  Professional: "Career Professional",
+  Professional: "Rising Professional",
   Expert: "Systems Architect",
   Executive: "Strategic Leader",
   Advanced: "Principal Strategist",
@@ -436,22 +433,6 @@ type VerificationProfilePayload = {
   profile?: { publicEnabled?: boolean; slug?: string; credentialId?: string };
 };
 
-type MasterProgress = {
-  ipAchieved: boolean;
-  interviewAchieved: boolean;
-  resumeAchieved: boolean;
-  currentInterviewScore: number;
-  currentResumeScore: number;
-};
-
-type CoachRecommendation = {
-  type: "SkillPath" | "PolishPath" | "HabitPath";
-  title: string;
-  message: string;
-  ctaLabel: string;
-  ctaHref: string;
-};
-
 export default function GrowthHubPage() {
   const { userId } = useAuth();
   const { user } = useUser();
@@ -477,121 +458,6 @@ export default function GrowthHubPage() {
   const [certificateBusy, setCertificateBusy] = useState(false);
   const [certificateMessage, setCertificateMessage] = useState("");
   const [accountProgress, setAccountProgress] = useState<AccountInterviewProgress>(EMPTY_INTERVIEW_PROGRESS);
-  const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [masterProgress, setMasterProgress] = useState<MasterProgress>({
-    ipAchieved: false,
-    interviewAchieved: false,
-    resumeAchieved: false,
-    currentInterviewScore: 0,
-    currentResumeScore: 0,
-  });
-  const [coachRoadmap, setCoachRoadmap] = useState<CoachRecommendation[]>([]);
-
-  function profileCompletionPct(): number {
-    if (typeof window === "undefined") return 0;
-    try {
-      const raw = window.localStorage.getItem("hirelyProfile");
-      if (!raw) return 0;
-      const profile = JSON.parse(raw) as Record<string, unknown>;
-      const fields = [
-        String(profile.currentJobTitle || "").trim(),
-        String(profile.preferredRole || "").trim(),
-        String(profile.city || "").trim(),
-        String(profile.state || "").trim(),
-        String(profile.zip || "").trim(),
-      ];
-      const listFields = [
-        Array.isArray(profile.targetCompanies) ? profile.targetCompanies.length : 0,
-        Array.isArray(profile.relocationPreferences) ? profile.relocationPreferences.length : 0,
-      ];
-      const completed = fields.filter(Boolean).length + listFields.filter((count) => count > 0).length;
-      return Math.round((completed / 7) * 100);
-    } catch {
-      return 0;
-    }
-  }
-
-  async function syncNotificationHeartbeat(payload?: { event?: "heartbeat" | "job-ready"; jobTitle?: string; company?: string }) {
-    try {
-      const latest = impactEntries[0];
-      const response = await fetch("/api/user/notification-state", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          event: payload?.event || "heartbeat",
-          jobTitle: payload?.jobTitle,
-          company: payload?.company,
-          snapshot: {
-            displayName: user?.firstName || "Professional",
-            totalIp: xp,
-            currentStreak: streakDays,
-            latestImpactAt: latest?.createdAt || 0,
-            profileCompletionPct: profileCompletionPct(),
-            targetJobCount: 1,
-            latestImpactTitle: latest?.action || "",
-            latestMockScore: Number(snapshot?.starrScore || accountProgress.latestStarrScore || 0),
-            globalResumeScore: loadHighestResumeScore(),
-          },
-        }),
-      });
-      if (!response.ok) return;
-      const data = (await response.json()) as {
-        notifications?: NotificationRecord[];
-        unreadCount?: number;
-        rankUp?: boolean;
-        rank?: string;
-        masterProgress?: MasterProgress;
-      };
-
-      if (Array.isArray(data.notifications)) setNotifications(data.notifications);
-      if (typeof data.unreadCount === "number") setUnreadCount(data.unreadCount);
-      if (data.masterProgress) setMasterProgress(data.masterProgress);
-
-      if (data.rankUp && (data.rank === "PROFESSIONAL" || data.rank === "MASTER")) {
-        setLevelUpModal({
-          level: data.rank === "MASTER" ? "Master" : "Executive",
-          title: data.rank === "MASTER" ? "Industry Authority" : "Strategic Leader",
-        });
-      }
-    } catch {
-      // Non-blocking notifications
-    }
-  }
-
-  async function markNotificationsRead(action: "mark-all-read" | "mark-read", id?: string) {
-    try {
-      await fetch("/api/user/notification-state", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, id }),
-      });
-
-      if (action === "mark-all-read") {
-        setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
-        setUnreadCount(0);
-      } else if (id) {
-        setNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, read: true } : item)));
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  async function loadCoachRecommendations() {
-    try {
-      const response = await fetch("/api/coach/recommendations", { cache: "no-store" });
-      if (!response.ok) return;
-      const data = (await response.json()) as { recommendations?: CoachRecommendation[] };
-      if (Array.isArray(data.recommendations)) {
-        setCoachRoadmap(data.recommendations.slice(0, 3));
-      }
-    } catch {
-      // ignore
-    }
-  }
 
   useEffect(() => {
     let cancelled = false;
@@ -716,8 +582,6 @@ export default function GrowthHubPage() {
     setImpactProof("");
     setImpactResult("");
     setImpactMessage(reward.awarded ? "Impact saved. +5 IP added." : "Impact saved.");
-    // Trigger fresh notification generation so the new win surfaces in the feed
-    void syncNotificationHeartbeat();
   };
 
   const score = snapshot ? readiness(snapshot.starrScore) : 0;
@@ -966,17 +830,6 @@ export default function GrowthHubPage() {
     }
   }, [attainedLevel, hydrated]);
 
-  useEffect(() => {
-    if (!hydrated || !userId) return;
-    void syncNotificationHeartbeat();
-    void loadCoachRecommendations();
-  }, [hydrated, userId]);
-
-  useEffect(() => {
-    if (!hydrated || !userId) return;
-    void syncNotificationHeartbeat();
-  }, [xp, streakDays, impactEntries, hydrated, userId]);
-
   return (
     <div className="lp-root">
       <main className="gh-main">
@@ -1032,25 +885,6 @@ export default function GrowthHubPage() {
                       <h1 className="gh-h1">GrowthHub</h1>
                       <ReadinessPill score={score} />
                       <StreakRing streakDays={streakDays} />
-                      <div className="gh-notif-wrap">
-                        <button
-                          type="button"
-                          className="gh-notif-bell"
-                          onClick={() => setNotifOpen((prev) => !prev)}
-                          aria-label="Open action feed"
-                          aria-expanded={notifOpen}
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18" aria-hidden="true">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                          </svg>
-                          {unreadCount > 0 && (
-                            <span className="gh-notif-dot" aria-label={`${unreadCount} unread`}>
-                              {Math.min(unreadCount, 9)}
-                            </span>
-                          )}
-                        </button>
-                      </div>
                     </div>
                     <div className="gh-ip-banner" aria-label="Professional progression">
                       <div className="gh-ip-head">
@@ -1175,100 +1009,6 @@ export default function GrowthHubPage() {
                     />
                   </div>
 
-                  {/* ── Weekly Milestone Log ── */}
-                  <motion.section
-                    className="gh-wins-section"
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.72 }}
-                  >
-                    <div className="gh-wins-top">
-                      <div>
-                        <p className="gh-section-label">Weekly Milestone Log</p>
-                        <p className="gh-wins-sub">
-                          {alumniStatus
-                            ? "You've reached Mastery. Log your latest win to maintain your Authority Score."
-                            : "What did you move the needle on this week? Each entry builds your professional archive."}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Input form */}
-                    <div className="gh-wins-form glass-card">
-                      <div className="gh-wins-form-grid">
-                        <div className="gh-wins-field">
-                          <label className="gh-wins-field-label" htmlFor="gh-impact-action">The Action</label>
-                          <textarea
-                            id="gh-impact-action"
-                            className="gh-impact-input"
-                            value={impactAction}
-                            onChange={(event) => setImpactAction(event.target.value)}
-                            placeholder="What did you complete or lead this week?"
-                          />
-                        </div>
-                        <div className="gh-wins-field">
-                          <label className="gh-wins-field-label" htmlFor="gh-impact-proof">The Proof</label>
-                          <textarea
-                            id="gh-impact-proof"
-                            className="gh-impact-input"
-                            value={impactProof}
-                            onChange={(event) => setImpactProof(event.target.value)}
-                            placeholder="Numbers: time saved, people helped, revenue, metrics."
-                          />
-                        </div>
-                        <div className="gh-wins-field">
-                          <label className="gh-wins-field-label" htmlFor="gh-impact-result">The Result</label>
-                          <textarea
-                            id="gh-impact-result"
-                            className="gh-impact-input"
-                            value={impactResult}
-                            onChange={(event) => setImpactResult(event.target.value)}
-                            placeholder="What was the final positive outcome?"
-                          />
-                        </div>
-                      </div>
-                      <div className="gh-wins-form-footer">
-                        <button className="gh-impact-save" onClick={saveImpactLogEntry}>
-                          Log This Win
-                        </button>
-                        {impactMessage && <p className="gh-impact-message">{impactMessage}</p>}
-                      </div>
-                    </div>
-
-                    {/* Win cards timeline */}
-                    <div className="gh-wins-timeline">
-                      {impactEntries.length === 0 ? (
-                        <div className="gh-wins-empty">
-                          <p className="gh-wins-empty-title">No wins logged yet this week.</p>
-                          <p className="gh-wins-empty-sub">What did you move the needle on today?</p>
-                        </div>
-                      ) : (
-                        impactEntries.slice(0, 5).map((entry) => {
-                          const isFresh = Date.now() - entry.createdAt < 24 * 60 * 60 * 1000;
-                          const dateLabel = new Date(entry.createdAt).toLocaleDateString("en-US", {
-                            month: "short", day: "numeric",
-                          });
-                          return (
-                            <div
-                              key={entry.id}
-                              className={`gh-win-card${isFresh ? " gh-win-card--fresh" : ""}`}
-                            >
-                              <div className="gh-win-card-header">
-                                <p className="gh-win-card-action">{entry.action}</p>
-                                <span className="gh-win-card-date">{dateLabel}</span>
-                              </div>
-                              <p className="gh-win-card-proof">{entry.proof}</p>
-                              <p className="gh-win-card-result">{entry.result}</p>
-                              {isFresh && (
-                                <span className="gh-win-card-fresh-tag">Just logged</span>
-                              )}
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  </motion.section>
-
                   {/* STARR breakdown strip */}
                   {snapshot && (
                     <motion.div
@@ -1388,38 +1128,6 @@ export default function GrowthHubPage() {
                     <StatRow label="Total IP" value={`${xp} IP`} />
                   </div>
 
-                  <div className="gh-sidebar-card glass-card gh-master-progress-card">
-                    <p className="gh-stats-title">Master Progress</p>
-                    <div className="gh-master-checklist">
-                      <p className={masterProgress.ipAchieved ? "gh-master-check is-done" : "gh-master-check"}>
-                        {masterProgress.ipAchieved ? "[X]" : "[ ]"} IP Achieved
-                      </p>
-                      <p className={masterProgress.interviewAchieved ? "gh-master-check is-done" : "gh-master-check"}>
-                        {masterProgress.interviewAchieved ? "[X]" : "[ ]"} 85%+ Interview Score (Current: {masterProgress.currentInterviewScore}%)
-                      </p>
-                      <p className={masterProgress.resumeAchieved ? "gh-master-check is-done" : "gh-master-check"}>
-                        {masterProgress.resumeAchieved ? "[X]" : "[ ]"} 90%+ Global Rating (Current: {masterProgress.currentResumeScore}%)
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="gh-sidebar-card glass-card gh-roadmap-card">
-                    <p className="gh-stats-title">Personalized Roadmap</p>
-                    {coachRoadmap.length === 0 ? (
-                      <p className="gh-sidebar-body">Loading your rank-aware recommendations...</p>
-                    ) : (
-                      <div className="gh-roadmap-list">
-                        {coachRoadmap.map((item) => (
-                          <Link key={item.type} href={item.ctaHref} className="gh-roadmap-item">
-                            <strong>{item.title}</strong>
-                            <span>{item.message}</span>
-                            <em>{item.ctaLabel} →</em>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
                   <div className="gh-sidebar-card glass-card gh-cert-card">
                     <p className="gh-stats-title">Master Certificate</p>
                     {certificateUnlocked ? (
@@ -1479,74 +1187,67 @@ export default function GrowthHubPage() {
                     </div>
                   )}
 
+                  <div className="gh-sidebar-card glass-card gh-impact-box">
+                    <p className="gh-stats-title">Impact Log</p>
+                    <p className="gh-sidebar-body">
+                      {alumniStatus
+                        ? "You've reached Mastery, but the market is evolving. Log your latest win to maintain your Authority Score."
+                        : "Think about your week. What's one thing you're proud of? Tell us what you did, the numbers involved, and the final result. We'll store this in your Archive to help you prove your value later."}
+                    </p>
+                    <div className="gh-impact-form">
+                      <label className="gh-impact-label" htmlFor="gh-impact-action">The Action</label>
+                      <textarea
+                        id="gh-impact-action"
+                        className="gh-impact-input"
+                        value={impactAction}
+                        onChange={(event) => setImpactAction(event.target.value)}
+                        placeholder="What did you complete or lead this week?"
+                      />
+                      <label className="gh-impact-label" htmlFor="gh-impact-proof">The Proof</label>
+                      <textarea
+                        id="gh-impact-proof"
+                        className="gh-impact-input"
+                        value={impactProof}
+                        onChange={(event) => setImpactProof(event.target.value)}
+                        placeholder="How many people helped? Time or money saved? Metrics?"
+                      />
+                      <label className="gh-impact-label" htmlFor="gh-impact-result">The Result</label>
+                      <textarea
+                        id="gh-impact-result"
+                        className="gh-impact-input"
+                        value={impactResult}
+                        onChange={(event) => setImpactResult(event.target.value)}
+                        placeholder="What was the final positive outcome?"
+                      />
+                      <button className="gh-impact-save" onClick={saveImpactLogEntry}>
+                        Save to Impact Log
+                      </button>
+                      {impactMessage && <p className="gh-impact-message">{impactMessage}</p>}
+                    </div>
+
+                    <div className="gh-impact-preview">
+                      <p className="gh-impact-preview-label">Recent Wins</p>
+                      {impactEntries.length === 0 ? (
+                        <p className="gh-sidebar-body gh-sidebar-body--spaced">
+                          No wins logged yet.
+                        </p>
+                      ) : (
+                        impactEntries.slice(0, 2).map((entry) => (
+                          <div key={entry.id} className="gh-impact-entry">
+                            <p className="gh-impact-entry-title">{entry.action}</p>
+                            <p className="gh-impact-entry-text">{entry.proof}</p>
+                            <p className="gh-impact-entry-text">{entry.result}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 </motion.aside>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </main>
-
-      {/* ── ACTION FEED DRAWER ── */}
-      {notifOpen && (
-        <>
-          <div
-            className="gh-feed-backdrop"
-            onClick={() => setNotifOpen(false)}
-            aria-hidden="true"
-          />
-          <aside className="gh-feed-drawer" role="dialog" aria-modal="true" aria-label="Action Feed">
-            <div className="gh-feed-header">
-              <div className="gh-feed-header-left">
-                <span className="gh-feed-title">Action Feed</span>
-                {unreadCount > 0 && (
-                  <span className="gh-feed-unread-badge">{unreadCount} new</span>
-                )}
-              </div>
-              <div className="gh-feed-header-right">
-                {unreadCount > 0 && (
-                  <button
-                    type="button"
-                    className="gh-feed-mark-all"
-                    onClick={() => void markNotificationsRead("mark-all-read")}
-                  >
-                    Mark all read
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="gh-feed-close"
-                  onClick={() => setNotifOpen(false)}
-                  aria-label="Close action feed"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-            <div className="gh-feed-list">
-              {notifications.length === 0 ? (
-                <div className="gh-feed-empty">
-                  <p>No activity yet.</p>
-                  <p>Complete sessions and earn IP to see your coaching updates here.</p>
-                </div>
-              ) : (
-                notifications.slice(0, 20).map((item) => (
-                  <NotificationItem
-                    key={item.id}
-                    item={item}
-                    onClick={() => {
-                      if (!item.read) {
-                        void markNotificationsRead("mark-read", item.id);
-                      }
-                      setNotifOpen(false);
-                      if (item.ctaHref) router.push(item.ctaHref);
-                    }}
-                  />
-                ))
-              )}
-            </div>
-          </aside>
-        </>
-      )}
 
       {/* ── FOCUS MODAL ── */}
       {focusModal && (
@@ -1555,17 +1256,16 @@ export default function GrowthHubPage() {
 
       {levelUpModal && (
         <div className="gh-levelup-overlay" onClick={() => setLevelUpModal(null)}>
-          <div className="gh-levelup-modal gh-levelup-modal--celebration" onClick={(event) => event.stopPropagation()}>
-            <p className="gh-levelup-label">RANK ACHIEVED</p>
+          <div className="gh-levelup-modal" onClick={(event) => event.stopPropagation()}>
+            <p className="gh-levelup-label">Level Unlocked</p>
             <h3 className="gh-levelup-title">{levelUpModal.level}</h3>
-            <p className="gh-levelup-sub">New perks unlocked, including executive-level interview scenarios.</p>
-            <p className="gh-levelup-sub">IP Earned: +500 bonus IP for the promotion.</p>
+            <p className="gh-levelup-sub">Professional Title: {levelUpModal.title}</p>
             <button
               type="button"
               className="gh-levelup-btn"
               onClick={() => setLevelUpModal(null)}
             >
-              View My New Career Roadmap
+              Continue
             </button>
           </div>
         </div>

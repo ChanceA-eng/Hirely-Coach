@@ -2,16 +2,24 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function SmartBrand({ className }: { className?: string }) {
   const { isSignedIn } = useAuth();
+  const pathname = usePathname();
   const router = useRouter();
   const [href, setHref] = useState("/");
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const isFoundationRoute = pathname?.startsWith("/foundation") ?? false;
+
   useEffect(() => {
+    if (isFoundationRoute) {
+      setHref("/foundation/home");
+      return;
+    }
+
     if (isSignedIn) {
       setHref("/growthhub");
       return;
@@ -28,7 +36,7 @@ export default function SmartBrand({ className }: { className?: string }) {
     } catch {
       // fallback to "/"
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, isFoundationRoute]);
 
   // ── Secret Handshake: double-click logo → admin ────────────────────────
   function handleClick(e: React.MouseEvent) {
@@ -49,7 +57,7 @@ export default function SmartBrand({ className }: { className?: string }) {
 
   return (
     <a href={href} className={className} onClick={handleClick} style={{ cursor: "pointer" }}>
-      Hirely Coach
+      {isFoundationRoute ? "Hirely Foundation" : "Hirely Coach"}
     </a>
   );
 }

@@ -1,0 +1,744 @@
+[
+  {
+    "letter": "A",
+    "phonetic": "a",
+    "letter_audio": "/audio/slot_a_short.mp3",
+    "example_word": "Apple",
+    "example_phonetic": "apo",
+    "example_audio": "/audio/word_apple.mp3",
+    "translation": "Tofaa",
+    "examples": [
+      {
+        "word": "Apple",
+        "phonetic": "apo",
+        "audio": "/audio/word_apple.mp3",
+        "translation": "Tofaa"
+      },
+      {
+        "word": "Cat",
+        "phonetic": "kat",
+        "audio": "/audio/word_cat.mp3",
+        "translation": "Paka"
+      },
+      {
+        "word": "Father",
+        "phonetic": "faza",
+        "audio": "/audio/word_father.mp3",
+        "translation": "Baba"
+      }
+    ]
+  },
+  {
+    "letter": "B",
+    "phonetic": "bi",
+    "letter_audio": "/audio/letter_b.mp3",
+    "example_word": "Book",
+    "example_phonetic": "buk",
+    "example_audio": "/audio/word_book.mp3",
+    "translation": "Kitabu",
+    "examples": [
+      {
+        "word": "Book",
+        "phonetic": "buk",
+        "audio": "/audio/word_book.mp3",
+        "translation": "Kitabu"
+      },
+      {
+        "word": "Ball",
+        "phonetic": "bol",
+        "audio": "/audio/word_ball.mp3",
+        "translation": "Mpira"
+      },
+      {
+        "word": "Banana",
+        "phonetic": "banana",
+        "audio": "/audio/word_banana.mp3",
+        "translation": "Ndizi"
+      }
+    ]
+  },
+  {
+    "letter": "C",
+    "phonetic": "k",
+    "letter_audio": "/audio/slot_c_k.mp3",
+    "example_word": "Cup",
+    "example_phonetic": "kap",
+    "example_audio": "/audio/word_cup.mp3",
+    "translation": "Kikombe",
+    "examples": [
+      {
+        "word": "Cup",
+        "phonetic": "kap",
+        "audio": "/audio/word_cup.mp3",
+        "translation": "Kikombe"
+      },
+      {
+        "word": "Car",
+        "phonetic": "kar",
+        "audio": "/audio/word_car.mp3",
+        "translation": "Gari"
+      }
+    ]
+  },
+  {
+    "letter": "D",
+    "phonetic": "di",
+    "letter_audio": "/audio/letter_d.mp3",
+    "example_word": "Door",
+    "example_phonetic": "doar",
+    "example_audio": "/audio/word_door.mp3",
+    "translation": "Mlango",
+    "examples": [
+      {
+        "word": "Door",
+        "phonetic": "doar",
+        "audio": "/audio/word_door.mp3",
+        "translation": "Mlango"
+      },
+      {
+        "word": "Duck",
+        "phonetic": "dauk",
+        "audio": "/audio/word_duck.mp3",
+        "translation": "Bata"
+      },
+      {
+        "word": "Dog",
+        "phonetic": "dog",
+        "audio": "/audio/word_dog.mp3",
+        "translation": "Mbwa"
+      }
+    ]
+  },
+  {
+    "letter": "E",
+    "phonetic": "i",
+    "letter_audio": "/audio/letter_e.mp3",
+    "example_word": "Elephant",
+    "example_phonetic": "elefant",
+    "example_audio": "/audio/word_elephant.mp3",
+    "translation": "Tembo",
+    "examples": [
+      {
+        "word": "Elephant",
+        "phonetic": "elefant",
+        "audio": "/audio/word_elephant.mp3",
+        "translation": "Tembo"
+      },
+      {
+        "word": "Egg",
+        "phonetic": "eg",
+        "audio": "/audio/word_egg.mp3",
+        "translation": "Yai"
+      },
+      {
+        "word": "Ear",
+        "phonetic": "iar",
+        "audio": "/audio/word_ear.mp3",
+        "translation": "Sikio"
+      }
+    ]
+  },
+  {
+    "letter": "F",
+    "phonetic": "ef",
+    "letter_audio": "/audio/letter_f.mp3",
+    "example_word": "Flower",
+    "example_phonetic": "flawa",
+    "example_audio": "/audio/word_flower.mp3",
+    "translation": "Ua",
+    "examples": [
+      {
+        "word": "Flower",
+        "phonetic": "flawa",
+        "audio": "/audio/word_flower.mp3",
+        "translation": "Ua"
+      },
+      {
+        "word": "Fan",
+        "phonetic": "fen",
+        "audio": "/audio/word_fan.mp3",
+        "translation": "Feni"
+      }
+    ]
+  },
+  {
+    "letter": "G",
+    "phonetic": "ji",
+    "letter_audio": "/audio/letter_g.mp3",
+    "example_word": "Grapes",
+    "example_phonetic": "grepsi",
+    "example_audio": "/audio/word_grapes.mp3",
+    "translation": "Mzabibu",
+    "examples": [
+      {
+        "word": "Grapes",
+        "phonetic": "grepsi",
+        "audio": "/audio/word_grapes.mp3",
+        "translation": "Mzabibu"
+      },
+      {
+        "word": "Goat",
+        "phonetic": "gout",
+        "audio": "/audio/word_goat.mp3",
+        "translation": "Mbuzi"
+      },
+      {
+        "word": "Gift",
+        "phonetic": "gift",
+        "audio": "/audio/word_gift.mp3",
+        "translation": "Zawadi"
+      }
+    ]
+  },
+  {
+    "letter": "H",
+    "phonetic": "eich",
+    "letter_audio": "/audio/letter_h.mp3",
+    "example_word": "Hat",
+    "example_phonetic": "hat",
+    "example_audio": "/audio/word_hat.mp3",
+    "translation": "Kofia",
+    "examples": [
+      {
+        "word": "Hat",
+        "phonetic": "hat",
+        "audio": "/audio/word_hat.mp3",
+        "translation": "Kofia"
+      },
+      {
+        "word": "House",
+        "phonetic": "hauz",
+        "audio": "/audio/word_house.mp3",
+        "translation": "Nyumba"
+      },
+      {
+        "word": "Horse",
+        "phonetic": "horsi",
+        "audio": "/audio/word_horse.mp3",
+        "translation": "Farasi"
+      }
+    ]
+  },
+  {
+    "letter": "I",
+    "phonetic": "ai",
+    "letter_audio": "/audio/letter_i.mp3",
+    "example_word": "Ice cream",
+    "example_phonetic": "ais krim",
+    "example_audio": "/audio/word_ice_cream.mp3",
+    "translation": "Aisikrimu",
+    "examples": [
+      {
+        "word": "Ice cream",
+        "phonetic": "ais krim",
+        "audio": "/audio/word_ice_cream.mp3",
+        "translation": "Aisikrimu"
+      },
+      {
+        "word": "Insect",
+        "phonetic": "insekt",
+        "audio": "/audio/word_insect.mp3",
+        "translation": "Kidudu"
+      },
+      {
+        "word": "Igloo",
+        "phonetic": "iglu",
+        "audio": "/audio/word_igloo.mp3",
+        "translation": "Nyumba ya barafu"
+      }
+    ]
+  },
+  {
+    "letter": "J",
+    "phonetic": "jei",
+    "letter_audio": "/audio/letter_j.mp3",
+    "example_word": "Juice",
+    "example_phonetic": "juis",
+    "example_audio": "/audio/word_juice.mp3",
+    "translation": "Juisi",
+    "examples": [
+      {
+        "word": "Juice",
+        "phonetic": "juis",
+        "audio": "/audio/word_juice.mp3",
+        "translation": "Juisi"
+      },
+      {
+        "word": "Jam",
+        "phonetic": "jam",
+        "audio": "/audio/word_jam.mp3",
+        "translation": "Matunda majimaji"
+      },
+      {
+        "word": "Jacket",
+        "phonetic": "jaketi",
+        "audio": "/audio/word_jacket.mp3",
+        "translation": "Jaketi"
+      }
+    ]
+  },
+  {
+    "letter": "K",
+    "phonetic": "kei",
+    "letter_audio": "/audio/letter_k.mp3",
+    "example_word": "Kite",
+    "example_phonetic": "kait",
+    "example_audio": "/audio/word_kite.mp3",
+    "translation": "Kishada",
+    "examples": [
+      {
+        "word": "Kite",
+        "phonetic": "kait",
+        "audio": "/audio/word_kite.mp3",
+        "translation": "Kishada"
+      },
+      {
+        "word": "Keys",
+        "phonetic": "kiiz",
+        "audio": "/audio/word_keys.mp3",
+        "translation": "Funguo"
+      },
+      {
+        "word": "Kangaroo",
+        "phonetic": "kangaruu",
+        "audio": "/audio/word_kangaroo.mp3",
+        "translation": "Kangaruu"
+      }
+    ]
+  },
+  {
+    "letter": "L",
+    "phonetic": "el",
+    "letter_audio": "/audio/letter_l.mp3",
+    "example_word": "Lion",
+    "example_phonetic": "laion",
+    "example_audio": "/audio/word_lion.mp3",
+    "translation": "Simba",
+    "examples": [
+      {
+        "word": "Lion",
+        "phonetic": "laion",
+        "audio": "/audio/word_lion.mp3",
+        "translation": "Simba"
+      },
+      {
+        "word": "Lamp",
+        "phonetic": "lamp",
+        "audio": "/audio/word_lamp.mp3",
+        "translation": "Taa"
+      },
+      {
+        "word": "Leaf",
+        "phonetic": "lif",
+        "audio": "/audio/word_leaf.mp3",
+        "translation": "Jani"
+      }
+    ]
+  },
+  {
+    "letter": "M",
+    "phonetic": "em",
+    "letter_audio": "/audio/letter_m.mp3",
+    "example_word": "Moon",
+    "example_phonetic": "mun",
+    "example_audio": "/audio/word_moon.mp3",
+    "translation": "Mwezi",
+    "examples": [
+      {
+        "word": "Moon",
+        "phonetic": "mun",
+        "audio": "/audio/word_moon.mp3",
+        "translation": "Mwezi"
+      },
+      {
+        "word": "Monkey",
+        "phonetic": "manki",
+        "audio": "/audio/word_monkey.mp3",
+        "translation": "Tumbili"
+      },
+      {
+        "word": "Milk",
+        "phonetic": "milk",
+        "audio": "/audio/word_milk.mp3",
+        "translation": "Maziwa"
+      }
+    ]
+  },
+  {
+    "letter": "N",
+    "phonetic": "en",
+    "letter_audio": "/audio/letter_n.mp3",
+    "example_word": "Nose",
+    "example_phonetic": "noz",
+    "example_audio": "/audio/word_nose.mp3",
+    "translation": "Pua",
+    "examples": [
+      {
+        "word": "Nose",
+        "phonetic": "noz",
+        "audio": "/audio/word_nose.mp3",
+        "translation": "Pua"
+      },
+      {
+        "word": "Net",
+        "phonetic": "net",
+        "audio": "/audio/word_net.mp3",
+        "translation": "Nyavu"
+      },
+      {
+        "word": "Nest",
+        "phonetic": "nest",
+        "audio": "/audio/word_nest.mp3",
+        "translation": "Kiota"
+      }
+    ]
+  },
+  {
+    "letter": "O",
+    "phonetic": "ou",
+    "letter_audio": "/audio/letter_o.mp3",
+    "example_word": "Orange",
+    "example_phonetic": "orenj",
+    "example_audio": "/audio/word_orange.mp3",
+    "translation": "Chungwa",
+    "examples": [
+      {
+        "word": "Orange",
+        "phonetic": "orenj",
+        "audio": "/audio/word_orange.mp3",
+        "translation": "Chungwa"
+      },
+      {
+        "word": "Owl",
+        "phonetic": "auwl",
+        "audio": "/audio/word_owl.mp3",
+        "translation": "Bundi"
+      },
+      {
+        "word": "Octopus",
+        "phonetic": "oktopas",
+        "audio": "/audio/word_octopus.mp3",
+        "translation": "Pweza"
+      }
+    ]
+  },
+  {
+    "letter": "P",
+    "phonetic": "pi",
+    "letter_audio": "/audio/letter_p.mp3",
+    "example_word": "Pencil",
+    "example_phonetic": "pensol",
+    "example_audio": "/audio/word_pencil.mp3",
+    "translation": "Penseli",
+    "examples": [
+      {
+        "word": "Pencil",
+        "phonetic": "pensol",
+        "audio": "/audio/word_pencil.mp3",
+        "translation": "Penseli"
+      },
+      {
+        "word": "Pig",
+        "phonetic": "pig",
+        "audio": "/audio/word_pig.mp3",
+        "translation": "Nguruwe"
+      },
+      {
+        "word": "Pizza",
+        "phonetic": "pitsa",
+        "audio": "/audio/word_pizza.mp3",
+        "translation": "Pizza"
+      }
+    ]
+  },
+  {
+    "letter": "Q",
+    "phonetic": "kiu",
+    "letter_audio": "/audio/letter_q.mp3",
+    "example_word": "Queen",
+    "example_phonetic": "kuin",
+    "example_audio": "/audio/word_queen.mp3",
+    "translation": "Malkia",
+    "examples": [
+      {
+        "word": "Queen",
+        "phonetic": "kuin",
+        "audio": "/audio/word_queen.mp3",
+        "translation": "Malkia"
+      },
+      {
+        "word": "Quilt",
+        "phonetic": "kuilt",
+        "audio": "/audio/word_quilt.mp3",
+        "translation": "Shuka ya kushonwa"
+      },
+      {
+        "word": "Quail",
+        "phonetic": "kweil",
+        "audio": "/audio/word_quail.mp3",
+        "translation": "Kware"
+      }
+    ]
+  },
+  {
+    "letter": "R",
+    "phonetic": "ar",
+    "letter_audio": "/audio/letter_r.mp3",
+    "example_word": "Rabbit",
+    "example_phonetic": "rabit",
+    "example_audio": "/audio/word_rabbit.mp3",
+    "translation": "Sungura",
+    "examples": [
+      {
+        "word": "Rabbit",
+        "phonetic": "rabit",
+        "audio": "/audio/word_rabbit.mp3",
+        "translation": "Sungura"
+      },
+      {
+        "word": "Rose",
+        "phonetic": "rouz",
+        "audio": "/audio/word_rose.mp3",
+        "translation": "Ua la roze"
+      },
+      {
+        "word": "Rainbow",
+        "phonetic": "reinbow",
+        "audio": "/audio/word_rainbow.mp3",
+        "translation": "Upinde wa mvua"
+      }
+    ]
+  },
+  {
+    "letter": "S",
+    "phonetic": "es",
+    "letter_audio": "/audio/letter_s.mp3",
+    "example_word": "Sun",
+    "example_phonetic": "san",
+    "example_audio": "/audio/word_sun.mp3",
+    "translation": "Jua",
+    "examples": [
+      {
+        "word": "Sun",
+        "phonetic": "san",
+        "audio": "/audio/word_sun.mp3",
+        "translation": "Jua"
+      },
+      {
+        "word": "Star",
+        "phonetic": "star",
+        "audio": "/audio/word_star.mp3",
+        "translation": "Nyota"
+      },
+      {
+        "word": "Snake",
+        "phonetic": "snek",
+        "audio": "/audio/word_snake.mp3",
+        "translation": "Nyoka"
+      }
+    ]
+  },
+  {
+    "letter": "T",
+    "phonetic": "ti",
+    "letter_audio": "/audio/letter_t.mp3",
+    "example_word": "Tree",
+    "example_phonetic": "trii",
+    "example_audio": "/audio/word_tree.mp3",
+    "translation": "Mti",
+    "examples": [
+      {
+        "word": "Tree",
+        "phonetic": "trii",
+        "audio": "/audio/word_tree.mp3",
+        "translation": "Mti"
+      },
+      {
+        "word": "Tiger",
+        "phonetic": "taiga",
+        "audio": "/audio/word_tiger.mp3",
+        "translation": "Chui"
+      },
+      {
+        "word": "Train",
+        "phonetic": "trein",
+        "audio": "/audio/word_train.mp3",
+        "translation": "Treni"
+      }
+    ]
+  },
+  {
+    "letter": "U",
+    "phonetic": "yu",
+    "letter_audio": "/audio/letter_u.mp3",
+    "example_word": "Umbrella",
+    "example_phonetic": "ambrela",
+    "example_audio": "/audio/word_umbrella.mp3",
+    "translation": "Mwavuli",
+    "examples": [
+      {
+        "word": "Umbrella",
+        "phonetic": "ambrela",
+        "audio": "/audio/word_umbrella.mp3",
+        "translation": "Mwavuli"
+      },
+      {
+        "word": "Unicorn",
+        "phonetic": "yunikorn",
+        "audio": "/audio/word_unicorn.mp3",
+        "translation": "Pembe moja"
+      },
+      {
+        "word": "Uniform",
+        "phonetic": "yuniform",
+        "audio": "/audio/word_uniform.mp3",
+        "translation": "Sare"
+      }
+    ]
+  },
+  {
+    "letter": "V",
+    "phonetic": "vi",
+    "letter_audio": "/audio/letter_v.mp3",
+    "example_word": "Van",
+    "example_phonetic": "veni",
+    "example_audio": "/audio/word_van.mp3",
+    "translation": "Veni",
+    "examples": [
+      {
+        "word": "Van",
+        "phonetic": "veni",
+        "audio": "/audio/word_van.mp3",
+        "translation": "Veni"
+      },
+      {
+        "word": "Violin",
+        "phonetic": "vaiolin",
+        "audio": "/audio/word_violin.mp3",
+        "translation": "Violin"
+      },
+      {
+        "word": "Vase",
+        "phonetic": "veis",
+        "audio": "/audio/word_vase.mp3",
+        "translation": "Mtungi"
+      }
+    ]
+  },
+  {
+    "letter": "W",
+    "phonetic": "dabo yu",
+    "letter_audio": "/audio/letter_w.mp3",
+    "example_word": "Water",
+    "example_phonetic": "warae",
+    "example_audio": "/audio/word_water.mp3",
+    "translation": "Maji",
+    "examples": [
+      {
+        "word": "Water",
+        "phonetic": "warae",
+        "audio": "/audio/word_water.mp3",
+        "translation": "Maji"
+      },
+      {
+        "word": "Whale",
+        "phonetic": "weol",
+        "audio": "/audio/word_whale.mp3",
+        "translation": "Nyangumi"
+      },
+      {
+        "word": "Window",
+        "phonetic": "windou",
+        "audio": "/audio/word_window.mp3",
+        "translation": "Dirisha"
+      }
+    ]
+  },
+  {
+    "letter": "X",
+    "phonetic": "eks",
+    "letter_audio": "/audio/letter_x.mp3",
+    "example_word": "Xylophone",
+    "example_phonetic": "ksailofon",
+    "example_audio": "/audio/word_xylophone.mp3",
+    "translation": "Marimba",
+    "examples": [
+      {
+        "word": "Xylophone",
+        "phonetic": "ksailofon",
+        "audio": "/audio/word_xylophone.mp3",
+        "translation": "Marimba"
+      },
+      {
+        "word": "X-ray",
+        "phonetic": "eksrei",
+        "audio": "/audio/word_x_ray.mp3",
+        "translation": "Eksrei"
+      },
+      {
+        "word": "Box",
+        "phonetic": "boks",
+        "audio": "/audio/word_box.mp3",
+        "translation": "Sanduku"
+      }
+    ]
+  },
+  {
+    "letter": "Y",
+    "phonetic": "wai",
+    "letter_audio": "/audio/letter_y.mp3",
+    "example_word": "Yellow",
+    "example_phonetic": "yelou",
+    "example_audio": "/audio/word_yellow.mp3",
+    "translation": "Njano",
+    "examples": [
+      {
+        "word": "Yellow",
+        "phonetic": "yelou",
+        "audio": "/audio/word_yellow.mp3",
+        "translation": "Njano"
+      },
+      {
+        "word": "Yacht",
+        "phonetic": "yach",
+        "audio": "/audio/word_yacht.mp3",
+        "translation": "Boti ya kibinafsi"
+      },
+      {
+        "word": "Yoyo",
+        "phonetic": "yoyo",
+        "audio": "/audio/word_yoyo.mp3",
+        "translation": "Yoyo"
+      }
+    ]
+  },
+  {
+    "letter": "Z",
+    "phonetic": "zi",
+    "letter_audio": "/audio/letter_z.mp3",
+    "example_word": "Zebra",
+    "example_phonetic": "zibra",
+    "example_audio": "/audio/word_zebra.mp3",
+    "translation": "Punda milia",
+    "examples": [
+      {
+        "word": "Zebra",
+        "phonetic": "zibra",
+        "audio": "/audio/word_zebra.mp3",
+        "translation": "Punda milia"
+      },
+      {
+        "word": "Zoo",
+        "phonetic": "zuu",
+        "audio": "/audio/word_zoo.mp3",
+        "translation": "Mbuga"
+      },
+      {
+        "word": "Zipper",
+        "phonetic": "zipar",
+        "audio": "/audio/word_zipper.mp3",
+        "translation": "Zipu"
+      }
+    ]
+  }
+]

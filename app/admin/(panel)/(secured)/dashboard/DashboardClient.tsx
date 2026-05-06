@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import mammoth from "mammoth";
 import CoachTooltip from "@/app/components/CoachTooltip";
 import JobsClient from "@/app/admin/jobs/JobsClient";
+import FoundationAdminTab from "./FoundationAdminTab";
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
 
@@ -19,7 +20,7 @@ type AdminUser = {
 };
 
 type DbStats = { total: number } | null;
-type Tab = "overview" | "users" | "refinery" | "advanced" | "communications";
+type Tab = "overview" | "users" | "refinery" | "advanced" | "foundation";
 type StarrLabTierConfig = {
   tier: number;
   title: string;
@@ -97,7 +98,8 @@ type UserAuditResponse = {
 };
 type LeaderboardRow = {
   userId: string;
-  name: string;  email: string;
+  name: string;
+  email: string;
   score: number;
   updatedAt: number;
   fileName: string;
@@ -131,17 +133,6 @@ type PdfJsLib = {
   getDocument: (source: { data: ArrayBuffer }) => { promise: Promise<PdfDocument> };
 };
 type PdfJsWindow = Window & typeof globalThis & { pdfjsLib?: PdfJsLib; pdfjs?: PdfJsLib };
-
-type CommEvent = {
-  id: string;
-  createdAt: number;
-  userId: string | null;
-  email: string | null;
-  featureTag: "Optimizer" | "Scorecard" | "Impact Log" | "Portfolio" | "Simulation" | "System";
-  intensityTier: "Casual" | "Professional" | "Surgical" | null;
-  message: string;
-  detail?: string;
-};
 
 /* ─── Static data ────────────────────────────────────────────────────── */
 
@@ -186,6 +177,22 @@ function fromLineInput(value: string) {
     .filter(Boolean);
 }
 
+function communicationHealth(metadata: Record<string, unknown>): "Imepokelewa" | "Imezuiwa" | "Imeshindikana" {
+  const deliveryState = String(metadata.foundationDeliveryStatus ?? metadata.notificationStatus ?? "").toLowerCase();
+  if (deliveryState === "failed" || deliveryState === "error") return "Imeshindikana";
+  if (deliveryState === "blocked") return "Imezuiwa";
+
+  const hasToken = Boolean(
+    metadata.pushToken ||
+    metadata.webPushToken ||
+    metadata.expoPushToken ||
+    metadata.foundationPushToken ||
+    metadata.webPushSubscription
+  );
+
+  return hasToken ? "Imepokelewa" : "Imezuiwa";
+}
+
 /* ─── Sub-components ─────────────────────────────────────────────────── */
 
 function GrowthChart({ data }: { data: { date: string; count: number }[] }) {
@@ -219,6 +226,7 @@ function GrowthChart({ data }: { data: { date: string; count: number }[] }) {
             />
             {i % 7 === 0 && (
               <text
+                          "Communication Health",
                 x={x + barW / 2}
                 y={H + 14}
                 fontSize={7}
@@ -256,6 +264,7 @@ export default function DashboardClient() {
   const [forcedTier, setForcedTier] = useState<number | "">("");
   const [forcedCourseLevel, setForcedCourseLevel] = useState<number | "">("");
   const [promotionSupportUnlock, setPromotionSupportUnlock] = useState(false);
+  const [foundationUnlockedModules, setFoundationUnlockedModules] = useState<number[]>([]);
   const [impactPointsDelta, setImpactPointsDelta] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
@@ -276,20 +285,6 @@ export default function DashboardClient() {
   const [loadingRawLogs, setLoadingRawLogs] = useState(false);
   const [selectedRawLogId, setSelectedRawLogId] = useState("");
 
-  // Communications tab state
-  const [commEvents, setCommEvents] = useState<CommEvent[]>([]);
-  const [loadingComm, setLoadingComm] = useState(false);
-  const [commSearch, setCommSearch] = useState("");
-  const [commFeatureFilter, setCommFeatureFilter] = useState<CommEvent["featureTag"] | "">("");
-  const [commTierFilter, setCommTierFilter] = useState<"Casual" | "Professional" | "Surgical" | "">("");
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [superAdminChecked, setSuperAdminChecked] = useState(false);
-
-  // Admin password confirmation state
-  const [adminPwPrompt, setAdminPwPrompt] = useState<{ action: string; onConfirm: () => void } | null>(null);
-  const [adminPwInput, setAdminPwInput] = useState("");
-  const [adminPwError, setAdminPwError] = useState("");
-
   useEffect(() => {
     Promise.all([
       fetch("/api/admin/users").then((r) => r.json()),
@@ -304,89 +299,8 @@ export default function DashboardClient() {
       .finally(() => setLoadingUsers(false));
   }, []);
 
-  async function checkSuperAdmin() {
+  async function loadHcConfig() {
     try {
-      const res = await fetch("/api/admin/users");
-      if (res.ok) {
-        // SuperAdmin check: only the configured admin can see communications
-        // We use a secondary env-based password stored in runtime-config
-        const pwRes = await fetch("/api/runtime-config");
-        if (pwRes.ok) {
-          const cfg = await pwRes.json() as { superAdminEnabled?: boolean };
-          setIsSuperAdmin(Boolean(cfg.superAdminEnabled));
-        } else {
-          setIsSuperAdmin(true); // fallback: if runtime-config not available, grant access to admin
-        }
-      }
-    } catch {
-      setIsSuperAdmin(false);
-    } finally {
-      setSuperAdminChecked(true);
-    }
-  }
-
-  async function loadCommEvents() {
-    setLoadingComm(true);
-    try {
-      const res = await fetch("/api/admin/raw-audit-logs");
-      const data = (await res.json()) as { logs?: RawAuditLog[] };
-      const logs = Array.isArray(data.logs) ? data.logs : [];
-
-      // Map raw audit logs to CommEvents
-      const events: CommEvent[] = logs.map((log): CommEvent => ({
-        id: log.id,
-        createdAt: log.createdAt,
-        userId: log.userId,
-        email: log.email,
-        featureTag: "Scorecard",
-        intensityTier: null,
-        message: `Resume audit completed — Score: ${log.normalizedReport?.overallScore ?? "–"}`,
-        detail: log.promptPreview,
-      }));
-
-      // Merge with user impact ledger events from users
-      const userEvents: CommEvent[] = users.flatMap((u) => {
-        const ledger = (u.publicMetadata?.impactLedger as Array<{ id: string; createdAt: number; action: string; proof: string; result: string }> ?? []);
-        return ledger.slice(0, 5).map((entry): CommEvent => ({
-          id: `impact-${entry.id}`,
-          createdAt: entry.createdAt,
-          userId: u.id,
-          email: u.email,
-          featureTag: "Impact Log",
-          intensityTier: null,
-          message: `Impact logged: ${entry.action}`,
-          detail: entry.result,
-        }));
-      });
-
-      const all = [...events, ...userEvents].sort((a, b) => b.createdAt - a.createdAt).slice(0, 200);
-      setCommEvents(all);
-    } catch {
-      setCommEvents([]);
-    } finally {
-      setLoadingComm(false);
-    }
-  }
-
-  function requireAdminPassword(action: string, onConfirm: () => void) {
-    setAdminPwInput("");
-    setAdminPwError("");
-    setAdminPwPrompt({ action, onConfirm });
-  }
-
-  function confirmAdminPassword() {
-    const ADMIN_PW = process.env.NEXT_PUBLIC_ADMIN_ACTION_PASSWORD || "hc-admin-2026";
-    if (adminPwInput === ADMIN_PW) {
-      adminPwPrompt?.onConfirm();
-      setAdminPwPrompt(null);
-      setAdminPwInput("");
-      setAdminPwError("");
-    } else {
-      setAdminPwError("Incorrect admin password. Access denied.");
-    }
-  }
-
-  async function loadHcConfig() {    try {
       const res = await fetch("/api/admin/hc-config");
       const data = (await res.json()) as HcConfig | { error?: string };
       if (!res.ok) throw new Error((data as { error?: string }).error || "Failed to load config");
@@ -492,11 +406,17 @@ export default function DashboardClient() {
       forcedTier?: number | null;
       forcedCourseLevel?: number | null;
       promotionSupportUnlock?: boolean;
+      foundationUnlockedModules?: number[];
     };
     setMasterUnlock(Boolean(override.masterUnlock));
     setForcedTier(typeof override.forcedTier === "number" ? override.forcedTier : "");
     setForcedCourseLevel(typeof override.forcedCourseLevel === "number" ? override.forcedCourseLevel : "");
     setPromotionSupportUnlock(Boolean(override.promotionSupportUnlock));
+    setFoundationUnlockedModules(
+      Array.isArray(override.foundationUnlockedModules)
+        ? override.foundationUnlockedModules.map(Number).filter((m) => Number.isFinite(m) && m >= 1 && m <= 12)
+        : []
+    );
     setImpactPointsDelta(Number(u.publicMetadata?.adminImpactPointsDelta ?? 0));
     setSaveMsg("");
   }
@@ -583,6 +503,7 @@ export default function DashboardClient() {
           forcedTier: forcedTier === "" ? null : forcedTier,
           forcedCourseLevel: forcedCourseLevel === "" ? null : forcedCourseLevel,
           promotionSupportUnlock,
+          foundationUnlockedModules,
           impactPointsDelta,
         }),
       });
@@ -630,6 +551,35 @@ export default function DashboardClient() {
       setSaveMsg(action === "save" ? "Snapshot captured." : "Snapshot restored.");
     } catch {
       setSaveMsg(action === "save" ? "Snapshot failed." : "Restore failed.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function resetUserOnboarding() {
+    if (!editUser) return;
+    setSaving(true);
+    setSaveMsg("");
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetUserId: editUser.id,
+          resetOnboarding: true,
+        }),
+      });
+      const data = (await res.json()) as { ok?: boolean; publicMetadata?: Record<string, unknown> };
+      if (!res.ok || !data.ok) throw new Error();
+      setUsers((prev) =>
+        prev.map((u) => (u.id === editUser.id ? { ...u, publicMetadata: data.publicMetadata || u.publicMetadata } : u))
+      );
+      if (data.publicMetadata) {
+        openEdit({ ...editUser, publicMetadata: data.publicMetadata });
+      }
+      setSaveMsg("Onboarding reset. The Two Door gate will show again on next login.");
+    } catch {
+      setSaveMsg("Onboarding reset failed.");
     } finally {
       setSaving(false);
     }
@@ -759,11 +709,11 @@ export default function DashboardClient() {
               ),
             },
             {
-              id: "communications",
-              label: "Communications",
+              id: "foundation",
+              label: "Foundation Mode",
               icon: (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
                 </svg>
               ),
             },
@@ -777,10 +727,6 @@ export default function DashboardClient() {
                 void loadHcConfig();
                 void loadLeaderboard();
                 void loadRawLogs();
-              }
-              if (t.id === "communications") {
-                void checkSuperAdmin();
-                void loadCommEvents();
               }
             }}
             style={{
@@ -1009,7 +955,7 @@ export default function DashboardClient() {
                       {filteredUsers.length === 0 ? (
                         <tr>
                           <td
-                            colSpan={6}
+                            colSpan={7}
                             style={{
                               ...S.td,
                               textAlign: "center",
@@ -1040,6 +986,11 @@ export default function DashboardClient() {
                             </td>
                             <td style={{ ...S.td, color: "#94a3b8" }}>
                               {u.email}
+                            </td>
+                            <td style={S.td}>
+                              <span style={{ ...S.levelBadge, borderColor: "rgba(148,163,184,0.3)", color: "#e2e8f0" }}>
+                                {communicationHealth(u.publicMetadata ?? {})}
+                              </span>
                             </td>
                             <td style={S.td}>
                               {u.publicMetadata?.kj ? (
@@ -1235,7 +1186,7 @@ export default function DashboardClient() {
                         type="button"
                         style={S.ghostDangerBtn}
                         disabled={savingConfig}
-                        onClick={() => requireAdminPassword("Clear All Resume Cache", () => void saveGlobalConfig({ clearCache: true }))}
+                        onClick={() => saveGlobalConfig({ clearCache: true })}
                       >
                         Clear All Resume Cache
                       </button>
@@ -1682,225 +1633,27 @@ export default function DashboardClient() {
               </div>
             </motion.div>
           )}
-          {/* ══ COMMUNICATIONS ══════════════════════════════════════════ */}
-          {tab === "communications" && (
+
+          {/* ══ FOUNDATION MODE ══════════════════════════════════════════ */}
+          {tab === "foundation" && (
             <motion.div
-              key="communications"
+              key="foundation"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.22 }}
             >
-              {superAdminChecked && !isSuperAdmin ? (
-                <div style={S.section}>
-                  <div style={{ ...S.emptyState, borderColor: "#dc2626", background: "rgba(220,38,38,0.08)" }}>
-                    <p style={{ color: "#ef4444", fontSize: "0.9rem", margin: 0, fontWeight: 600 }}>
-                      🔒 SuperAdmin Access Required
-                    </p>
-                    <p style={{ color: "#94a3b8", fontSize: "0.82rem", margin: "8px 0 0" }}>
-                      The Communications tab is restricted to the SuperAdmin role. Contact the system owner to enable SuperAdmin access.
-                    </p>
-                  </div>
+              <div style={S.section}>
+                <div style={S.sectionHead}>
+                  <h2 style={S.sectionTitle}>Foundation Mode Admin</h2>
+                  <span style={S.sectionSub}>Lesson editor · Analytics · Health · Video manager · Notifications</span>
                 </div>
-              ) : (
-                <>
-                  <div style={S.section}>
-                    <div style={S.sectionHead}>
-                      <h2 style={S.sectionTitle}>Live Activity Feed</h2>
-                      <span style={S.sectionSub}>Real-time communications generated by user actions</span>
-                    </div>
-
-                    {/* Search & Filter Bar */}
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-                      <input
-                        type="search"
-                        placeholder="Search by User ID or Email…"
-                        value={commSearch}
-                        onChange={(e) => setCommSearch(e.target.value)}
-                        style={{ ...S.searchInput, flex: 1, minWidth: 220 }}
-                      />
-                      <select
-                        value={commFeatureFilter}
-                        onChange={(e) => setCommFeatureFilter(e.target.value as CommEvent["featureTag"] | "")}
-                        style={{ ...S.drawerInput, minWidth: 160 }}
-                      >
-                        <option value="">All Features</option>
-                        <option value="Optimizer">Optimizer</option>
-                        <option value="Scorecard">Scorecard</option>
-                        <option value="Impact Log">Impact Log</option>
-                        <option value="Portfolio">Portfolio</option>
-                        <option value="Simulation">Simulation</option>
-                        <option value="System">System</option>
-                      </select>
-                      <select
-                        value={commTierFilter}
-                        onChange={(e) => setCommTierFilter(e.target.value as "Casual" | "Professional" | "Surgical" | "")}
-                        style={{ ...S.drawerInput, minWidth: 150 }}
-                      >
-                        <option value="">All Intensities</option>
-                        <option value="Casual">Casual</option>
-                        <option value="Professional">Professional</option>
-                        <option value="Surgical">Surgical</option>
-                      </select>
-                      <button
-                        type="button"
-                        style={S.secondaryBtn}
-                        onClick={() => void loadCommEvents()}
-                        disabled={loadingComm}
-                      >
-                        {loadingComm ? "Refreshing…" : "↻ Refresh"}
-                      </button>
-                    </div>
-
-                    {/* Danger actions with admin password guard */}
-                    <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-                      <button
-                        type="button"
-                        style={S.ghostDangerBtn}
-                        onClick={() =>
-                          requireAdminPassword("Purge All Communications", () => {
-                            setCommEvents([]);
-                          })
-                        }
-                      >
-                        Purge All
-                      </button>
-                    </div>
-
-                    {/* Feed */}
-                    {loadingComm ? (
-                      <div style={{ ...S.skeleton, height: 200 }} />
-                    ) : (
-                      (() => {
-                        const filtered = commEvents.filter((e) => {
-                          const q = commSearch.toLowerCase();
-                          const matchesSearch = !q || (e.userId ?? "").toLowerCase().includes(q) || (e.email ?? "").toLowerCase().includes(q);
-                          const matchesFeature = !commFeatureFilter || e.featureTag === commFeatureFilter;
-                          const matchesTier = !commTierFilter || e.intensityTier === commTierFilter;
-                          return matchesSearch && matchesFeature && matchesTier;
-                        });
-
-                        if (!filtered.length) {
-                          return (
-                            <div style={S.emptyState}>
-                              <p style={{ margin: 0, color: "#9ca3af", fontSize: "0.84rem" }}>
-                                No communications match your filters. {commEvents.length === 0 ? "No events recorded yet." : `${commEvents.length} total events hidden by filters.`}
-                              </p>
-                            </div>
-                          );
-                        }
-
-                        return (
-                          <div style={{ display: "grid", gap: 8 }}>
-                            {filtered.map((event) => {
-                              const tagColors: Record<string, string> = {
-                                Optimizer: "#0ea5e9",
-                                Scorecard: "#7c3aed",
-                                "Impact Log": "#10b981",
-                                Portfolio: "#f59e0b",
-                                Simulation: "#ef4444",
-                                System: "#6b7280",
-                              };
-                              const tierColors: Record<string, string> = {
-                                Casual: "#10b981",
-                                Professional: "#f59e0b",
-                                Surgical: "#ef4444",
-                              };
-                              const tagColor = tagColors[event.featureTag] ?? "#6b7280";
-                              const tierColor = event.intensityTier ? (tierColors[event.intensityTier] ?? "#6b7280") : null;
-
-                              return (
-                                <div key={event.id} style={{ ...S.logCard, display: "grid", gridTemplateColumns: "1fr auto", gap: 8, alignItems: "start" }}>
-                                  <div>
-                                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginBottom: 4 }}>
-                                      <span style={{ fontSize: "0.67rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: tagColor, padding: "1px 6px", borderRadius: 3, border: `1px solid ${tagColor}50`, background: `${tagColor}14` }}>
-                                        {event.featureTag}
-                                      </span>
-                                      {tierColor && event.intensityTier && (
-                                        <span style={{ fontSize: "0.67rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: tierColor, padding: "1px 6px", borderRadius: 3, border: `1px solid ${tierColor}50`, background: `${tierColor}14` }}>
-                                          {event.intensityTier}
-                                        </span>
-                                      )}
-                                      <span style={{ fontSize: "0.73rem", color: "#6b7280" }}>
-                                        {event.email || event.userId || "Guest"}
-                                      </span>
-                                    </div>
-                                    <p style={{ margin: 0, fontSize: "0.85rem", color: "#e2e8f0", fontWeight: 500 }}>{event.message}</p>
-                                    {event.detail && (
-                                      <p style={{ margin: "4px 0 0", fontSize: "0.76rem", color: "#9ca3af" }}>{event.detail.slice(0, 120)}{event.detail.length > 120 ? "…" : ""}</p>
-                                    )}
-                                  </div>
-                                  <div style={{ textAlign: "right", flexShrink: 0 }}>
-                                    <p style={{ ...S.logDate, margin: 0 }}>{new Date(event.createdAt).toLocaleString()}</p>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        );
-                      })()
-                    )}
-                  </div>
-                </>
-              )}
+                <FoundationAdminTab />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-
-      {/* ── Admin Password Confirmation Modal ───────────────────────── */}
-      <AnimatePresence>
-        {adminPwPrompt && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setAdminPwPrompt(null)}
-              style={{ ...S.overlay, zIndex: 60 }}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.94 }}
-              transition={{ duration: 0.18 }}
-              style={{
-                position: "fixed",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                zIndex: 70,
-                background: "#0f172a",
-                border: "1px solid rgba(220,38,38,0.4)",
-                borderRadius: 14,
-                padding: 28,
-                width: 360,
-                maxWidth: "90vw",
-                boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
-              }}
-            >
-              <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: "0.95rem", color: "#f8fafc" }}>Admin Confirmation Required</p>
-              <p style={{ margin: "0 0 16px", fontSize: "0.82rem", color: "#94a3b8" }}>
-                Enter admin password to confirm: <strong style={{ color: "#f87171" }}>{adminPwPrompt.action}</strong>
-              </p>
-              <input
-                type="password"
-                value={adminPwInput}
-                onChange={(e) => setAdminPwInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && confirmAdminPassword()}
-                placeholder="Admin password"
-                style={{ ...S.drawerInput, width: "100%", marginBottom: 10 }}
-                autoFocus
-              />
-              {adminPwError && <p style={{ margin: "0 0 10px", fontSize: "0.78rem", color: "#ef4444" }}>{adminPwError}</p>}
-              <div style={{ display: "flex", gap: 10 }}>
-                <button type="button" style={S.ghostDangerBtn} onClick={confirmAdminPassword}>Confirm</button>
-                <button type="button" style={S.secondaryBtn} onClick={() => setAdminPwPrompt(null)}>Cancel</button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       {/* ── Edit User Drawer ─────────────────────────────────────────────── */}
       <AnimatePresence>
@@ -2103,17 +1856,8 @@ export default function DashboardClient() {
                           style={S.drawerInput}
                         >
                           <option value="">Tier jumper</option>
-                          {[
-                            { value: 1, label: "Tier 1 – Novice (Casual)" },
-                            { value: 2, label: "Tier 2 – Apprentice (Casual)" },
-                            { value: 3, label: "Tier 3 – Candidate (Casual)" },
-                            { value: 4, label: "Tier 4 – Professional ⭐" },
-                            { value: 5, label: "Tier 5 – Expert (Surgical)" },
-                            { value: 6, label: "Tier 6 – Executive (Surgical)" },
-                            { value: 7, label: "Tier 7 – Advanced (Surgical)" },
-                            { value: 8, label: "Tier 8 – Master (Surgical)" },
-                          ].map(({ value, label }) => (
-                            <option key={`forced-tier-${value}`} value={value}>{label}</option>
+                          {Array.from({ length: 7 }, (_, index) => index + 1).map((tier) => (
+                            <option key={`forced-tier-${tier}`} value={tier}>Tier {tier}</option>
                           ))}
                         </select>
                         <select
@@ -2136,16 +1880,50 @@ export default function DashboardClient() {
                           placeholder="IP injector delta"
                         />
                       </div>
+                      <div style={{ display: "grid", gap: 8 }}>
+                        <span style={{ fontSize: "0.78rem", color: "#94a3b8", fontWeight: 600 }}>
+                          Foundation module override (testing)
+                        </span>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, minmax(0, 1fr))", gap: 6 }}>
+                          {Array.from({ length: 12 }, (_, index) => index + 1).map((moduleNum) => {
+                            const selected = foundationUnlockedModules.includes(moduleNum);
+                            return (
+                              <button
+                                key={`foundation-module-override-${moduleNum}`}
+                                type="button"
+                                onClick={() => {
+                                  setFoundationUnlockedModules((prev) =>
+                                    prev.includes(moduleNum)
+                                      ? prev.filter((value) => value !== moduleNum)
+                                      : [...prev, moduleNum].sort((a, b) => a - b)
+                                  );
+                                }}
+                                style={{
+                                  padding: "6px 0",
+                                  borderRadius: 8,
+                                  border: selected ? "1px solid #10b981" : "1px solid #334155",
+                                  background: selected ? "rgba(16, 185, 129, 0.12)" : "#111827",
+                                  color: selected ? "#6ee7b7" : "#94a3b8",
+                                  fontSize: "0.78rem",
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                M{moduleNum}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                         <button type="button" style={S.secondaryBtn} onClick={() => void runUserSnapshotAction("save")}>
                           Snapshot State
                         </button>
-                        <button
-                          type="button"
-                          style={S.ghostDangerBtn}
-                          onClick={() => requireAdminPassword("Restore User Snapshot", () => void runUserSnapshotAction("restore"))}
-                        >
+                        <button type="button" style={S.ghostDangerBtn} onClick={() => void runUserSnapshotAction("restore")}>
                           Restore Snapshot
+                        </button>
+                        <button type="button" style={S.ghostDangerBtn} onClick={() => void resetUserOnboarding()}>
+                          Reset Onboarding
                         </button>
                       </div>
                     </div>
@@ -2173,7 +1951,7 @@ export default function DashboardClient() {
 
               <div style={S.drawerFooter}>
                 <button
-                  onClick={() => requireAdminPassword("Save User Changes", () => void saveEdit())}
+                  onClick={saveEdit}
                   disabled={saving}
                   style={{
                     ...S.primaryBtn,

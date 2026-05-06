@@ -1,0 +1,157 @@
+{
+  "module": 9,
+  "title": "Maelekezo na Mtaani",
+  "title_sw": "Directions and the Community",
+  "description": "Learn how to ask for and give directions. Master navigation vocabulary to help others find their way.",
+  "description_sw": "Jifunze jinsi ya kuuliza na kutoa maelekezo ya njia. Simamia maneno ya njia ili kusaidia wengine kupata njia sahihi.",
+  "sofia_intro": "Today we learn how to ask for and give directions. This is essential when you are out in the community or need help finding a place.",
+  "sofia_intro_sw": "Leo tutajifunza jinsi ya kuuliza na kutoa maelekezo ya njia. Hii itakusaidia usipotee na uweze kusaidia wengine unapokuwa mtaani au mjini.",
+  "lessons": [
+    {
+      "id": "9-1",
+      "type": "vocabulary_grid",
+      "title": "Direction Vocabulary",
+      "title_sw": "Maneno ya Njia",
+      "sofia_hint": "Click each direction word to hear it. Use these when you need help navigating!",
+      "sofia_hint_sw": "Bonyeza kila neno la njia kulisikia. Tumia haya unapohitaji kusaidiwa kuelekezana!",
+      "words": [
+        { "word": "Left", "sw": "Kushoto", "emoji": "👈", "example": "Turn left at the corner.", "audio_url": "/audio/left.mp3" },
+        { "word": "Right", "sw": "Kulia", "emoji": "👉", "example": "Go right on this road.", "audio_url": "/audio/right.mp3" },
+        { "word": "Straight", "sw": "Moja kwa moja", "emoji": "⬆️", "example": "Go straight ahead.", "audio_url": "/audio/straight.mp3" },
+        { "word": "Turn", "sw": "Pinda / Kata kona", "emoji": "🔄", "example": "Turn left here.", "audio_url": "/audio/turn.mp3" },
+        { "word": "Near", "sw": "Karibu", "emoji": "📍", "example": "The bank is near.", "audio_url": "/audio/near.mp3" },
+        { "word": "Far", "sw": "Mbali", "emoji": "🌁", "example": "The school is far from here.", "audio_url": "/audio/far.mp3" },
+        { "word": "Corner", "sw": "Kona", "emoji": "🔶", "example": "I see you at the corner.", "audio_url": "/audio/corner.mp3" },
+        { "word": "Cross", "sw": "Vuka / Kata", "emoji": "✖️", "example": "Cross the street here.", "audio_url": "/audio/cross.mp3" }
+      ]
+    },
+    {
+      "id": "9-2",
+      "type": "vocabulary_grid",
+      "title": "Community Buildings",
+      "title_sw": "Majengo ya Jamii",
+      "sofia_hint": "Click each building to hear it. These are places you visit every day!",
+      "sofia_hint_sw": "Bonyeza kila jengo kulisikia. Hizi ni mahali unayotembea kila siku!",
+      "words": [
+        { "word": "Hospital", "sw": "Hospitali", "emoji": "🏥", "example": "The hospital is near the market.", "audio_url": "/audio/hospital.mp3" },
+        { "word": "Bank", "sw": "Benki", "emoji": "🏦", "example": "Where is the nearest bank?", "audio_url": "/audio/bank.mp3" },
+        { "word": "School", "sw": "Shule", "emoji": "🏫", "example": "The school is across the street.", "audio_url": "/audio/school.mp3" },
+        { "word": "Market", "sw": "Soko", "emoji": "🏪", "example": "I am going to the market.", "audio_url": "/audio/market.mp3" },
+        { "word": "Restaurant", "sw": "Upishi", "emoji": "🍽️", "example": "This restaurant has good food.", "audio_url": "/audio/restaurant.mp3" },
+        { "word": "Post Office", "sw": "Ofisi ya Posta", "emoji": "📮", "example": "The post office closes at 5 PM.", "audio_url": "/audio/post_office.mp3" },
+        { "word": "Park", "sw": "Bustani", "emoji": "🌳", "example": "Let us meet at the park.", "audio_url": "/audio/park.mp3" },
+        { "word": "Street", "sw": "Barabara", "emoji": "🛣️", "example": "This is a busy street.", "audio_url": "/audio/street.mp3" }
+      ]
+    },
+    {
+      "id": "9-3",
+      "type": "multiple_choice",
+      "title": "Directions and Navigation Quiz",
+      "title_sw": "Mchezo wa Maelekezo",
+      "sofia_hint": "Choose the correct direction or location to complete each sentence.",
+      "sofia_hint_sw": "Chagua njia au mahali sahihi kukamilisha kila sentensi.",
+      "questions": [
+        {
+          "prompt": "Go ________. (Nenda moja kwa moja)",
+          "prompt_sw": "Go ________. (Nenda moja kwa moja)",
+          "options": ["Left", "Right", "Straight", "Turn"],
+          "options_sw": ["Left", "Right", "Straight", "Turn"],
+          "correct": 2
+        },
+        {
+          "prompt": "Turn ________. (Pinda kushoto)",
+          "prompt_sw": "Turn ________. (Pinda kushoto)",
+          "options": ["Left", "Right", "Straight", "Far"],
+          "options_sw": ["Left", "Right", "Straight", "Far"],
+          "correct": 0
+        },
+        {
+          "prompt": "The ________ is near. (Hospitali ipo karibu)",
+          "prompt_sw": "The ________ is near. (Hospitali ipo karibu)",
+          "options": ["School", "Hospital", "Market", "Bank"],
+          "options_sw": ["School", "Hospital", "Market", "Bank"],
+          "correct": 1
+        },
+        {
+          "prompt": "The school is ________. (Shule ipo mbali)",
+          "prompt_sw": "The school is ________. (Shule ipo mbali)",
+          "options": ["Near", "Far", "Left", "Right"],
+          "options_sw": ["Near", "Far", "Left", "Right"],
+          "correct": 1
+        },
+        {
+          "prompt": "'Corner' means: ('Kona' inamaanisha:)",
+          "prompt_sw": "'Corner' means: ('Kona' inamaanisha:)",
+          "options": ["Street", "Market", "The angle where two streets meet", "Park"],
+          "options_sw": ["Street", "Market", "The angle where two streets meet", "Park"],
+          "correct": 2
+        },
+        {
+          "prompt": "Which building helps you with money? (Jengo lipi linakusaidia na pesa?)",
+          "prompt_sw": "Which building helps you with money? (Jengo lipi linakusaidia na pesa?)",
+          "options": ["School", "Hospital", "Bank", "Restaurant"],
+          "options_sw": ["School", "Hospital", "Bank", "Restaurant"],
+          "correct": 2
+        },
+        {
+          "prompt": "Go straight to the ________. (Nenda moja kwa moja hadi sokoni)",
+          "prompt_sw": "Go straight to the ________. (Nenda moja kwa moja hadi sokoni)",
+          "options": ["Bank", "School", "Market", "Hospital"],
+          "options_sw": ["Bank", "School", "Market", "Hospital"],
+          "correct": 2
+        },
+        {
+          "prompt": "The ________ is next to the bank. (Hospitali ipo karibu na benki)",
+          "prompt_sw": "The ________ is next to the bank. (Hospitali ipo karibu na benki)",
+          "options": ["School", "Restaurant", "Hospital", "Park"],
+          "options_sw": ["School", "Restaurant", "Hospital", "Park"],
+          "correct": 2
+        }
+      ]
+    },
+    {
+      "id": "9-4",
+      "type": "multiple_choice",
+      "title": "Module 9 Final Assessment",
+      "title_sw": "Tathmini ya Mwisho ya Moduli 9",
+      "is_graduation_gate": false,
+      "questions": [
+        {
+          "prompt": "Which direction is opposite of 'Left'? (Njia ipi ni kinyume cha 'Left'?)",
+          "prompt_sw": "Which direction is opposite of 'Left'? (Njia ipi ni kinyume cha 'Left'?)",
+          "options": ["Right", "Straight", "Back", "Forward"],
+          "options_sw": ["Right", "Straight", "Back", "Forward"],
+          "correct": 0
+        },
+        {
+          "prompt": "'Go straight to the market' means: ('Nenda moja kwa moja mpaka sokoni' inamaanisha:)",
+          "prompt_sw": "'Go straight to the market' means: ('Nenda moja kwa moja mpaka sokoni' inamaanisha:)",
+          "options": ["Turn left", "Do not turn — continue ahead", "Turn right", "Go back"],
+          "options_sw": ["Pinda kushoto", "Usipinde — endelea mbele", "Pinda kulia", "Rudi nyuma"],
+          "correct": 1
+        },
+        {
+          "prompt": "What is a 'Post Office'? (Ofisi ya Posta ni nini?)",
+          "prompt_sw": "What is a 'Post Office'? (Ofisi ya Posta ni nini?)",
+          "options": ["A bank", "A place to send letters and packages", "A hospital", "A school"],
+          "options_sw": ["Benki", "Mahali pa kutuma barua na vifurushi", "Hospitali", "Shule"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which is nearest in your community? (Lipi ni karibu zaidi katika jamii yako?)",
+          "prompt_sw": "Which is nearest in your community? (Lipi ni karibu zaidi katika jamii yako?)",
+          "options": ["School", "Bank", "Market", "All are the same"],
+          "options_sw": ["Shule", "Benki", "Soko", "Zote ni sawa"],
+          "correct": 2
+        },
+        {
+          "prompt": "You say 'The hospital is near the market' when: (Unasema 'The hospital is near the market' lini:)",
+          "prompt_sw": "You say 'The hospital is near the market' when: (Unasema 'The hospital is near the market' lini:)",
+          "options": ["The hospital is far from market", "The hospital is very close to the market", "The hospital is closed", "The market is closed"],
+          "options_sw": ["Hospitali iko mbali na soko", "Hospitali iko sana karibu na soko", "Hospitali imefungwa", "Soko limefungwa"],
+          "correct": 1
+        }
+      ]
+    }
+  ]
+}

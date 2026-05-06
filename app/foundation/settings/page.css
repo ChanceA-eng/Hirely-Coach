@@ -1,0 +1,199 @@
+.fs-root {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 35%),
+    radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.06), transparent 30%),
+    linear-gradient(180deg, #020617 0%, #020617 100%);
+  color: #f8fafc;
+  padding: 32px 24px 80px;
+}
+
+.fs-inner {
+  max-width: 840px;
+  margin: 0 auto;
+}
+
+.fs-header {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 32px 36px;
+  margin-bottom: 24px;
+}
+
+.fs-eyebrow {
+  color: #10b981;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+.fs-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0 0 6px;
+  color: #f8fafc;
+}
+
+.fs-sub {
+  color: #6b7280;
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+.fs-panel {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 36px;
+}
+
+.fs-section-label {
+  color: #10b981;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 20px;
+}
+
+.fs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.fs-field {
+  margin-bottom: 20px;
+}
+
+.fs-label {
+  display: block;
+  color: #9ca3af;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.fs-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #f8fafc;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.fs-input:focus {
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.fs-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 8px 0 24px;
+}
+
+.fs-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fs-toggle-row:last-of-type {
+  border-bottom: none;
+}
+
+.fs-toggle-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fs-toggle-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin: 0 0 2px;
+}
+
+.fs-toggle-desc {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.fs-toggle {
+  width: 44px;
+  height: 24px;
+  accent-color: #10b981;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.fs-actions {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fs-btn-primary {
+  background: #064e3b;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: filter 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.fs-btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 8px 24px rgba(6, 78, 59, 0.4);
+}
+
+.fs-save-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .fs-root {
+    padding: 20px 14px 48px;
+  }
+
+  .fs-header,
+  .fs-panel {
+    padding: 22px 18px;
+  }
+
+  .fs-row {
+    grid-template-columns: 1fr;
+  }
+
+  .fs-title {
+    font-size: 1.45rem;
+  }
+}

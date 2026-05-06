@@ -1,0 +1,217 @@
+{
+  "module": 6,
+  "title": "The Professional Vocabulary",
+  "title_sw": "Msamiati wa Kitaaluma",
+  "description": "Build the words that will define your career - from office basics to power verbs.",
+  "description_sw": "Jenga maneno ambayo yataelezea kazi yako - kuanzia misingi ya ofisi hadi vitenzi vikali.",
+  "sofia_intro": "Module 6 is where your career language begins! These are the words your future boss uses every day.",
+  "sofia_intro_sw": "Moduli ya 6 ndipo lugha yako ya kazi inaanza! Haya ndio maneno ambayo mkubwa wako wa kesho anatumia kila siku.",
+  "lessons": [
+    {
+      "id": "6-1",
+      "type": "vocabulary_grid",
+      "title": "Office Basics",
+      "title_sw": "Misingi ya Ofisi",
+      "sofia_hint": "Click each word to hear it. Then try to use it in a sentence!",
+      "sofia_hint_sw": "Bonyeza kila neno kulisikia. Kisha jaribu kulitumia katika sentensi!",
+      "words": [
+        { "word": "Meeting", "sw": "Mkutano", "emoji": "🤝", "example": "We have a meeting at 9 AM.", "audio_url": "/audio/meeting.mp3" },
+        { "word": "Deadline", "sw": "Muda wa mwisho", "emoji": "⏰", "example": "The deadline is Friday.", "audio_url": "/audio/deadline.mp3" },
+        { "word": "Report", "sw": "Ripoti", "emoji": "📄", "example": "Please send the report.", "audio_url": "/audio/report.mp3" },
+        { "word": "Manager", "sw": "Meneja", "emoji": "👔", "example": "My manager approved my leave.", "audio_url": "/audio/manager.mp3" },
+        { "word": "Schedule", "sw": "Ratiba", "emoji": "📅", "example": "Check the schedule for today.", "audio_url": "/audio/schedule.mp3" },
+        { "word": "Department", "sw": "Idara", "emoji": "🏢", "example": "Which department do you work in?", "audio_url": "/audio/department.mp3" },
+        { "word": "Email", "sw": "Barua pepe", "emoji": "📧", "example": "I will send an email.", "audio_url": "/audio/email.mp3" },
+        { "word": "Salary", "sw": "Mshahara", "emoji": "💵", "example": "My salary is paid monthly.", "audio_url": "/audio/salary.mp3" },
+        { "word": "Colleague", "sw": "Mwenzangu kazini", "emoji": "👥", "example": "She is my colleague.", "audio_url": "/audio/colleague.mp3" },
+        { "word": "Client", "sw": "Mteja", "emoji": "🤵", "example": "The client is happy.", "audio_url": "/audio/client.mp3" }
+      ]
+    },
+    {
+      "id": "6-2",
+      "type": "vocabulary_grid",
+      "title": "Power Action Verbs",
+      "title_sw": "Vitenzi Vikali vya Kitaaluma",
+      "sofia_hint": "These verbs make your resume and interviews powerful.",
+      "sofia_hint_sw": "Vitenzi hivi hufanya wasifu wako na mahojiano yako yenye nguvu.",
+      "words": [
+        { "word": "Manage", "sw": "Simamia", "emoji": "🏗️", "example": "I manage a team of 10.", "audio_url": "/audio/manage.mp3" },
+        { "word": "Lead", "sw": "Ongoza", "emoji": "👑", "example": "She leads the project.", "audio_url": "/audio/lead.mp3" },
+        { "word": "Create", "sw": "Unda", "emoji": "✨", "example": "He created a new system.", "audio_url": "/audio/create.mp3" },
+        { "word": "Improve", "sw": "Boresha", "emoji": "📈", "example": "We improved our results.", "audio_url": "/audio/improve.mp3" },
+        { "word": "Achieve", "sw": "Fikia lengo", "emoji": "🏆", "example": "We achieved our target.", "audio_url": "/audio/achieve.mp3" },
+        { "word": "Coordinate", "sw": "Ratibu", "emoji": "🔗", "example": "I coordinate the team schedule.", "audio_url": "/audio/coordinate.mp3" },
+        { "word": "Deliver", "sw": "Toa/Peleka", "emoji": "📦", "example": "We delivered the project on time.", "audio_url": "/audio/deliver.mp3" },
+        { "word": "Support", "sw": "Saidia", "emoji": "🙋", "example": "I support the operations team.", "audio_url": "/audio/support.mp3" },
+        { "word": "Analyze", "sw": "Changanua", "emoji": "🔍", "example": "I analyzed the data.", "audio_url": "/audio/analyze.mp3" },
+        { "word": "Present", "sw": "Wasilisha", "emoji": "📊", "example": "She presented the results.", "audio_url": "/audio/present.mp3" }
+      ]
+    },
+    {
+      "id": "6-3",
+      "type": "number_builder",
+      "title": "Numbers and Time for Work",
+      "title_sw": "Nambari na Wakati Kazini",
+      "sofia_hint": "Build numbers by combining tens and ones.",
+      "sofia_hint_sw": "Jenga nambari kwa kuchanganya makumi na moja.",
+      "tens": [
+        { "value": 10, "word": "Ten", "sw": "Kumi" },
+        { "value": 20, "word": "Twenty", "sw": "Ishirini" },
+        { "value": 30, "word": "Thirty", "sw": "Thelathini" },
+        { "value": 40, "word": "Forty", "sw": "Arobaini" },
+        { "value": 50, "word": "Fifty", "sw": "Hamsini" },
+        { "value": 60, "word": "Sixty", "sw": "Sitini" },
+        { "value": 70, "word": "Seventy", "sw": "Sabini" },
+        { "value": 80, "word": "Eighty", "sw": "Themanini" },
+        { "value": 90, "word": "Ninety", "sw": "Tisini" }
+      ],
+      "ones": [
+        { "value": 1, "word": "one", "sw": "moja" },
+        { "value": 2, "word": "two", "sw": "mbili" },
+        { "value": 3, "word": "three", "sw": "tatu" },
+        { "value": 4, "word": "four", "sw": "nne" },
+        { "value": 5, "word": "five", "sw": "tano" },
+        { "value": 6, "word": "six", "sw": "sita" },
+        { "value": 7, "word": "seven", "sw": "saba" },
+        { "value": 8, "word": "eight", "sw": "nane" },
+        { "value": 9, "word": "nine", "sw": "tisa" }
+      ],
+      "time_phrases": [
+        { "en": "At 9 AM", "sw": "Saa tatu asubuhi" },
+        { "en": "In 30 minutes", "sw": "Baada ya dakika thelathini" },
+        { "en": "By Friday", "sw": "Ifikapo Ijumaa" },
+        { "en": "Last quarter", "sw": "Robo ya mwisho" },
+        { "en": "Next week", "sw": "Wiki ijayo" }
+      ]
+    },
+    {
+      "id": "6-4",
+      "type": "vocabulary_grid",
+      "title": "More Professional Words",
+      "title_sw": "Maneno Zaidi ya Kitaaluma",
+      "sofia_hint": "Click each word to hear it. These words will impress any employer!",
+      "sofia_hint_sw": "Bonyeza kila neno kulisikia. Maneno haya yatavutia mwajiri yeyote!",
+      "words": [
+        { "word": "Project", "sw": "Mradi", "emoji": "📋", "example": "I am leading a project.", "audio_url": "/audio/project.mp3" },
+        { "word": "Budget", "sw": "Bajeti", "emoji": "💰", "example": "We need to cut the budget.", "audio_url": "/audio/budget.mp3" },
+        { "word": "Feedback", "sw": "Maoni", "emoji": "💬", "example": "I gave him feedback.", "audio_url": "/audio/feedback.mp3" },
+        { "word": "Performance", "sw": "Utendaji", "emoji": "📊", "example": "My performance was excellent.", "audio_url": "/audio/performance.mp3" },
+        { "word": "Promotion", "sw": "Kupandishwa cheo", "emoji": "🚀", "example": "She received a promotion.", "audio_url": "/audio/promotion.mp3" },
+        { "word": "Contract", "sw": "Mkataba", "emoji": "📝", "example": "Sign the contract, please.", "audio_url": "/audio/contract.mp3" },
+        { "word": "Training", "sw": "Mafunzo", "emoji": "🎓", "example": "Attend the training session.", "audio_url": "/audio/training.mp3" },
+        { "word": "Strategy", "sw": "Mkakati", "emoji": "♟️", "example": "What is the strategy?", "audio_url": "/audio/strategy.mp3" },
+        { "word": "Target", "sw": "Lengo", "emoji": "🎯", "example": "We hit the target.", "audio_url": "/audio/target.mp3" },
+        { "word": "Invoice", "sw": "Ankara", "emoji": "🧾", "example": "Please process this invoice.", "audio_url": "/audio/invoice.mp3" }
+      ]
+    },
+    {
+      "id": "6-5",
+      "type": "multiple_choice",
+      "title": "Word Match Challenge",
+      "title_sw": "Mchezo wa Kulinganisha Maneno",
+      "sofia_hint": "Pick the correct English word for each Swahili clue.",
+      "sofia_hint_sw": "Chagua neno sahihi la Kiingereza kwa kila kidokezo cha Kiswahili.",
+      "questions": [
+        {
+          "prompt": "Which word means 'Meneja'?",
+          "prompt_sw": "Neno gani linamaanisha 'Meneja'?",
+          "options": ["Client", "Manager", "Colleague", "Salary"],
+          "options_sw": ["Client", "Manager", "Colleague", "Salary"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which is a power action VERB?",
+          "prompt_sw": "Lipi ni kitenzi kikali (power verb)?",
+          "options": ["Meeting", "Report", "Lead", "Budget"],
+          "options_sw": ["Meeting", "Report", "Lead", "Budget"],
+          "correct": 2
+        },
+        {
+          "prompt": "'Bajeti' means:",
+          "prompt_sw": "'Bajeti' inamaanisha:",
+          "options": ["Target", "Invoice", "Budget", "Training"],
+          "options_sw": ["Target", "Invoice", "Budget", "Training"],
+          "correct": 2
+        },
+        {
+          "prompt": "'Simamia' means:",
+          "prompt_sw": "'Simamia' inamaanisha:",
+          "options": ["Create", "Analyze", "Manage", "Deliver"],
+          "options_sw": ["Create", "Analyze", "Manage", "Deliver"],
+          "correct": 2
+        },
+        {
+          "prompt": "Which word means 'Mshahara'?",
+          "prompt_sw": "Neno gani linamaanisha 'Mshahara'?",
+          "options": ["Schedule", "Department", "Email", "Salary"],
+          "options_sw": ["Schedule", "Department", "Email", "Salary"],
+          "correct": 3
+        },
+        {
+          "prompt": "'Achieve' means:",
+          "prompt_sw": "'Achieve' inamaanisha:",
+          "options": ["Ratibu", "Fikia lengo", "Unda", "Saidia"],
+          "options_sw": ["Ratibu", "Fikia lengo", "Unda", "Saidia"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which word means 'Maoni'?",
+          "prompt_sw": "Neno gani linamaanisha 'Maoni'?",
+          "options": ["Contract", "Promotion", "Feedback", "Strategy"],
+          "options_sw": ["Contract", "Promotion", "Feedback", "Strategy"],
+          "correct": 2
+        },
+        {
+          "prompt": "'Utendaji' means:",
+          "prompt_sw": "'Utendaji' inamaanisha:",
+          "options": ["Project", "Performance", "Invoice", "Target"],
+          "options_sw": ["Project", "Performance", "Invoice", "Target"],
+          "correct": 1
+        }
+      ]
+    },
+    {
+      "id": "6-6",
+      "type": "multiple_choice",
+      "title": "Module 6 Final Assessment",
+      "title_sw": "Tathmini ya Mwisho ya Moduli 6",
+      "questions": [
+        {
+          "prompt": "Which word best replaces 'do' in a professional resume?",
+          "prompt_sw": "Neno gani linafaa zaidi kubadilisha 'do' kwenye wasifu wa kitaaluma?",
+          "options": ["make", "manage", "did", "working"],
+          "options_sw": ["make", "manage", "did", "working"],
+          "correct": 1
+        },
+        {
+          "prompt": "What is the English word for 'Mkutano'?",
+          "prompt_sw": "Neno la Kiingereza kwa 'Mkutano' ni lipi?",
+          "options": ["Schedule", "Colleague", "Meeting", "Department"],
+          "options_sw": ["Schedule", "Colleague", "Meeting", "Department"],
+          "correct": 2
+        },
+        {
+          "prompt": "How do you say 'Thelathini na mbili' in English?",
+          "prompt_sw": "Unasemaje 'Thelathini na mbili' kwa Kiingereza?",
+          "options": ["Twenty-two", "Thirty-two", "Forty-two", "Thirteen-two"],
+          "options_sw": ["Twenty-two", "Thirty-two", "Forty-two", "Thirteen-two"],
+          "correct": 1
+        },
+        {
+          "prompt": "Complete: 'I ___ the project results to the team last Monday.'",
+          "prompt_sw": "Kamilisha: 'I ___ the project results to the team last Monday.'",
+          "options": ["was present", "presented", "presenting", "present"],
+          "options_sw": ["was present", "presented", "presenting", "present"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which sentence uses a power verb correctly?",
+          "prompt_sw": "Sentensi ipi inatumia power verb kwa usahihi?",
+          "options": ["I did some stuff for the team.", "I made things better.", "I improved team efficiency by 25%.", "I was doing management things."],
+          "options_sw": ["I did some stuff for the team.", "I made things better.", "I improved team efficiency by 25%.", "I was doing management things."],
+          "correct": 2
+        }
+      ]
+    }
+  ]
+}

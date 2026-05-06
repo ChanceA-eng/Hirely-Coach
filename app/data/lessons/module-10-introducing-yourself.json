@@ -1,0 +1,171 @@
+{
+  "module": 10,
+  "title": "Kujitambulisha",
+  "title_sw": "Introducing Yourself and Your Work",
+  "description": "Learn how to introduce yourself, talk about your job, and describe what you do. This is the gateway to professional English.",
+  "description_sw": "Jifunze jinsi ya kujitambulisha, kuzungumza kuhusu kazi yako, na kuelezea kile unachokifanya. Hii ni mlango wa lugha ya kazi.",
+  "sofia_intro": "Introducing yourself is the first step to success. Today you learn how to say your name, your job, and what you do. This is crucial for your career!",
+  "sofia_intro_sw": "Kujitambulisha ndio mlango wa kwanza wa mafanikio. Leo utajifunza jinsi ya kusema jina lako, kazi yako, na kile unachokifanya. Hii ni muhimu kwa ajili ya kazi yako!",
+  "lessons": [
+    {
+      "id": "10-1",
+      "type": "vocabulary_grid",
+      "title": "Key Vocabulary for Introduction",
+      "title_sw": "Maneno Muhimu ya Kujitambulisha",
+      "sofia_hint": "Click each word to hear it. These words are essential for introducing yourself!",
+      "sofia_hint_sw": "Bonyeza kila neno kulisikia. Maneno haya ni muhimu kwa kujitambulisha!",
+      "words": [
+        { "word": "Name", "sw": "Jina", "emoji": "🏷️", "example": "My name is James.", "audio_url": "/audio/name.mp3" },
+        { "word": "Job", "sw": "Kazi", "emoji": "💼", "example": "My job is as a developer.", "audio_url": "/audio/job.mp3" },
+        { "word": "Work", "sw": "Fanya kazi", "emoji": "🏢", "example": "I work as a teacher.", "audio_url": "/audio/work.mp3" },
+        { "word": "Developer", "sw": "Msanidi wa programu", "emoji": "💻", "example": "I am a software developer.", "audio_url": "/audio/developer.mp3" },
+        { "word": "Help", "sw": "Saidia", "emoji": "🤝", "example": "I help people solve problems.", "audio_url": "/audio/help.mp3" },
+        { "word": "Experience", "sw": "Uzoefu", "emoji": "⭐", "example": "I have 5 years of experience.", "audio_url": "/audio/experience.mp3" },
+        { "word": "Company", "sw": "Kampuni", "emoji": "🏭", "example": "I work for a big company.", "audio_url": "/audio/company.mp3" },
+        { "word": "Passion", "sw": "Shauku", "emoji": "💪", "example": "I have a passion for technology.", "audio_url": "/audio/passion.mp3" }
+      ]
+    },
+    {
+      "id": "10-2",
+      "type": "dialogue",
+      "title": "Introduction Dialogues",
+      "title_sw": "Mazungumzo ya Kujitambulisha",
+      "sofia_hint": "Listen to these real introduction conversations. Then read along and practice!",
+      "sofia_hint_sw": "Sikiliza mazungumzo halisi ya kujitambulisha. Kisha soma pamoja na fanya mazoezi!",
+      "dialogues": [
+        {
+          "title": "Basic Introduction",
+          "title_sw": "Kujitambulisha Kwa Kawaida",
+          "lines": [
+            { "speaker": "Person A", "en": "Hello. My name is Juma.", "sw": "Habari. Jina langu ni Juma.", "audio_url": "/audio/dial_1_1.mp3" },
+            { "speaker": "Person B", "en": "Nice to meet you, Juma. I am Sarah.", "sw": "Furaha kukutana nawe, Juma. Mimi ni Sarah.", "audio_url": "/audio/dial_1_2.mp3" },
+            { "speaker": "Person A", "en": "Nice to meet you too. What do you do?", "sw": "Furaha kukutana nawe pia. Unafanya kazi gani?", "audio_url": "/audio/dial_1_3.mp3" },
+            { "speaker": "Person B", "en": "I am a teacher. What about you?", "sw": "Mimi ni mwalimu. Na wewe?", "audio_url": "/audio/dial_1_4.mp3" },
+            { "speaker": "Person A", "en": "I work in technology. I am a developer.", "sw": "Ninafanya kazi katika teknolojia. Mimi ni msanidi wa programu.", "audio_url": "/audio/dial_1_5.mp3" }
+          ]
+        },
+        {
+          "title": "Professional Introduction",
+          "title_sw": "Kujitambulisha kwa Mtaalamu",
+          "lines": [
+            { "speaker": "You", "en": "Good morning. My name is James. I am a software developer.", "sw": "Habari za asubuhi. Jina langu ni James. Mimi ni msanidi wa programu ya kompyuta.", "audio_url": "/audio/dial_2_1.mp3" },
+            { "speaker": "Recruiter", "en": "Pleased to meet you, James. Tell me about your experience.", "sw": "Furaha kukutana nawe, James. Nipe maelezo kuhusu uzoefu wako.", "audio_url": "/audio/dial_2_2.mp3" },
+            { "speaker": "You", "en": "I have five years of experience building websites. I help companies succeed online.", "sw": "Nina miaka mitano ya uzoefu katika kujenga wavuti. Ninasaidia kampuni kuwa na mafanikio online.", "audio_url": "/audio/dial_2_3.mp3" },
+            { "speaker": "Recruiter", "en": "That is impressive. What is your passion?", "sw": "Hilo ni jambo la kuvutia. Ni nini shauku yako?", "audio_url": "/audio/dial_2_4.mp3" },
+            { "speaker": "You", "en": "My passion is creating solutions that solve real problems for people.", "sw": "Shauku yangu ni kuunda suluhisho linalotatua matatizo halisi kwa watu.", "audio_url": "/audio/dial_2_5.mp3" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "10-3",
+      "type": "multiple_choice",
+      "title": "Introduction and Work Quiz",
+      "title_sw": "Mchezo wa Kujitambulisha na Kazi",
+      "sofia_hint": "Choose the correct answer for each question about introducing yourself.",
+      "sofia_hint_sw": "Chagua jibu sahihi kwa kila swali kuhusu kujitambulisha.",
+      "questions": [
+        {
+          "prompt": "How do you introduce your name? (Unajitambulisha kwa jinsi gani?)",
+          "prompt_sw": "How do you introduce your name? (Unajitambulisha kwa jinsi gani?)",
+          "options": ["I like my name", "My name is...", "My job is...", "I work..."],
+          "options_sw": ["Napenda jina langu", "Jina langu ni...", "Kazi yangu ni...", "Ninafanya kazi..."],
+          "correct": 1
+        },
+        {
+          "prompt": "'I am a developer' means: (Kauli 'I am a developer' inamaanisha:)",
+          "prompt_sw": "'I am a developer' means: (Kauli 'I am a developer' inamaanisha:)",
+          "options": ["Mimi ni mwalimu", "Mimi ni msanidi wa programu", "Mimi ni daktari", "Mimi ni meneja"],
+          "options_sw": ["Mimi ni mwalimu", "Mimi ni msanidi wa programu", "Mimi ni daktari", "Mimi ni meneja"],
+          "correct": 1
+        },
+        {
+          "prompt": "What is a good response to 'What do you do?' (Jibu bora la 'What do you do?' ni lipi?)",
+          "prompt_sw": "What is a good response to 'What do you do?' (Jibu bora la 'What do you do?' ni lipi?)",
+          "options": ["I like to eat", "I am happy", "I work as a...", "I like sports"],
+          "options_sw": ["Napenda kula", "Niko na furaha", "Ninafanya kazi kama...", "Napenda michezo"],
+          "correct": 2
+        },
+        {
+          "prompt": "What does 'experience' mean? (Neno 'experience' linamaanisha nini?)",
+          "prompt_sw": "What does 'experience' mean? (Neno 'experience' linamaanisha nini?)",
+          "options": ["Your age", "How long you have worked", "Your name", "Your salary"],
+          "options_sw": ["Umri wako", "Kwa muda gani umefanya kazi", "Jina lako", "Mshahara wako"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which sentence is correct? (Sentensi ipi ni sahihi?)",
+          "prompt_sw": "Which sentence is correct? (Sentensi ipi ni sahihi?)",
+          "options": ["I help companies to succeed", "Companies help I succeed", "I succeed help companies", "Help I companies succeed"],
+          "options_sw": ["Ninasaidia kampuni kuwa na mafanikio", "Kampuni zinasaidia mimi kuwa na mafanikio", "Ninakuwa mafanikio na kusaidia kampuni", "Zinasaidia mimi kampuni"],
+          "correct": 0
+        },
+        {
+          "prompt": "What is a good 'passion' to mention? (Ni 'shauku' gani nzuri kumtaja?)",
+          "prompt_sw": "What is a good 'passion' to mention? (Ni 'shauku' gani nzuri kumtaja?)",
+          "options": ["I like sleeping", "Creating solutions for real problems", "I like to complain", "I hate working"],
+          "options_sw": ["Napenda kulala", "Kuunda suluhisho kwa matatizo halisi", "Napenda kulalamika", "Ninaopenda kazi"],
+          "correct": 1
+        },
+        {
+          "prompt": "'I have 5 years of experience' shows: (Kauli 'I have 5 years of experience' inaonyesha:)",
+          "prompt_sw": "'I have 5 years of experience' shows: (Kauli 'I have 5 years of experience' inaonyesha:)",
+          "options": ["Your age", "Your competence", "Your salary", "Your location"],
+          "options_sw": ["Umri wako", "Ujuzi wako", "Mshahara wako", "Mahali palipo"],
+          "correct": 1
+        },
+        {
+          "prompt": "When introducing yourself professionally, what should you mention? (Unapojitambulisha kwa mtaalamu, nini unapaswa kumtaja?)",
+          "prompt_sw": "When introducing yourself professionally, what should you mention? (Unapojitambulisha kwa mtaalamu, nini unapaswa kumtaja?)",
+          "options": ["Your salary", "Your age", "Your name, job, and experience", "Your family"],
+          "options_sw": ["Mshahara wako", "Umri wako", "Jina lako, kazi, na uzoefu wako", "Familia yako"],
+          "correct": 2
+        }
+      ]
+    },
+    {
+      "id": "10-4",
+      "type": "multiple_choice",
+      "title": "Module 10 Final Assessment",
+      "title_sw": "Tathmini ya Mwisho ya Moduli 10",
+      "is_graduation_gate": false,
+      "questions": [
+        {
+          "prompt": "Complete the introduction: 'My name is ________.' (Kamilisha kujitambulisha: 'My name is ________.')",
+          "prompt_sw": "Complete the introduction: 'My name is ________.' (Kamilisha kujitambulisha: 'My name is ________.')",
+          "options": ["[Your name]", "happy", "five years", "a company"],
+          "options_sw": ["[Jina lako]", "furaha", "miaka mitano", "kampuni"],
+          "correct": 0
+        },
+        {
+          "prompt": "'I work as a teacher' means: ('Ninafanya kazi kama mwalimu' inamaanisha:)",
+          "prompt_sw": "'I work as a teacher' means: ('Ninafanya kazi kama mwalimu' inamaanisha:)",
+          "options": ["I study to be a teacher", "My job is teaching", "I teach students", "Teaching is my passion"],
+          "options_sw": ["Ninajifunza kuwa mwalimu", "Kazi yangu ni kufundisha", "Ninafundisha wanafunzi", "Kufundisha ni shauku yangu"],
+          "correct": 1
+        },
+        {
+          "prompt": "What helps you stand out in an introduction? (Nini kinakusaidia kuonekana tofauti katika kujitambulisha?)",
+          "prompt_sw": "What helps you stand out in an introduction? (Nini kinakusaidia kuonekana tofauti katika kujitambulisha?)",
+          "options": ["Shouting", "Mentioning your passion and experience", "Being quiet", "Talking about your hobbies only"],
+          "options_sw": ["Kupiga kelele", "Kumtaja shauku na uzoefu wako", "Kuwa kimya", "Kuzungumza kuhusu michezo yako tu"],
+          "correct": 1
+        },
+        {
+          "prompt": "The best introduction is: (Kujitambulisha bora zaidi ni:)",
+          "prompt_sw": "The best introduction is: (Kujitambulisha bora zaidi ni:)",
+          "options": ["Long and detailed", "Clear, confident, and memorable", "Very short", "Talking only about your problems"],
+          "options_sw": ["Ndefu na iliyoeleza sana", "Wazi, yenye ujasiri, na ya kukamatia", "Mfupi sana", "Kuzungumza kuhusu matatizo yako tu"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which introduces job first? (Lipi linajitambulisha kazi kwanza?)",
+          "prompt_sw": "Which introduces job first? (Lipi linajitambulisha kazi kwanza?)",
+          "options": ["Hello, I am a developer", "My name is James, and I am a developer", "I work hard every day", "I like my job very much"],
+          "options_sw": ["Habari, mimi ni msanidi wa programu", "Jina langu ni James, na mimi ni msanidi wa programu", "Ninafanya kazi kwa bidii kila siku", "Napenda kazi yangu sana"],
+          "correct": 0
+        }
+      ]
+    }
+  ]
+}

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed:jobs": "node scripts/seed-jobs-from-csv.mjs"
+    "seed:jobs": "node scripts/seed-jobs-from-csv.mjs",
+    "audio:normalize": "node scripts/normalize-foundation-audio-paths.mjs",
+    "audio:validate": "node scripts/validate-foundation-audio.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.22.0",
@@ -22,6 +24,7 @@
     "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "resend": "^6.12.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

@@ -9,6 +9,7 @@ import {
   type HelpArticle,
   type HelpCategory,
 } from "../data/help-articles";
+import { RichBody } from "../components/TermTooltip";
 import "./page.css";
 
 // ── Category colour map ────────────────────────────────────────────────────
@@ -71,7 +72,7 @@ function ArticleView({
           {section.heading && (
             <h2 className="hc-article-section-heading">{section.heading}</h2>
           )}
-          <p className="hc-article-body">{section.body}</p>
+          <RichBody text={section.body} className="hc-article-body" />
           {section.list && (
             <ul className="hc-article-list-items">
               {section.list.map((item, j) => (

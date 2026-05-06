@@ -1,0 +1,156 @@
+{
+  "module": 5,
+  "title": "Chakula na Ununuzi",
+  "title_sw": "Food and Shopping",
+  "lessons": [
+    {
+      "id": "5-1",
+      "title": "Chakula na Ununuzi",
+      "title_sw": "Food and Shopping",
+      "type": "vocabulary_grid",
+      "vocabulary": [
+        { "english": "Bread", "swahili": "Mkate", "phonetic": "bred" },
+        { "english": "Milk", "swahili": "Maziwa", "phonetic": "milk" },
+        { "english": "Water", "swahili": "Maji", "phonetic": "wara" },
+        { "english": "Eggs", "swahili": "Mayai", "phonetic": "egz" },
+        { "english": "Rice", "swahili": "Wali/Mchele", "phonetic": "rais" },
+        { "english": "Meat", "swahili": "Nyama", "phonetic": "miit" },
+        { "english": "Fruits", "swahili": "Matunda", "phonetic": "fruts" },
+        { "english": "How much?", "swahili": "Bei gani?", "phonetic": "hau mach" },
+        { "english": "Price", "swahili": "Bei", "phonetic": "prais" },
+        { "english": "Buy", "swahili": "Nunua", "phonetic": "bai" }
+      ],
+      "instruction_en": "Listen and click to hear the pronunciation of each food item and shopping phrase.",
+      "instruction_sw": "Sikiliza na ubofye kusikiliza matamshi ya kila chakula na maneno ya manunuzi."
+    },
+    {
+      "id": "5-2",
+      "title": "Mwili na Afya",
+      "title_sw": "Body and Health",
+      "type": "vocabulary_grid",
+      "vocabulary": [
+        { "english": "Head", "swahili": "Kichwa", "phonetic": "hed" },
+        { "english": "Eye", "swahili": "Jicho", "phonetic": "ai" },
+        { "english": "Hand", "swahili": "Mkono", "phonetic": "hand" },
+        { "english": "Leg", "swahili": "Mguu", "phonetic": "leg" },
+        { "english": "Stomach", "swahili": "Tumbo", "phonetic": "stamaki" },
+        { "english": "Back", "swahili": "Mgongo", "phonetic": "bak" },
+        { "english": "Hurt", "swahili": "Umia", "phonetic": "hat" },
+        { "english": "Pain", "swahili": "Maumivu", "phonetic": "pein" },
+        { "english": "Sick", "swahili": "Mgonjwa", "phonetic": "sik" },
+        { "english": "Doctor", "swahili": "Daktari", "phonetic": "dokta" }
+      ],
+      "instruction_en": "Learn body parts and health-related vocabulary by listening and clicking each word.",
+      "instruction_sw": "Jifunze sehemu za mwili na maneno ya afya kwa kusikiliza na kubofya kila neno."
+    },
+    {
+      "id": "5-3",
+      "title": "Kazi na Ofisi",
+      "title_sw": "Work and Office",
+      "type": "vocabulary_grid",
+      "vocabulary": [
+        { "english": "Task", "swahili": "Kazi/Jukumu", "phonetic": "task" },
+        { "english": "Email", "swahili": "Barua pepe", "phonetic": "imeili" },
+        { "english": "Meeting", "swahili": "Mkutano", "phonetic": "miting" },
+        { "english": "Boss", "swahili": "Meneja/Bosi", "phonetic": "bos" },
+        { "english": "Call", "swahili": "Simu", "phonetic": "kol" },
+        { "english": "Report", "swahili": "Ripoti", "phonetic": "riport" },
+        { "english": "Write", "swahili": "Andika", "phonetic": "rait" },
+        { "english": "Read", "swahili": "Soma", "phonetic": "riid" },
+        { "english": "Send", "swahili": "Tuma", "phonetic": "send" },
+        { "english": "Finish", "swahili": "Maliza", "phonetic": "finish" }
+      ],
+      "instruction_en": "Learn workplace vocabulary essential for professional communication.",
+      "instruction_sw": "Jifunze maneno ya kazi muhimu kwa mawasiliano ya kazi."
+    },
+    {
+      "id": "5-4",
+      "title": "Module 5 Final Assessment",
+      "title_sw": "Tathmini ya Mwisho ya Moduli 5",
+      "type": "multiple_choice",
+      "is_graduation_gate": false,
+      "questions": [
+        {
+          "question_en": "What is the English word for 'Mkate'?",
+          "question_sw": "Neno la Kiingereza la 'Mkate' ni lipi?",
+          "options": [
+            { "text": "Bread", "correct": true },
+            { "text": "Meat", "correct": false },
+            { "text": "Milk", "correct": false },
+            { "text": "Water", "correct": false }
+          ]
+        },
+        {
+          "question_en": "How do you ask the price of something?",
+          "question_sw": "Unauliza bei kwa jinsi gani?",
+          "options": [
+            { "text": "How much?", "correct": true },
+            { "text": "How many?", "correct": false },
+            { "text": "What is it?", "correct": false },
+            { "text": "Buy now", "correct": false }
+          ]
+        },
+        {
+          "question_en": "Which body part means 'Kichwa'?",
+          "question_sw": "Sehemu ya mwili ipi ina maana ya 'Kichwa'?",
+          "options": [
+            { "text": "Head", "correct": true },
+            { "text": "Hand", "correct": false },
+            { "text": "Leg", "correct": false },
+            { "text": "Eye", "correct": false }
+          ]
+        },
+        {
+          "question_en": "What does 'Hurt' mean?",
+          "question_sw": "'Hurt' ina maana ya nini?",
+          "options": [
+            { "text": "Umia/Inauma", "correct": true },
+            { "text": "Mgonjwa", "correct": false },
+            { "text": "Maumivu", "correct": false },
+            { "text": "Daktari", "correct": false }
+          ]
+        },
+        {
+          "question_en": "Which word means 'Email'?",
+          "question_sw": "Neno lipi lina maana ya 'Barua pepe'?",
+          "options": [
+            { "text": "Email", "correct": true },
+            { "text": "Call", "correct": false },
+            { "text": "Meeting", "correct": false },
+            { "text": "Report", "correct": false }
+          ]
+        },
+        {
+          "question_en": "What is a 'Mkutano'?",
+          "question_sw": "'Mkutano' ni nini?",
+          "options": [
+            { "text": "Meeting", "correct": true },
+            { "text": "Task", "correct": false },
+            { "text": "Email", "correct": false },
+            { "text": "Boss", "correct": false }
+          ]
+        },
+        {
+          "question_en": "Which phrase means to finish something?",
+          "question_sw": "Ni neno lipi lina maana ya kumaliza kitu?",
+          "options": [
+            { "text": "Finish", "correct": true },
+            { "text": "Start", "correct": false },
+            { "text": "Send", "correct": false },
+            { "text": "Write", "correct": false }
+          ]
+        },
+        {
+          "question_en": "What do you do with 'Mayai'?",
+          "question_sw": "Unafanya nini na 'Mayai'?",
+          "options": [
+            { "text": "Buy", "correct": true },
+            { "text": "Read", "correct": false },
+            { "text": "Send", "correct": false },
+            { "text": "Write", "correct": false }
+          ]
+        }
+      ]
+    }
+  ]
+}

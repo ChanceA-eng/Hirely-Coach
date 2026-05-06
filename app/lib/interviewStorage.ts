@@ -76,93 +76,10 @@ function safeParse(value: string | null) {
   }
 }
 
-const URL_RE = /https?:\/\/[^\s]+/i;
-
-function looksLikeUrl(value: string): boolean {
-  const v = value.trim().toLowerCase();
-  if (!v) return false;
-  return v.includes("http") || v.includes("searchjobs") || URL_RE.test(v);
-}
-
-function extractSessionUrl(session: InterviewSession): string {
-  const title = String(session.jobTitle || "").trim();
-  if (URL_RE.test(title)) {
-    return title.match(URL_RE)?.[0] || "";
-  }
-
-  const jobText = String(session.job || "");
-  const url = jobText.match(URL_RE)?.[0] || "";
-  return url;
-}
-
 export function loadInterviewHistory(userId?: string | null): InterviewSession[] {
   if (typeof window === "undefined") return [];
   const raw = window.localStorage.getItem(getHistoryKey(userId));
   return safeParse(raw);
-}
-
-export async function backfillLegacySessionTitles(userId?: string | null): Promise<number> {
-  if (typeof window === "undefined") return 0;
-
-  const history = loadInterviewHistory(userId);
-  if (!history.length) return 0;
-
-  const updated = [...history];
-  let changed = 0;
-
-  for (let i = 0; i < updated.length; i += 1) {
-    const session = updated[i];
-    const currentTitle = String(session.jobTitle || "").trim();
-    if (currentTitle && !looksLikeUrl(currentTitle)) continue;
-
-    const sourceUrl = extractSessionUrl(session);
-    if (!sourceUrl) continue;
-
-    try {
-      const res = await fetch("/api/scrape-job", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: sourceUrl }),
-      });
-      if (!res.ok) continue;
-
-      const data = (await res.json()) as { title?: string; company?: string };
-      const title = String(data.title || "").trim();
-      const company = String(data.company || "").trim();
-      const cleanTitle = company ? `${title} @ ${company}` : title;
-
-      if (!cleanTitle || looksLikeUrl(cleanTitle)) continue;
-
-      updated[i] = {
-        ...session,
-        jobTitle: cleanTitle,
-      };
-      changed += 1;
-    } catch {
-      // continue with next session
-    }
-  }
-
-  if (changed > 0) {
-    window.localStorage.setItem(getHistoryKey(userId), JSON.stringify(updated.slice(0, 20)));
-
-    const snapshot = loadGrowthHubSnapshot(userId);
-    if (snapshot) {
-      const matched = updated.find((session) => session.id === snapshot.sessionId);
-      const matchedTitle = String(matched?.jobTitle || "").trim();
-      if (matchedTitle && !looksLikeUrl(matchedTitle)) {
-        saveGrowthHubSnapshot(
-          {
-            ...snapshot,
-            jobTitle: matchedTitle,
-          },
-          userId
-        );
-      }
-    }
-  }
-
-  return changed;
 }
 
 export function findInterviewSession(sessionId: string, userId?: string | null) {
@@ -183,6 +100,38 @@ export function saveInterviewSession(session: InterviewSession, userId?: string 
 export function clearInterviewHistory(userId?: string | null) {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(getHistoryKey(userId));
+}
+
+/**
+ * Backfills jobTitle on sessions that were saved before jobTitle was captured.
+ * Derives a human-readable title from the first non-URL line of the job field.
+ * Returns the number of sessions that were updated.
+ */
+export async function backfillLegacySessionTitles(
+  userId?: string | null
+): Promise<number> {
+  if (typeof window === "undefined") return 0;
+  const sessions = loadInterviewHistory(userId);
+  let changed = 0;
+
+  const filled = sessions.map((session) => {
+    const existing = session.jobTitle?.trim();
+    if (existing && !/^https?:\/\//i.test(existing)) return session;
+    const firstLine = session.job.trim().split("\n")[0]?.trim().slice(0, 60) ?? "";
+    const derived = firstLine && !/^https?:\/\//i.test(firstLine) ? firstLine : "Target Job";
+    changed += 1;
+    return { ...session, jobTitle: derived };
+  });
+
+  if (changed > 0) {
+    try {
+      window.localStorage.setItem(getHistoryKey(userId), JSON.stringify(filled));
+    } catch {
+      // ignore localStorage failures
+    }
+  }
+
+  return changed;
 }
 
 export function saveGrowthHubSnapshot(snapshot: GrowthHubSnapshot, userId?: string | null) {

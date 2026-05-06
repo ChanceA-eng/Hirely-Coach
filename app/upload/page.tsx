@@ -432,10 +432,10 @@ export default function UploadPage() {
       ) {
         extracted = await readDOCXFile(file);
       } else if (file.type === "application/msword") {
-        setError("DOC files are not supported. Please convert to DOCX.");
+        setError("Oops! We can't open .DOC files yet. Save it as .DOCX first and try again!");
         return;
       } else {
-        setError("Unsupported file type. Please upload PDF, DOCX, or TXT.");
+        setError("Hmm, we can only read PDF, DOCX, or TXT files. Try uploading one of those!");
         return;
       }
 
@@ -454,7 +454,7 @@ export default function UploadPage() {
       }
       await scanResume(cleaned, file.name);
     } catch {
-      setError("Unable to read the file. Please try a different file.");
+      setError("Oops! We had trouble opening that file. Could you try a different one?");
     } finally {
       setIsParsing(false);
     }
@@ -464,7 +464,7 @@ export default function UploadPage() {
     const cleaned = cleanResumeText(resumeOverride ?? resumeText);
     const activeFileName = fileNameOverride ?? fileName;
     if (!cleaned) {
-      setError("Upload a resume file or paste resume text before scanning.");
+      setError("Add your resume first — upload a file or paste your text below.");
       return;
     }
 
@@ -562,14 +562,14 @@ export default function UploadPage() {
       const deepRes = await deepPromise;
       const deepData = (await deepRes.json()) as ResumeAuditReport | { error?: string };
       if (!deepRes.ok && !fastReport) {
-        setError((deepData as { error?: string }).error || "Resume scan failed.");
+        setError((deepData as { error?: string }).error || "Oops! The scan hit a snag. Please try again!");
         setDeepLoading(false);
         return;
       }
 
       const finalReport = deepRes.ok ? (deepData as ResumeAuditReport) : fastReport;
       if (!finalReport) {
-        setError("Resume scan failed.");
+        setError("Oops! The scan hit a snag. Please try again!");
         setDeepLoading(false);
         return;
       }
@@ -616,10 +616,10 @@ export default function UploadPage() {
       applyScoreRewards(finalReport.overallScore);
 
       if (!deepRes.ok) {
-        setError("Fast scores loaded. Detailed feedback is temporarily delayed.");
+        setError("Quick scores are ready! Detailed feedback is on its way.");
       }
     } catch {
-      setError("Unable to reach the audit service. Please try again.");
+      setError("Hmm, we couldn't connect just now. Give it another try!");
       setDeepLoading(false);
     } finally {
       setIsScanning(false);
@@ -675,7 +675,7 @@ export default function UploadPage() {
       setCopiedEntryId(entry.id);
       window.setTimeout(() => setCopiedEntryId(""), 1800);
     } catch {
-      setError("Unable to copy the Impact Log entry right now.");
+      setError("Oops! We couldn't copy that entry. Try again?");
     }
   };
 

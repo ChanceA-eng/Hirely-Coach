@@ -12,8 +12,8 @@ export default function SignUpPage() {
       </div>
       <SignUp
         path="/sign-up"
-        forceRedirectUrl="/growthhub"
-        fallbackRedirectUrl="/growthhub"
+        forceRedirectUrl="/onboarding"
+        fallbackRedirectUrl="/onboarding"
         appearance={{
           variables: {
             colorPrimary: "#10b981",

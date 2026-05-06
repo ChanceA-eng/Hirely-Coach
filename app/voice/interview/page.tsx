@@ -495,7 +495,7 @@ export default function InterviewPage() {
       });
       const data = await response.json();
       if (!response.ok) {
-        setError(data.error || "Unable to generate feedback.");
+        setError(data.error || "Oops! We couldn't load your feedback. Try again?");
         setFeedback("");
         setStatus("finished");
         return;
@@ -560,7 +560,7 @@ export default function InterviewPage() {
         });
       }
     } catch {
-      setError("Unable to generate feedback.");
+      setError("Oops! We couldn't load your feedback. Try again?");
       setFeedback("");
       setStatus("finished");
     }
@@ -815,7 +815,7 @@ export default function InterviewPage() {
         break;
       }
       case "error":
-        setError(`Realtime API error: ${msg.error?.message ?? "Unknown error"}`);
+        setError(`Oops! Something went wrong with the connection: ${msg.error?.message ?? "Unknown error"}`);
         setStatus("error");
         break;
       default:
@@ -844,7 +844,7 @@ export default function InterviewPage() {
       const sessionData = await sessionRes.json();
 
       if (!sessionRes.ok) {
-        setError(sessionData.error || "Failed to start realtime session.");
+        setError(sessionData.error || "We couldn't start the session. Try refreshing and try again!");
         setStatus("error");
         return;
       }
@@ -866,7 +866,7 @@ export default function InterviewPage() {
 
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
-          setError("WebRTC connection lost.");
+          setError("Oops! The connection dropped. Try reconnecting.");
           setStatus("error");
           cleanup();
         }
@@ -897,7 +897,7 @@ export default function InterviewPage() {
       });
 
       dc.addEventListener("error", () => {
-        setError("Data channel error.");
+        setError("Oops! There was a connection issue. Please try again.");
         setStatus("error");
       });
 
@@ -946,7 +946,7 @@ export default function InterviewPage() {
       const answerSdp = await sdpRes.text();
 
       if (!sdpRes.ok) {
-        setError(`WebRTC failed: ${answerSdp}`);
+        setError(`Oops! We couldn't connect. Try again or refresh the page. (${answerSdp})`);
         setStatus("error");
         cleanup();
         return;
@@ -954,7 +954,7 @@ export default function InterviewPage() {
 
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to connect.";
+      const message = err instanceof Error ? err.message : "Oops! Something went wrong. Try refreshing the page.";
       setError(message);
       setStatus("error");
     }
@@ -975,13 +975,13 @@ export default function InterviewPage() {
       });
       const data = await response.json();
       if (!response.ok) {
-        setError(data.error || "Unable to generate interview questions.");
+        setError(data.error || "Oops! We couldn't load your questions. Try again?");
         setStatus("error");
         return;
       }
       const list = parseQuestions(data.questions || "");
       if (!list.length) {
-        setError("Could not generate questions. Try a different job description.");
+        setError("Hmm, we couldn't build questions from that. Try a different job description?");
         setStatus("error");
         return;
       }
@@ -993,14 +993,14 @@ export default function InterviewPage() {
       setSegmentProgress(0);
       await startRealtimeSession(list, selectedTier);
     } catch {
-      setError("Server error while generating questions.");
+      setError("Something went wrong on our end. Try again in a moment!");
       setStatus("error");
     }
   };
 
   const handleSelectTier = async (selectedTier: StarrTierId) => {
     if (!isTierUnlocked(completedTiers, selectedTier)) {
-      setError("That tier is locked. Complete the previous tier to unlock it.");
+      setError("That level is locked. Finish the previous level to unlock it!");
       return;
     }
     setError("");

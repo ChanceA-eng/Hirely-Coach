@@ -6,6 +6,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth, useClerk, useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import SmartBrand from "./SmartBrand";
+import {
+  getMode,
+  setMode,
+  getFoundationProgress,
+  TOTAL_FOUNDATION_LESSONS,
+} from "../lib/foundationProgress";
 
 const NAV = [
   { href: "/growthhub", label: "GrowthHub" },
@@ -27,8 +33,12 @@ function IdentityNudge() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const [mode, setModeState] = useState<"foundation" | "coach" | null>(null);
+
+  const isFoundation = pathname?.startsWith("/foundation") ?? false;
 
   const firstName = user?.firstName ?? user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] ?? "Account";
 
@@ -42,6 +52,15 @@ function IdentityNudge() {
     if (open) document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
+
+  useEffect(() => {
+    fetch("/api/user/mode")
+      .then((res) => res.json() as Promise<{ current_mode: "foundation" | "coach" | null }>)
+      .then((payload) => {
+        setModeState(payload.current_mode);
+      })
+      .catch(() => setModeState(getMode()));
+  }, []);
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
@@ -118,21 +137,36 @@ function IdentityNudge() {
             }}
           >
             <NudgeItem
-              icon="⌂"
-              label="Go to GrowthHub"
-              onClick={() => { router.push("/growthhub"); setOpen(false); }}
-            />
-            <NudgeItem
               icon="◎"
-              label="Profile & Settings"
-              onClick={() => { router.push("/growthhub/profile"); setOpen(false); }}
+              label="Settings"
+              onClick={() => {
+                router.push(isFoundation ? "/foundation/settings" : "/growthhub/profile");
+                setOpen(false);
+              }}
             />
+            {!isFoundation && (
+              <NudgeItem
+                icon="⌂"
+                label="Go to GrowthHub"
+                onClick={() => { router.push("/growthhub"); setOpen(false); }}
+              />
+            )}
+            {isFoundation && mode === "coach" && (
+              <NudgeItem
+                icon="←"
+                label="Exit Foundation"
+                onClick={() => { router.push("/growthhub"); setOpen(false); }}
+              />
+            )}
             <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "6px 0" }} />
             <NudgeItem
               icon="→"
               label="Logout"
               danger
-              onClick={() => { setOpen(false); signOut({ redirectUrl: "/" }); }}
+              onClick={() => {
+                setOpen(false);
+                signOut({ redirectUrl: "/" });
+              }}
             />
           </motion.div>
         )}
@@ -192,17 +226,56 @@ function NudgeItem({
 export default function Header() {
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
-  const showLandingButtons = !isSignedIn && pathname === "/";
+  const [mode, setModeState] = useState<"foundation" | "coach" | null>(null);
+  const [progress, setProgress] = useState(0);
+
+  const isFoundation = pathname?.startsWith("/foundation") ?? false;
+  const isLandingPage = pathname === "/";
+  const showLandingContent = !isSignedIn && isLandingPage;
+
+  // Sync mode from API on sign-in
+  useEffect(() => {
+    if (!isSignedIn) {
+      setModeState(null);
+      return;
+    }
+    fetch("/api/user/mode")
+      .then((res) => res.json() as Promise<{ current_mode: "foundation" | "coach" | null }>)
+      .then((payload) => {
+        setModeState(payload.current_mode);
+        if (payload.current_mode) setMode(payload.current_mode);
+      })
+      .catch(() => setModeState(getMode()));
+  }, [isSignedIn]);
+
+  // Update progress bar whenever we're on a foundation route
+  useEffect(() => {
+    if (!isFoundation) return;
+    const data = getFoundationProgress();
+    const pct = Math.round((data.completedLessons.length / TOTAL_FOUNDATION_LESSONS) * 100);
+    setProgress(Math.max(0, Math.min(100, pct)));
+  }, [isFoundation, pathname]);
 
   return (
     <header className="global-header">
       <div className="global-header-inner">
+
+        {/* LEFT: Brand + optional landing nav */}
         <div className="global-header-left">
           <SmartBrand className="global-header-brand" />
-          {showLandingButtons && (
+          {isFoundation && (
+            <Link
+              href="/foundation/home"
+              className="glass-nav-item"
+              style={{ fontSize: "0.82rem", padding: "6px 14px" }}
+            >
+              My Path
+            </Link>
+          )}
+          {showLandingContent && (
             <nav className="global-header-links" aria-label="Section links">
               {UTILITY_NAV.map(({ href, label }) => (
-                <Link key={`${label}-${href}`} href={href} className="global-header-muted-link">
+                <Link key={label} href={href} className="global-header-muted-link">
                   {label}
                 </Link>
               ))}
@@ -210,61 +283,148 @@ export default function Header() {
           )}
         </div>
 
+        {/* RIGHT: Conditional nav based on mode */}
         <div className="global-header-right">
-          <nav className="global-header-nav" aria-label="Primary">
-            <SignedIn>
-              {NAV.map(({ href, label }) => {
-                const base = href.split("?")[0];
-                const active = pathname === base || pathname.startsWith(base + "/");
-                const isHelp = label === "?";
-                return (
+
+          <SignedIn>
+            {isFoundation ? (
+              /* ── FOUNDATION MODE ─────────────────────────────── */
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+
+                {/* Progress bar + percentage */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{
+                    width: 120,
+                    height: 6,
+                    background: "rgba(255,255,255,0.08)",
+                    borderRadius: 99,
+                    overflow: "hidden",
+                  }}>
+                    <div style={{
+                      width: `${progress}%`,
+                      height: "100%",
+                      background: "linear-gradient(90deg,#34d399,#22c55e)",
+                      transition: "width 0.35s ease",
+                    }} />
+                  </div>
+                  <span style={{
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    color: "#d1fae5",
+                    whiteSpace: "nowrap",
+                  }}>
+                    {progress}%
+                  </span>
+                </div>
+
+                {mode === "coach" && (
                   <Link
-                    key={href}
-                    href={href}
-                    aria-label={isHelp ? "Help Center" : undefined}
-                    title={isHelp ? "Help Center" : undefined}
-                    style={
-                      isHelp
-                        ? {
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: 28,
-                            height: 28,
-                            borderRadius: "50%",
-                            background: active
-                              ? "rgba(16,185,129,0.18)"
-                              : "rgba(255,255,255,0.06)",
-                            border: active
-                              ? "1px solid rgba(16,185,129,0.45)"
-                              : "1px solid rgba(255,255,255,0.1)",
-                            color: active ? "#10b981" : "#94a3b8",
-                            fontSize: "0.78rem",
-                            fontWeight: 800,
-                            lineHeight: 1,
-                            textDecoration: "none",
-                            flexShrink: 0,
-                          }
-                        : active
-                        ? { color: "#10b981" }
-                        : undefined
-                    }
+                    href="/growthhub"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                      color: "#94a3b8",
+                      textDecoration: "none",
+                      border: "1px solid rgba(148,163,184,0.2)",
+                      borderRadius: 6,
+                      padding: "0.3rem 0.65rem",
+                      whiteSpace: "nowrap",
+                    }}
                   >
-                    {label}
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
+                    </svg>
+                    Exit Foundation
                   </Link>
-                );
-              })}
-            </SignedIn>
-          </nav>
+                )}
+
+                {/* Notification bell (opens FoundationCommandCenter drawer) */}
+                <button
+                  type="button"
+                  aria-label="Open notifications"
+                  onClick={() => window.dispatchEvent(new CustomEvent("foundation:open-inbox"))}
+                  style={{
+                    position: "relative",
+                    width: 32,
+                    height: 32,
+                    borderRadius: 6,
+                    border: "1px solid rgba(148,163,184,0.2)",
+                    background: "rgba(255,255,255,0.04)",
+                    color: "#f59e0b",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                    <path d="M9 17a3 3 0 0 0 6 0" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              /* ── STANDARD COACH MODE ─────────────────────────── */
+              <nav className="global-header-nav" aria-label="Primary">
+                {NAV.map(({ href, label }) => {
+                  const base = href.split("?")[0];
+                  const active = pathname === base || pathname.startsWith(base + "/");
+                  const isHelp = label === "?";
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      aria-label={isHelp ? "Help Center" : undefined}
+                      title={isHelp ? "Help Center" : undefined}
+                      style={
+                        isHelp
+                          ? {
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: 28,
+                              height: 28,
+                              borderRadius: "50%",
+                              background: active ? "rgba(16,185,129,0.18)" : "rgba(255,255,255,0.06)",
+                              border: active ? "1px solid rgba(16,185,129,0.45)" : "1px solid rgba(255,255,255,0.1)",
+                              color: active ? "#10b981" : "#94a3b8",
+                              fontSize: "0.78rem",
+                              fontWeight: 800,
+                              lineHeight: 1,
+                              textDecoration: "none",
+                              flexShrink: 0,
+                            }
+                          : active
+                          ? { color: "#10b981" }
+                          : undefined
+                      }
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
+              </nav>
+            )}
+
+            {/* Switch to Foundation — only shown in Coach mode outside Foundation routes */}
+            {!isFoundation && mode === "coach" && (
+              <Link href="/foundation/home" className="global-header-muted-link">
+                Foundation
+              </Link>
+            )}
+          </SignedIn>
 
           <SignedOut>
-            {showLandingButtons && (
+            {showLandingContent && (
               <div className="global-header-auth" aria-label="Authentication">
                 <SignInButton mode="modal">
                   <button className="global-auth-btn" type="button">Login</button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <button className="global-auth-btn global-auth-btn--strong" type="button">Try Hirely Coach now</button>
+                  <button className="global-auth-btn global-auth-btn--strong" type="button">Try Hirely Coach Now</button>
                 </SignUpButton>
               </div>
             )}
@@ -273,6 +433,7 @@ export default function Header() {
           <SignedIn>
             <IdentityNudge />
           </SignedIn>
+
         </div>
       </div>
     </header>

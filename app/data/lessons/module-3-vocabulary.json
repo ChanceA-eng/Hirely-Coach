@@ -1,0 +1,353 @@
+{
+  "module": 3,
+  "title": "Sound Mastery Lab",
+  "title_sw": "Maabara ya Umilisi wa Sauti",
+  "description": "Master vowels, consonant clusters, and pronunciation mechanics with guided drills.",
+  "description_sw": "Umiliki vokali, makundi ya konsonanti, na mifumo ya matamshi kupitia mazoezi ya hatua kwa hatua.",
+  "sofia_intro": "Vowels and consonants are where your fluency starts to sound natural. Let us train your ear and mouth together.",
+  "sofia_intro_sw": "Vokali na konsonanti ndizo msingi wa matamshi ya asili. Tufundishe sikio na mdomo wako kwa pamoja.",
+  "lessons": [
+    {
+      "id": "3-1",
+      "type": "sounds_lab",
+      "title": "Maajabu ya Vokali (The Power of Vowels)",
+      "title_sw": "Maajabu ya Vokali",
+      "instruction_sw": "Vokali A, E, I, O, U ni roho ya neno. Leo utaona sauti fupi, sauti ndefu, na siri ya silent E.",
+      "instruction_en": "Vowels A, E, I, O, U are the heart of a word. Learn short sounds, long sounds, and silent E.",
+      "sofia_hint": "A single vowel can make two different sounds. Train slowly and clearly.",
+      "sofia_hint_sw": "Vokali moja inaweza kutoa sauti mbili tofauti. Jifunze taratibu na kwa uwazi.",
+      "short_vowels": [
+        {
+          "vowel": "A",
+          "phonetic_sw": "a",
+          "items": [
+            { "word": "Hat", "phonetic_sw": "hat", "translation_sw": "Kofia", "audio_en": "/audio/hat.mp3" },
+            { "word": "Man", "phonetic_sw": "man", "translation_sw": "Mwanamume", "audio_en": "/audio/man.mp3" },
+            { "word": "Bag", "phonetic_sw": "bag", "translation_sw": "Begi", "audio_en": "/audio/bag.mp3" }
+          ]
+        },
+        {
+          "vowel": "E",
+          "phonetic_sw": "e",
+          "items": [
+            { "word": "Egg", "phonetic_sw": "eg", "translation_sw": "Yai", "audio_en": "/audio/egg.mp3" },
+            { "word": "Pen", "phonetic_sw": "pen", "translation_sw": "Kalamu", "audio_en": "/audio/pen.mp3" },
+            { "word": "Ten", "phonetic_sw": "ten", "translation_sw": "Kumi", "audio_en": "/audio/ten.mp3" }
+          ]
+        },
+        {
+          "vowel": "I",
+          "phonetic_sw": "i",
+          "items": [
+            { "word": "Sit", "phonetic_sw": "sit", "translation_sw": "Keti", "audio_en": "/audio/sit.mp3" },
+            { "word": "Pig", "phonetic_sw": "pig", "translation_sw": "Nguruwe", "audio_en": "/audio/pig.mp3" },
+            { "word": "Bin", "phonetic_sw": "bin", "translation_sw": "Pipa la takataka", "audio_en": "/audio/bin.mp3" }
+          ]
+        },
+        {
+          "vowel": "O",
+          "phonetic_sw": "o",
+          "items": [
+            { "word": "Dog", "phonetic_sw": "dog", "translation_sw": "Mbwa", "audio_en": "/audio/dog.mp3" },
+            { "word": "Box", "phonetic_sw": "boks", "translation_sw": "Sanduku", "audio_en": "/audio/box.mp3" },
+            { "word": "Stop", "phonetic_sw": "stop", "translation_sw": "Simama", "audio_en": "/audio/stop.mp3" }
+          ]
+        },
+        {
+          "vowel": "U",
+          "phonetic_sw": "a",
+          "items": [
+            { "word": "Sun", "phonetic_sw": "san", "translation_sw": "Jua", "audio_en": "/audio/sun.mp3" },
+            { "word": "Cup", "phonetic_sw": "kap", "translation_sw": "Kikombe", "audio_en": "/audio/cup.mp3" },
+            { "word": "Run", "phonetic_sw": "ran", "translation_sw": "Kimbia", "audio_en": "/audio/run.mp3" }
+          ]
+        }
+      ],
+      "letter_applications": [
+        { "letter": "A", "phonetic_sw": "ei", "example_word": "Apple", "example_phonetic_sw": "apo", "translation_sw": "Tofaa", "audio_letter_en": "/audio/letter_a.mp3", "audio_example_en": "/audio/word_apple.mp3" },
+        { "letter": "B", "phonetic_sw": "bi", "example_word": "Book", "example_phonetic_sw": "buk", "translation_sw": "Kitabu", "audio_letter_en": "/audio/letter_b.mp3", "audio_example_en": "/audio/word_book.mp3" },
+        { "letter": "C", "phonetic_sw": "si/k", "example_word": "Cat", "example_phonetic_sw": "kat", "translation_sw": "Paka", "audio_letter_en": "/audio/letter_c.mp3", "audio_example_en": "/audio/word_cat.mp3" },
+        { "letter": "D", "phonetic_sw": "di", "example_word": "Dog", "example_phonetic_sw": "dog", "translation_sw": "Mbwa", "audio_letter_en": "/audio/letter_d.mp3", "audio_example_en": "/audio/word_dog.mp3" },
+        { "letter": "E", "phonetic_sw": "i", "example_word": "Egg", "example_phonetic_sw": "eg", "translation_sw": "Yai", "audio_letter_en": "/audio/letter_e.mp3", "audio_example_en": "/audio/egg.mp3" },
+        { "letter": "F", "phonetic_sw": "ef", "example_word": "Fish", "example_phonetic_sw": "fish", "translation_sw": "Samaki", "audio_letter_en": "/audio/letter_f.mp3", "audio_example_en": "/audio/fish.mp3" },
+        { "letter": "G", "phonetic_sw": "ji", "example_word": "Green", "example_phonetic_sw": "grin", "translation_sw": "Kijani", "audio_letter_en": "/audio/letter_g.mp3", "audio_example_en": "/audio/green.mp3" },
+        { "letter": "H", "phonetic_sw": "eich", "example_word": "Hat", "example_phonetic_sw": "hat", "translation_sw": "Kofia", "audio_letter_en": "/audio/letter_h.mp3", "audio_example_en": "/audio/hat.mp3" },
+        { "letter": "I", "phonetic_sw": "ai", "example_word": "Ink", "example_phonetic_sw": "ink", "translation_sw": "Wino", "audio_letter_en": "/audio/letter_i.mp3", "audio_example_en": "/audio/word_ink.mp3" },
+        { "letter": "J", "phonetic_sw": "jei", "example_word": "Job", "example_phonetic_sw": "job", "translation_sw": "Kazi", "audio_letter_en": "/audio/letter_j.mp3", "audio_example_en": "/audio/word_job.mp3" },
+        { "letter": "K", "phonetic_sw": "kei", "example_word": "King", "example_phonetic_sw": "king", "translation_sw": "Mfalme", "audio_letter_en": "/audio/letter_k.mp3", "audio_example_en": "/audio/king.mp3" },
+        { "letter": "L", "phonetic_sw": "el", "example_word": "Light", "example_phonetic_sw": "lait", "translation_sw": "Mwanga", "audio_letter_en": "/audio/letter_l.mp3", "audio_example_en": "/audio/light.mp3" },
+        { "letter": "M", "phonetic_sw": "em", "example_word": "Man", "example_phonetic_sw": "man", "translation_sw": "Mwanamume", "audio_letter_en": "/audio/letter_m.mp3", "audio_example_en": "/audio/man.mp3" },
+        { "letter": "N", "phonetic_sw": "en", "example_word": "Nose", "example_phonetic_sw": "nouz", "translation_sw": "Pua", "audio_letter_en": "/audio/letter_n.mp3", "audio_example_en": "/audio/word_nose.mp3" },
+        { "letter": "O", "phonetic_sw": "ou", "example_word": "Orange", "example_phonetic_sw": "orenji", "translation_sw": "Rangi ya chungwa", "audio_letter_en": "/audio/letter_o.mp3", "audio_example_en": "/audio/orange.mp3" },
+        { "letter": "P", "phonetic_sw": "pi", "example_word": "Pen", "example_phonetic_sw": "pen", "translation_sw": "Kalamu", "audio_letter_en": "/audio/letter_p.mp3", "audio_example_en": "/audio/pen.mp3" },
+        { "letter": "Q", "phonetic_sw": "kyu", "example_word": "Queen", "example_phonetic_sw": "kwin", "translation_sw": "Malkia", "audio_letter_en": "/audio/letter_q.mp3", "audio_example_en": "/audio/word_queen.mp3" },
+        { "letter": "R", "phonetic_sw": "ar", "example_word": "Run", "example_phonetic_sw": "ran", "translation_sw": "Kimbia", "audio_letter_en": "/audio/letter_r.mp3", "audio_example_en": "/audio/run.mp3" },
+        { "letter": "S", "phonetic_sw": "es", "example_word": "Sun", "example_phonetic_sw": "san", "translation_sw": "Jua", "audio_letter_en": "/audio/letter_s.mp3", "audio_example_en": "/audio/sun.mp3" },
+        { "letter": "T", "phonetic_sw": "ti", "example_word": "Ten", "example_phonetic_sw": "ten", "translation_sw": "Kumi", "audio_letter_en": "/audio/letter_t.mp3", "audio_example_en": "/audio/ten.mp3" },
+        { "letter": "U", "phonetic_sw": "yu", "example_word": "Umbrella", "example_phonetic_sw": "ambrela", "translation_sw": "Mwavuli", "audio_letter_en": "/audio/letter_u.mp3", "audio_example_en": "/audio/word_umbrella.mp3" },
+        { "letter": "V", "phonetic_sw": "vi", "example_word": "Very", "example_phonetic_sw": "veri", "translation_sw": "Sana", "audio_letter_en": "/audio/letter_v.mp3", "audio_example_en": "/audio/very.mp3" },
+        { "letter": "W", "phonetic_sw": "dablyu", "example_word": "Water", "example_phonetic_sw": "wota", "translation_sw": "Maji", "audio_letter_en": "/audio/letter_w.mp3", "audio_example_en": "/audio/word_water.mp3" },
+        { "letter": "X", "phonetic_sw": "eks", "example_word": "Box", "example_phonetic_sw": "boks", "translation_sw": "Sanduku", "audio_letter_en": "/audio/letter_x.mp3", "audio_example_en": "/audio/box.mp3" },
+        { "letter": "Y", "phonetic_sw": "wai", "example_word": "Yellow", "example_phonetic_sw": "yelou", "translation_sw": "Njano", "audio_letter_en": "/audio/letter_y.mp3", "audio_example_en": "/audio/yellow.mp3" },
+        { "letter": "Z", "phonetic_sw": "zed", "example_word": "Zoo", "example_phonetic_sw": "zu", "translation_sw": "Bustani ya wanyama", "audio_letter_en": "/audio/letter_z.mp3", "audio_example_en": "/audio/word_zoo.mp3" }
+      ],
+      "long_vowel_pairs": [
+        {
+          "from": "Mad",
+          "to": "Made",
+          "sound": "ei",
+          "from_phonetic_sw": "mad",
+          "to_phonetic_sw": "meid",
+          "translation_sw": "Mad inakuwa Made - Imetengenezwa",
+          "audio_from_en": "/audio/mad.mp3",
+          "audio_to_en": "/audio/made.mp3"
+        },
+        {
+          "from": "Fin",
+          "to": "Fine",
+          "sound": "ai",
+          "from_phonetic_sw": "fin",
+          "to_phonetic_sw": "fain",
+          "translation_sw": "Fin inakuwa Fine - Safi/Sawa",
+          "audio_from_en": "/audio/fin.mp3",
+          "audio_to_en": "/audio/fine.mp3"
+        },
+        {
+          "from": "Hop",
+          "to": "Hope",
+          "sound": "ou",
+          "from_phonetic_sw": "hop",
+          "to_phonetic_sw": "houp",
+          "translation_sw": "Hop inakuwa Hope - Tumaini",
+          "audio_from_en": "/audio/hop.mp3",
+          "audio_to_en": "/audio/hope.mp3"
+        },
+        {
+          "from": "Cut",
+          "to": "Cute",
+          "sound": "yu",
+          "from_phonetic_sw": "kat",
+          "to_phonetic_sw": "kyut",
+          "translation_sw": "Cut inakuwa Cute - Mrembo/Anayevutia",
+          "audio_from_en": "/audio/cut.mp3",
+          "audio_to_en": "/audio/cute.mp3"
+        }
+      ],
+      "long_vowel_sets": [
+        { "vowel": "A", "sound": "ai", "example_word": "Cake", "example_phonetic_sw": "keik", "translation_sw": "Keki", "audio_en": "/audio/cake.mp3" },
+        { "vowel": "E", "sound": "ii", "example_word": "Eve", "example_phonetic_sw": "iiv", "translation_sw": "Hawa", "audio_en": "/audio/eve.mp3" },
+        { "vowel": "I", "sound": "ai", "example_word": "Bike", "example_phonetic_sw": "baik", "translation_sw": "Baiskeli", "audio_en": "/audio/bike.mp3" },
+        { "vowel": "O", "sound": "ou", "example_word": "Home", "example_phonetic_sw": "houm", "translation_sw": "Nyumbani", "audio_en": "/audio/home.mp3" },
+        { "vowel": "U", "sound": "yu", "example_word": "Cube", "example_phonetic_sw": "kyub", "translation_sw": "Mchemraba", "audio_en": "/audio/cube.mp3" },
+        { "vowel": "Y", "sound": "ai", "example_word": "My", "example_phonetic_sw": "mai", "translation_sw": "Yangu", "audio_en": "/audio/my.mp3" }
+      ],
+      "listen_choose": [
+        {
+          "prompt_text_en": "Fine",
+          "prompt_phonetic_sw": "fain",
+          "options": ["FIN", "FINE"],
+          "correct": 1
+        },
+        {
+          "prompt_text_en": "Made",
+          "prompt_phonetic_sw": "meid",
+          "options": ["MAD", "MADE"],
+          "correct": 1
+        }
+      ],
+      "fill_blanks": [
+        { "clue_sw": "Picha ya kofia", "template": "H _ T", "answer": "A" },
+        { "clue_sw": "Picha ya kikombe", "template": "C _ P", "answer": "U" }
+      ],
+      "sentence_examples": [
+        { "en": "Cake uses long A.", "phonetic_sw": "keik yuziz long ei", "sw": "Cake hutumia A ndefu.", "audio_en": "/audio/cake_uses_long_a.mp3" },
+        { "en": "Home uses long O.", "phonetic_sw": "houm yuziz long ou", "sw": "Home hutumia O ndefu.", "audio_en": "/audio/home_uses_long_o.mp3" }
+      ]
+    },
+    {
+      "id": "3-2",
+      "type": "sounds_lab",
+      "title": "Somo la 5: Konsonanti na Sauti Changamani",
+      "title_sw": "Somo la 5: Konsonanti na Sauti Changamani",
+      "instruction_sw": "Kuna herufi zinazokaa pamoja na kutengeneza sauti mpya kabisa. Hapa ndipo Kiingereza kinapochangamsha.",
+      "instruction_en": "Some letters combine to form completely new sounds. This is where English gets exciting.",
+      "sofia_hint": "Focus on ending sounds and tiny differences. They change meaning fast.",
+      "sofia_hint_sw": "Lenga sauti za mwisho na tofauti ndogo. Hizo hubadilisha maana haraka.",
+      "digraph_groups": [
+        {
+          "label": "SH",
+          "phonetic_sw": "sha",
+          "items": [
+            { "word": "Fish", "phonetic_sw": "fish", "translation_sw": "Samaki", "audio_en": "/audio/fish.mp3" },
+            { "word": "Ship", "phonetic_sw": "ship", "translation_sw": "Mel", "audio_en": "/audio/ship.mp3" },
+            { "word": "Wash", "phonetic_sw": "wosh", "translation_sw": "Osha", "audio_en": "/audio/wash.mp3" }
+          ]
+        },
+        {
+          "label": "CH",
+          "phonetic_sw": "cha",
+          "items": [
+            { "word": "Chips", "phonetic_sw": "chips", "translation_sw": "Viazi", "audio_en": "/audio/chips.mp3" },
+            { "word": "Lunch", "phonetic_sw": "lanch", "translation_sw": "Chakula cha mchana", "audio_en": "/audio/lunch.mp3" },
+            { "word": "Watch", "phonetic_sw": "woch", "translation_sw": "Saa/Tazama", "audio_en": "/audio/watch.mp3" }
+          ]
+        },
+        {
+          "label": "TH (za)",
+          "phonetic_sw": "za",
+          "items": [
+            { "word": "This", "phonetic_sw": "zis", "translation_sw": "Hii", "audio_en": "/audio/this.mp3" },
+            { "word": "Father", "phonetic_sw": "faza", "translation_sw": "Baba", "audio_en": "/audio/father.mp3" }
+          ]
+        },
+        {
+          "label": "TH (tha)",
+          "phonetic_sw": "tha",
+          "items": [
+            { "word": "Three", "phonetic_sw": "thri", "translation_sw": "Tatu", "audio_en": "/audio/three.mp3" },
+            { "word": "Bath", "phonetic_sw": "bath", "translation_sw": "Oga", "audio_en": "/audio/bath.mp3" }
+          ]
+        },
+        {
+          "label": "WH",
+          "phonetic_sw": "wa",
+          "items": [
+            { "word": "What", "phonetic_sw": "wot", "translation_sw": "Nini", "audio_en": "/audio/what.mp3" },
+            { "word": "White", "phonetic_sw": "wait", "translation_sw": "Nyeupe", "audio_en": "/audio/white.mp3" },
+            { "word": "Where", "phonetic_sw": "wea", "translation_sw": "Wapi", "audio_en": "/audio/where.mp3" }
+          ]
+        }
+      ],
+      "ending_blends": [
+        {
+          "label": "-NG",
+          "phonetic_sw": "ng",
+          "items": [
+            { "word": "Sing", "phonetic_sw": "sing", "translation_sw": "Imba", "audio_en": "/audio/sing.mp3" },
+            { "word": "Long", "phonetic_sw": "long", "translation_sw": "Ndefu", "audio_en": "/audio/long.mp3" },
+            { "word": "King", "phonetic_sw": "king", "translation_sw": "Mfalme", "audio_en": "/audio/king.mp3" }
+          ]
+        },
+        {
+          "label": "-NK",
+          "phonetic_sw": "nk",
+          "items": [
+            { "word": "Bank", "phonetic_sw": "benk", "translation_sw": "Benki", "audio_en": "/audio/bank.mp3" },
+            { "word": "Drink", "phonetic_sw": "drink", "translation_sw": "Kunywa", "audio_en": "/audio/drink.mp3" },
+            { "word": "Pink", "phonetic_sw": "pink", "translation_sw": "Rangi ya pinki", "audio_en": "/audio/pink.mp3" }
+          ]
+        },
+        {
+          "label": "-CK",
+          "phonetic_sw": "k",
+          "items": [
+            { "word": "Back", "phonetic_sw": "bak", "translation_sw": "Nyuma", "audio_en": "/audio/back.mp3" },
+            { "word": "Rock", "phonetic_sw": "rok", "translation_sw": "Jiwe", "audio_en": "/audio/rock.mp3" },
+            { "word": "Duck", "phonetic_sw": "dak", "translation_sw": "Bata", "audio_en": "/audio/duck.mp3" }
+          ]
+        }
+      ],
+      "minimal_pairs": [
+        {
+          "left": "Pin",
+          "left_phonetic_sw": "pin",
+          "right": "Bin",
+          "right_phonetic_sw": "bin",
+          "note_sw": "P vs B",
+          "audio_left_en": "/audio/pin.mp3",
+          "audio_right_en": "/audio/bin.mp3"
+        },
+        {
+          "left": "Light",
+          "left_phonetic_sw": "lait",
+          "right": "Right",
+          "right_phonetic_sw": "rait",
+          "note_sw": "L vs R",
+          "audio_left_en": "/audio/light.mp3",
+          "audio_right_en": "/audio/right.mp3"
+        },
+        {
+          "left": "Bus",
+          "left_phonetic_sw": "bas",
+          "right": "Buzz",
+          "right_phonetic_sw": "baz",
+          "note_sw": "S vs Z",
+          "audio_left_en": "/audio/bus.mp3",
+          "audio_right_en": "/audio/buzz.mp3"
+        }
+      ]
+    },
+    {
+      "id": "3-3",
+      "type": "sounds_lab",
+      "title": "Pronunciation Tools Lab",
+      "title_sw": "Maabara ya Zana za Matamshi",
+      "instruction_sw": "Tumia slider, rekodi sauti yako, na fuata mwongozo wa mdomo kwa sauti ngumu.",
+      "instruction_en": "Use slider comparison, voice recording, and mouth guidance for hard sounds.",
+      "sofia_hint": "Record, compare, and repeat until your pronunciation feels natural.",
+      "sofia_hint_sw": "Rekodi, linganisha, na rudia hadi matamshi yako yawe ya asili.",
+      "record_targets": [
+        { "word": "Three", "phonetic_sw": "thri", "cue_sw": "Sema neno hili kwa uwazi mara tatu" },
+        { "word": "This", "phonetic_sw": "zis", "cue_sw": "Linganisha TH laini na TH ngumu" },
+        { "word": "Very", "phonetic_sw": "veri", "cue_sw": "Leta meno juu yaguse mdomo wa chini kidogo" }
+      ],
+      "mouth_guides": [
+        {
+          "sound": "TH",
+          "tip_sw": "Weka ncha ya ulimi kati ya meno ya mbele, kisha toa hewa taratibu.",
+          "tip_en": "Place the tongue tip gently between front teeth, then release air softly.",
+          "media_url": "/assets/media/mouth/th-guide.gif"
+        },
+        {
+          "sound": "V",
+          "tip_sw": "Meno ya juu yaguse mdomo wa chini na utoe sauti kwa mtetemo mdogo.",
+          "tip_en": "Touch upper teeth to lower lip and produce a gentle voiced vibration.",
+          "media_url": "/assets/media/mouth/v-guide.gif"
+        }
+      ]
+    },
+    {
+      "id": "3-4",
+      "type": "multiple_choice",
+      "title": "Module 3 Final Assessment",
+      "title_sw": "Tathmini ya Mwisho ya Moduli 3",
+      "questions": [
+        {
+          "prompt": "Which word uses a long vowel sound due to silent E?",
+          "prompt_sw": "Neno gani lina sauti ndefu kwa sababu ya silent E?",
+          "options": ["fin", "mad", "hope", "hat"],
+          "options_sw": ["fin", "mad", "hope", "hat"],
+          "correct": 2
+        },
+        {
+          "prompt": "Which digraph appears in 'ship'?",
+          "prompt_sw": "Digraph gani ipo kwenye neno 'ship'?",
+          "options": ["ch", "sh", "th", "wh"],
+          "options_sw": ["ch", "sh", "th", "wh"],
+          "correct": 1
+        },
+        {
+          "prompt": "Choose the correct minimal pair for L vs R.",
+          "prompt_sw": "Chagua minimal pair sahihi kwa L vs R.",
+          "options": ["Pin/Bin", "Bus/Buzz", "Light/Right", "Hop/Hope"],
+          "options_sw": ["Pin/Bin", "Bus/Buzz", "Light/Right", "Hop/Hope"],
+          "correct": 2
+        },
+        {
+          "prompt": "Which ending blend appears in 'bank'?",
+          "prompt_sw": "Ending blend gani ipo kwenye 'bank'?",
+          "options": ["-ng", "-sh", "-nk", "-ck"],
+          "options_sw": ["-ng", "-sh", "-nk", "-ck"],
+          "correct": 2
+        },
+        {
+          "prompt": "What is the short-vowel partner of 'bite'?",
+          "prompt_sw": "Ni neno lipi la sauti fupi linalolingana na 'bite'?",
+          "options": ["bit", "bet", "bat", "bot"],
+          "options_sw": ["bit", "bet", "bat", "bot"],
+          "correct": 0
+        }
+      ]
+    }
+  ]
+}

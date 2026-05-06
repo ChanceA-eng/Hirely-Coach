@@ -1,0 +1,238 @@
+{
+  "module": 6,
+  "title": "Conversation Confidence",
+  "title_sw": "Ujasiri wa Mazungumzo",
+  "description": "Practice real English conversations, listening, and speaking for graduation.",
+  "description_sw": "Fanya mazoezi ya mazungumzo halisi, kusikiliza, na kuzungumza kwa ajili ya kuhitimu.",
+  "sofia_intro": "This is the final module. You are ready to talk confidently with recruiters.",
+  "sofia_intro_sw": "Hii ni moduli ya mwisho. Uko tayari kuzungumza kwa ujasiri na waajiri.",
+  "lessons": [
+    {
+      "id": "6-1",
+      "type": "dialogue",
+      "title": "Greetings and Introductions",
+      "title_sw": "Salamu na Utambulisho",
+      "sofia_hint": "Practice these dialogues by clicking play, then say them yourself.",
+      "sofia_hint_sw": "Fanya mazoezi ya mazungumzo haya kwa kubonyeza play, kisha yaseme mwenyewe.",
+      "dialogues": [
+        {
+          "title": "Meeting a New Colleague",
+          "title_sw": "Kukutana na Mwenzako Mpya",
+          "lines": [
+            { "speaker": "You", "en": "Good morning. My name is James. I just joined the team.", "sw": "Habari za asubuhi. Jina langu ni James. Nimeungana na timu tu.", "audio_url": "/audio/intro_1.mp3" },
+            { "speaker": "Sofia", "en": "Good morning, James! Nice to meet you. I am Sofia, the team lead.", "sw": "Habari za asubuhi, James! Furaha kukutana nawe. Mimi ni Sofia, kiongozi wa timu.", "audio_url": "/audio/intro_2.mp3" },
+            { "speaker": "You", "en": "Nice to meet you too. I am looking forward to working with everyone.", "sw": "Furaha kukutana nawe pia. Ninasubiri kufanya kazi na kila mtu.", "audio_url": "/audio/intro_3.mp3" }
+          ]
+        },
+        {
+          "title": "Introducing Yourself in an Interview",
+          "title_sw": "Kujitambulisha kwenye Mahojiano",
+          "lines": [
+            { "speaker": "Sofia", "en": "Please tell me about yourself.", "sw": "Tafadhali nipe maelezo kuhusu wewe.", "audio_url": "/audio/interview_intro_1.mp3" },
+            { "speaker": "You", "en": "My name is James. I have three years of experience in customer service.", "sw": "Jina langu ni James. Nina uzoefu wa miaka mitatu kwenye huduma za wateja.", "audio_url": "/audio/interview_intro_2.mp3" },
+            { "speaker": "Sofia", "en": "That is impressive. Why do you want this job?", "sw": "Hilo ni jambo la kuvutia. Kwa nini unataka kazi hii?", "audio_url": "/audio/interview_intro_3.mp3" },
+            { "speaker": "You", "en": "I want to grow my skills and contribute to a great team.", "sw": "Nataka kukuza ujuzi wangu na kuchangia timu nzuri.", "audio_url": "/audio/interview_intro_4.mp3" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6-2",
+      "type": "listening",
+      "title": "Listening Comprehension",
+      "title_sw": "Uelewa wa Kusikiliza",
+      "exercises": [
+        {
+          "audio_url": "/audio/clip_1.mp3",
+          "transcript": "Our team meeting is at 9 AM in Conference Room B. Please bring your weekly report.",
+          "transcript_sw": "Mkutano wa timu uko saa tatu asubuhi kwenye chumba B. Tafadhali lete ripoti yako ya wiki.",
+          "question": "What should you bring to the meeting?",
+          "question_sw": "Unapaswa kuleta nini kwenye mkutano?",
+          "options": ["Your lunch", "Your weekly report", "Your phone", "A presentation"],
+          "correct": 1
+        },
+        {
+          "audio_url": "/audio/clip_2.mp3",
+          "transcript": "The deadline for the project has been moved to next Friday.",
+          "transcript_sw": "Muda wa mwisho wa mradi umesogezwa hadi Ijumaa ijayo.",
+          "question": "What changed about the project?",
+          "question_sw": "Nini kimebadilika kuhusu mradi?",
+          "options": ["The team changed", "The budget changed", "The deadline moved", "The location changed"],
+          "correct": 2
+        },
+        {
+          "audio_url": "/audio/clip_3.mp3",
+          "transcript": "Our client is very happy. We improved their sales by 30%.",
+          "transcript_sw": "Mteja wetu ameridhika sana. Tumeongeza mauzo yao kwa 30%.",
+          "question": "What was the improvement percentage?",
+          "question_sw": "Kiwango cha uboreshaji kilikuwa kipi?",
+          "options": ["10%", "20%", "30%", "40%"],
+          "correct": 2
+        }
+      ]
+    },
+    {
+      "id": "6-3",
+      "type": "speaking_prompt",
+      "title": "Speaking Practice",
+      "title_sw": "Mazoezi ya Kuzungumza",
+      "prompts": [
+        {
+          "question": "What is your name and where are you from?",
+          "question_sw": "Jina lako ni nani na unatoka wapi?",
+          "sample_answer": "My name is James. I am from Nairobi, Kenya.",
+          "sample_answer_sw": "Jina langu ni James. Ninatoka Nairobi, Kenya."
+        },
+        {
+          "question": "What kind of work do you do or want to do?",
+          "question_sw": "Unafanya kazi gani au unataka kufanya kazi gani?",
+          "sample_answer": "I work in customer service. I want to become a team leader.",
+          "sample_answer_sw": "Nafanya kazi kwenye huduma za wateja. Nataka kuwa kiongozi wa timu."
+        },
+        {
+          "question": "Tell me about one achievement you are proud of.",
+          "question_sw": "Nieleze mafanikio moja unayojivunia.",
+          "sample_answer": "I improved customer satisfaction by 20% in my last job.",
+          "sample_answer_sw": "Niliboresha kuridhika kwa wateja kwa 20% kwenye kazi yangu iliyopita."
+        }
+      ]
+    },
+    {
+      "id": "6-4",
+      "type": "dialogue",
+      "title": "Workplace Conversations",
+      "title_sw": "Mazungumzo ya Mahali pa Kazi",
+      "sofia_hint": "These are everyday situations. Listen, then repeat each line yourself.",
+      "sofia_hint_sw": "Hizi ni hali za kila siku. Sikiliza, kisha rudia kila mstari mwenyewe.",
+      "dialogues": [
+        {
+          "title": "Asking for Clarification",
+          "title_sw": "Kuomba Ufafanuzi",
+          "lines": [
+            { "speaker": "Manager", "en": "Please send me the report by end of day.", "sw": "Tafadhali nitumie ripoti mwisho wa siku.", "audio_url": "/audio/clarify_1.mp3" },
+            { "speaker": "You", "en": "Of course. Which report do you mean — the sales or the budget report?", "sw": "Bila shaka. Ripoti gani unayomaanisha — ya mauzo au ya bajeti?", "audio_url": "/audio/clarify_2.mp3" },
+            { "speaker": "Manager", "en": "The sales report. Thank you for asking.", "sw": "Ripoti ya mauzo. Asante kwa kuuliza.", "audio_url": "/audio/clarify_3.mp3" }
+          ]
+        },
+        {
+          "title": "Joining a Meeting Late",
+          "title_sw": "Kuingia Mkutano Kwa Kuchelewa",
+          "lines": [
+            { "speaker": "You", "en": "Sorry I am late. I was in another meeting.", "sw": "Samahani nimechelewa. Nilikuwa kwenye mkutano mwingine.", "audio_url": "/audio/late_1.mp3" },
+            { "speaker": "Sofia", "en": "No problem. We just started. Please take a seat.", "sw": "Hakuna tatizo. Tulianza tu. Tafadhali keti.", "audio_url": "/audio/late_2.mp3" },
+            { "speaker": "You", "en": "Thank you. Can I get a quick update?", "sw": "Asante. Naweza kupata muhtasari mfupi?", "audio_url": "/audio/late_3.mp3" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6-5",
+      "type": "listening",
+      "title": "Listening Practice 2",
+      "title_sw": "Mazoezi ya Kusikiliza 2",
+      "exercises": [
+        {
+          "audio_url": "/audio/clip_4.mp3",
+          "transcript": "Could you please coordinate with the sales team and send me a summary by Thursday?",
+          "transcript_sw": "Je, unaweza kuratibu na timu ya mauzo na kunitumia muhtasari ifikapo Alhamisi?",
+          "question": "What is the deadline?",
+          "question_sw": "Tarehe ya mwisho ni lini?",
+          "options": ["Monday", "Tuesday", "Thursday", "Friday"],
+          "correct": 2
+        },
+        {
+          "audio_url": "/audio/clip_5.mp3",
+          "transcript": "Your performance review is scheduled for next Tuesday at 2 PM.",
+          "transcript_sw": "Tathmini yako ya utendaji imepangwa kwa Jumanne ijayo saa nane mchana.",
+          "question": "What is happening next Tuesday?",
+          "question_sw": "Kinachofanyika Jumanne ijayo ni nini?",
+          "options": ["A meeting", "A training", "A performance review", "A promotion"],
+          "correct": 2
+        },
+        {
+          "audio_url": "/audio/clip_6.mp3",
+          "transcript": "We need to cut the budget by 15%. Please review all project expenses.",
+          "transcript_sw": "Tunahitaji kupunguza bajeti kwa asilimia 15. Tafadhali kagua gharama zote za mradi.",
+          "question": "What should be reviewed?",
+          "question_sw": "Nini kinapaswa kukaguliwa?",
+          "options": ["The team list", "Project expenses", "The schedule", "Staff emails"],
+          "correct": 1
+        },
+        {
+          "audio_url": "/audio/clip_7.mp3",
+          "transcript": "Great job on the presentation. The client was very impressed with your results.",
+          "transcript_sw": "Kazi nzuri kwenye uwasilishaji. Mteja alivutwa sana na matokeo yako.",
+          "question": "Who was impressed?",
+          "question_sw": "Nani alivutwa?",
+          "options": ["The manager", "The client", "The team", "Sofia"],
+          "correct": 1
+        }
+      ]
+    },
+    {
+      "id": "6-6",
+      "type": "multiple_choice",
+      "title": "Module 6 Final Assessment",
+      "title_sw": "Tathmini ya Mwisho ya Moduli 6",
+      "is_graduation_gate": true,
+      "questions": [
+        {
+          "prompt": "What is the correct professional morning greeting?",
+          "prompt_sw": "Salamu sahihi ya asubuhi kwenye mazingira ya kitaaluma ni ipi?",
+          "options": ["Hey", "Good morning", "What's up", "Yo"],
+          "options_sw": ["Hey", "Good morning", "What's up", "Yo"],
+          "correct": 1
+        },
+        {
+          "prompt": "'The deadline is next Friday' means:",
+          "prompt_sw": "Kauli 'The deadline is next Friday' inamaanisha nini?",
+          "options": ["Meeting on Friday", "Rest on Friday", "Work done by Friday", "Friday is holiday"],
+          "options_sw": ["Mkutano Ijumaa", "Pumzika Ijumaa", "Kazi ikamilike Ijumaa", "Ijumaa ni likizo"],
+          "correct": 2
+        },
+        {
+          "prompt": "'Please coordinate with the team' means:",
+          "prompt_sw": "Kauli 'Please coordinate with the team' inamaanisha nini?",
+          "options": ["Work alone", "Communicate and work together", "Write an email only", "Wait for instructions"],
+          "options_sw": ["Fanya kazi peke yako", "Wasiliana na fanya kazi pamoja", "Andika barua pepe tu", "Subiri maelekezo"],
+          "correct": 1
+        },
+        {
+          "prompt": "What does 'Sorry I am late. I was in another meeting' show?",
+          "prompt_sw": "Kauli 'Sorry I am late. I was in another meeting' inaonyesha nini?",
+          "options": ["Rudeness", "Professionalism", "Anger", "Confusion"],
+          "options_sw": ["Ukali", "Utaalamu", "Hasira", "Mkanganyiko"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which response is best when asked for clarification?",
+          "prompt_sw": "Jibu gani ni bora unapoulizwa kutoa ufafanuzi?",
+          "options": ["I do not know", "Which one do you mean?", "Ask someone else", "Later"],
+          "options_sw": ["Sijui", "Unamaanisha ipi?", "Uliza mtu mwingine", "Baadaye"],
+          "correct": 1
+        },
+        {
+          "prompt": "'Performance review' is about:",
+          "prompt_sw": "'Performance review' inahusu nini?",
+          "options": ["Your salary only", "How well you work", "Your attendance only", "Your uniform"],
+          "options_sw": ["Mshahara wako tu", "Jinsi unavyofanya kazi", "Mahudhurio yako tu", "Sare yako"],
+          "correct": 1
+        },
+        {
+          "prompt": "The word 'coordinate' in a workplace means:",
+          "prompt_sw": "Neno 'coordinate' mahali pa kazi linamaanisha:",
+          "options": ["Ratibu", "Unda", "Simamia", "Boresha"],
+          "options_sw": ["Ratibu", "Unda", "Simamia", "Boresha"],
+          "correct": 0
+        },
+        {
+          "prompt": "Which word means 'Muhtasari'?",
+          "prompt_sw": "Neno gani linamaanisha 'Muhtasari'?",
+          "options": ["Report", "Summary", "Feedback", "Invoice"],
+          "options_sw": ["Ripoti", "Muhtasari", "Maoni", "Ankara"],
+          "correct": 1
+        }
+      ]
+    }
+  ]
+}

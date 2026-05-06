@@ -1,0 +1,45 @@
+{
+  "vowel_short_sounds": [
+    { "vowel": "A", "examples": ["Hat", "Man", "Bag"] },
+    { "vowel": "E", "examples": ["Egg", "Pen", "Ten"] },
+    { "vowel": "I", "examples": ["Sit", "Pig", "Bin"] },
+    { "vowel": "O", "examples": ["Dog", "Box", "Stop"] },
+    { "vowel": "U", "examples": ["Sun", "Cup", "Run"] }
+  ],
+  "silent_e_pairs": [
+    { "short": "Mad", "long": "Made", "sound": "ei" },
+    { "short": "Fin", "long": "Fine", "sound": "ai" },
+    { "short": "Hop", "long": "Hope", "sound": "ou" },
+    { "short": "Cut", "long": "Cute", "sound": "yu" }
+  ],
+  "long_vowels_full": [
+    { "vowel": "A", "sound": "ai", "example": "Cake" },
+    { "vowel": "E", "sound": "ii", "example": "Eve" },
+    { "vowel": "I", "sound": "ai", "example": "Bike" },
+    { "vowel": "O", "sound": "ou", "example": "Home" },
+    { "vowel": "U", "sound": "yu", "example": "Cube" },
+    { "vowel": "Y", "sound": "ai", "example": "My" }
+  ],
+  "digraphs": {
+    "SH": ["Fish", "Ship", "Wash"],
+    "CH": ["Chips", "Lunch", "Watch"],
+    "TH_voiced": ["This", "Father"],
+    "TH_unvoiced": ["Three", "Bath"],
+    "WH": ["What", "White", "Where"]
+  },
+  "ending_blends": {
+    "NG": ["Sing", "Long", "King"],
+    "NK": ["Bank", "Drink", "Pink"],
+    "CK": ["Back", "Rock", "Duck"]
+  },
+  "minimal_pairs": [
+    ["Pin", "Bin"],
+    ["Light", "Right"],
+    ["Bus", "Buzz"]
+  ],
+  "expansion_tasks": [
+    "Long vowel booster set for A/E/I/O/U/Y",
+    "Voice Recording Activity: compare learner voice with Sofia",
+    "Visual Mouth Guide: TH and V mouth position"
+  ]
+}

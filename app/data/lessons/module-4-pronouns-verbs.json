@@ -1,0 +1,379 @@
+{
+  "module": 4,
+  "title": "Pronouns and Verbs",
+  "title_sw": "Viwakilishi na Vitenzi",
+  "description": "Understand common English pronouns and verbs with Swahili meaning and daily use.",
+  "description_sw": "Elewa viwakilishi na vitenzi vya kawaida vya Kiingereza pamoja na tafsiri ya Kiswahili na matumizi ya kila siku.",
+  "sofia_intro": "Understanding pronouns and verbs helps you build clear sentences and communicate with confidence.",
+  "sofia_intro_sw": "Kuelewa viwakilishi na vitenzi kunakusaidia kujenga sentensi zilizo wazi na kuwasiliana kwa ujasiri.",
+  "lessons": [
+    {
+      "id": "4-1",
+      "type": "lesson_card",
+      "title": "Introduction: Pronouns and Verbs",
+      "title_sw": "Utangulizi: Viwakilishi na Vitenzi",
+      "instruction_sw": "Somo hili linaeleza aina za viwakilishi na vitenzi vya msingi kwa matumizi ya sentensi.",
+      "instruction_en": "This lesson introduces pronoun types and core verbs for sentence building.",
+      "content": [
+        {
+          "label": "Pronouns",
+          "label_sw": "Viwakilishi",
+          "explanation": "Pronouns replace nouns to avoid repetition and make sentences easier to understand.",
+          "explanation_sw": "Viwakilishi huchukua nafasi ya nomino ili kuepuka kurudia maneno na kurahisisha sentensi kueleweka.",
+          "examples": ["I am ready.", "She is here.", "They are working."],
+          "examples_sw": ["Mimi niko tayari.", "Yeye yupo hapa.", "Wao wanafanya kazi."]
+        },
+        {
+          "label": "Verbs",
+          "label_sw": "Vitenzi",
+          "explanation": "Verbs are action words that show what a person or thing does.",
+          "explanation_sw": "Vitenzi ni maneno ya tendo yanayoonyesha mtu au kitu kinafanya nini.",
+          "examples": ["eat", "work", "talk"],
+          "examples_sw": ["kula", "kufanya kazi", "kuzungumza"]
+        }
+      ],
+      "common_mistakes": [
+        {
+          "wrong": "Me am ready",
+          "right": "I am ready",
+          "explanation": "Use subject pronoun 'I' before a verb in a sentence.",
+          "explanation_sw": "Tumia subject pronoun 'I' kabla ya kitenzi kwenye sentensi."
+        }
+      ],
+      "practice_sentences": [
+        { "en": "She eats an apple.", "sw": "Yeye anakula tofaa." },
+        { "en": "We work together.", "sw": "Sisi tunafanya kazi pamoja." }
+      ]
+    },
+    {
+      "id": "4-2",
+      "type": "vocabulary_grid",
+      "title": "Pronouns in Daily Use",
+      "title_sw": "Viwakilishi vya Matumizi ya Kila Siku",
+      "instruction_sw": "Bonyeza kila kiwakilishi kusikia matamshi na mfano wa matumizi.",
+      "instruction_en": "Tap each pronoun to hear pronunciation and usage.",
+      "words": [
+        { "word": "I", "sw": "Mimi", "emoji": "🙋", "example": "I am ready.", "audio_url": "/audio/i.mp3" },
+        { "word": "You", "sw": "Wewe", "emoji": "👉", "example": "You are welcome.", "audio_url": "/audio/you.mp3" },
+        { "word": "He", "sw": "Yeye (wa kiume)", "emoji": "👨", "example": "He is my friend.", "audio_url": "/audio/he.mp3" },
+        { "word": "She", "sw": "Yeye (wa kike)", "emoji": "👩", "example": "She is my teacher.", "audio_url": "/audio/she.mp3" },
+        { "word": "It", "sw": "Kitu/Hai", "emoji": "📦", "example": "It is on the table.", "audio_url": "/audio/it.mp3" },
+        { "word": "We", "sw": "Sisi", "emoji": "👥", "example": "We are learning.", "audio_url": "/audio/we.mp3" },
+        { "word": "They", "sw": "Wao", "emoji": "🧑‍🤝‍🧑", "example": "They are here.", "audio_url": "/audio/they.mp3" }
+      ]
+    },
+    {
+      "id": "4-3",
+      "type": "vocabulary_grid",
+      "title": "Core Action Verbs",
+      "title_sw": "Vitenzi vya Msingi",
+      "instruction_sw": "Jifunze vitenzi vya kila siku kwa sauti na mifano.",
+      "instruction_en": "Learn core daily verbs with audio and examples.",
+      "words": [
+        { "word": "Eat", "sw": "Kula", "emoji": "🍽", "example": "They eat every day.", "audio_url": "/audio/eat.mp3" },
+        { "word": "Drink", "sw": "Kunywa", "emoji": "🥤", "example": "I drink water.", "audio_url": "/audio/drink.mp3" },
+        { "word": "Run", "sw": "Kukimbia", "emoji": "🏃", "example": "We run in the morning.", "audio_url": "/audio/run.mp3" },
+        { "word": "Cook", "sw": "Kupika", "emoji": "🍳", "example": "She cooks dinner.", "audio_url": "/audio/cook.mp3" },
+        { "word": "Clean", "sw": "Kusafisha", "emoji": "🧹", "example": "He cleans the room.", "audio_url": "/audio/clean.mp3" },
+        { "word": "Work", "sw": "Kufanya kazi", "emoji": "💼", "example": "We work together.", "audio_url": "/audio/work.mp3" },
+        { "word": "Talk", "sw": "Kuzungumza", "emoji": "🗣", "example": "They talk every day.", "audio_url": "/audio/talk.mp3" },
+        { "word": "Listen", "sw": "Kusikiliza", "emoji": "👂", "example": "Please listen carefully.", "audio_url": "/audio/listen.mp3" },
+        { "word": "Help", "sw": "Kusaidia", "emoji": "🤝", "example": "We will help them.", "audio_url": "/audio/help.mp3" }
+      ]
+    },
+    {
+      "id": "4-4",
+      "type": "dialogue",
+      "title": "Dialogues for Practice",
+      "title_sw": "Mazungumzo ya Mazoezi",
+      "dialogues": [
+        {
+          "title": "Scenario 1: At Home",
+          "title_sw": "Mazingira 1: Nyumbani",
+          "lines": [
+            { "speaker": "Person A", "en": "I will cook dinner.", "sw": "Mimi nitapika chakula cha jioni.", "audio_url": "/audio/dialogue_home_1.mp3" },
+            { "speaker": "Person B", "en": "I will clean the house.", "sw": "Mimi nitafanya usafi wa nyumba.", "audio_url": "/audio/dialogue_home_2.mp3" }
+          ]
+        },
+        {
+          "title": "Scenario 2: At Work",
+          "title_sw": "Mazingira 2: Kazini",
+          "lines": [
+            { "speaker": "Manager", "en": "They need help with the new project.", "sw": "Wao wanahitaji msaada na mradi mpya.", "audio_url": "/audio/dialogue_work_1.mp3" },
+            { "speaker": "Employee", "en": "We will help them.", "sw": "Sisi tutawasaidia.", "audio_url": "/audio/dialogue_work_2.mp3" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4-5",
+      "type": "noun_lab",
+      "title": "Majina ya Vitu (Common Nouns)",
+      "title_sw": "Majina ya Vitu",
+      "instruction_sw": "Leo tunajifunza majina ya vitu vya nyumbani na kazini, pamoja na umoja na wingi.",
+      "instruction_en": "Learn common nouns for home and work, plus singular/plural usage.",
+      "noun_tabs": [
+        {
+          "id": "home",
+          "label_en": "Home Objects",
+          "label_sw": "Vitu vya Nyumbani",
+          "items": [
+            { "word": "Table", "phonetic_sw": "teibo", "translation_sw": "Meza", "emoji": "🪑", "audio_en": "/audio/table.mp3" },
+            { "word": "Chair", "phonetic_sw": "chea", "translation_sw": "Kiti", "emoji": "🪑", "audio_en": "/audio/chair.mp3" },
+            { "word": "Bed", "phonetic_sw": "bed", "translation_sw": "Kitanda", "emoji": "🛏", "audio_en": "/audio/bed.mp3" },
+            { "word": "Door", "phonetic_sw": "doa", "translation_sw": "Mlango", "emoji": "🚪", "audio_en": "/audio/door.mp3" },
+            { "word": "Window", "phonetic_sw": "windou", "translation_sw": "Dirisha", "emoji": "🪟", "audio_en": "/audio/window.mp3" },
+            { "word": "Phone", "phonetic_sw": "foni", "translation_sw": "Simu", "emoji": "📱", "audio_en": "/audio/phone.mp3" }
+          ]
+        },
+        {
+          "id": "work",
+          "label_en": "Work Objects",
+          "label_sw": "Vitu vya Ofisini/Kazini",
+          "items": [
+            { "word": "Computer", "phonetic_sw": "kompyuta", "translation_sw": "Kompyuta", "emoji": "💻", "audio_en": "/audio/computer.mp3" },
+            { "word": "Paper", "phonetic_sw": "peipa", "translation_sw": "Karatasi", "emoji": "📄", "audio_en": "/audio/paper.mp3" },
+            { "word": "Pen", "phonetic_sw": "pen", "translation_sw": "Kalamu", "emoji": "🖊", "audio_en": "/audio/pen.mp3" },
+            { "word": "Office", "phonetic_sw": "ofisi", "translation_sw": "Ofisi", "emoji": "🏢", "audio_en": "/audio/office.mp3" },
+            { "word": "Meeting", "phonetic_sw": "miting", "translation_sw": "Mkutano", "emoji": "🤝", "audio_en": "/audio/meeting.mp3" }
+          ]
+        }
+      ],
+      "plural_pairs": [
+        { "singular": "Book", "singular_phonetic_sw": "buk", "plural": "Books", "plural_phonetic_sw": "buks", "translation_sw": "Kitabu/Vitabu", "singular_count": 1, "plural_count": 2, "audio_singular_en": "/audio/book.mp3", "audio_plural_en": "/audio/books.mp3" },
+        { "singular": "Car", "singular_phonetic_sw": "ka", "plural": "Cars", "plural_phonetic_sw": "kas", "translation_sw": "Gari/Magari", "singular_count": 1, "plural_count": 3, "audio_singular_en": "/audio/car.mp3", "audio_plural_en": "/audio/cars.mp3" },
+        { "singular": "Pen", "singular_phonetic_sw": "pen", "plural": "Pens", "plural_phonetic_sw": "pens", "translation_sw": "Kalamu/Kalamu nyingi", "singular_count": 1, "plural_count": 4, "audio_singular_en": "/audio/pen.mp3", "audio_plural_en": "/audio/pens.mp3" }
+      ],
+      "sentence_examples": [
+        { "en": "I have a pen.", "phonetic_sw": "ai hav e pen", "sw": "Mimi nina kalamu.", "audio_en": "/audio/i_have_a_pen.mp3" },
+        { "en": "She cleans the table.", "phonetic_sw": "shi klinz ze teibo", "sw": "Yeye anasafisha meza.", "audio_en": "/audio/she_cleans_the_table.mp3" },
+        { "en": "They use computers.", "phonetic_sw": "zei yuz kompyutaz", "sw": "Wao wanatumia kompyuta.", "audio_en": "/audio/they_use_computers.mp3" }
+      ],
+      "match_game": [
+        { "word": "Computer", "target_emoji": "💻" },
+        { "word": "Phone", "target_emoji": "📱" },
+        { "word": "Door", "target_emoji": "🚪" }
+      ]
+    },
+    {
+      "id": "4-6",
+      "type": "adjective_lab",
+      "title": "Maelezo ya Vitu (Adjectives)",
+      "title_sw": "Maelezo ya Vitu",
+      "instruction_sw": "Jifunze sifa zinazopingana na mpangilio wa adjective + noun kwenye sentensi.",
+      "instruction_en": "Learn opposite adjectives and English adjective+noun order.",
+      "adjective_pairs": [
+        { "left_word": "Big", "left_phonetic_sw": "big", "left_translation_sw": "Kikubwa", "right_word": "Small", "right_phonetic_sw": "smol", "right_translation_sw": "Kidogo", "left_audio_en": "/audio/big.mp3", "right_audio_en": "/audio/small.mp3" },
+        { "left_word": "New", "left_phonetic_sw": "nyu", "left_translation_sw": "Kipya", "right_word": "Old", "right_phonetic_sw": "ould", "right_translation_sw": "Cha zamani", "left_audio_en": "/audio/new.mp3", "right_audio_en": "/audio/old.mp3" },
+        { "left_word": "Good", "left_phonetic_sw": "gud", "left_translation_sw": "Kizuri", "right_word": "Bad", "right_phonetic_sw": "bad", "right_translation_sw": "Kibaya", "left_audio_en": "/audio/good.mp3", "right_audio_en": "/audio/bad.mp3" },
+        { "left_word": "Hot", "left_phonetic_sw": "hot", "left_translation_sw": "Moto", "right_word": "Cold", "right_phonetic_sw": "kould", "right_translation_sw": "Baridi", "left_audio_en": "/audio/hot.mp3", "right_audio_en": "/audio/cold.mp3" },
+        { "left_word": "Easy", "left_phonetic_sw": "izi", "left_translation_sw": "Rahisi", "right_word": "Hard", "right_phonetic_sw": "had", "right_translation_sw": "Ngumu", "left_audio_en": "/audio/easy.mp3", "right_audio_en": "/audio/hard.mp3" }
+      ],
+      "sentence_order_items": [
+        { "sw": "Nyumba kubwa.", "en": "Big house.", "phonetic_sw": "big hauz", "adjective": "big", "noun": "house", "audio_en": "/audio/big_house.mp3" },
+        { "sw": "Gari jipya.", "en": "New car.", "phonetic_sw": "nyu ka", "adjective": "new", "noun": "car", "audio_en": "/audio/new_car.mp3" }
+      ],
+      "more_examples": [
+        { "en": "A small phone.", "phonetic_sw": "e smol foni", "sw": "Simu ndogo.", "audio_en": "/audio/a_small_phone.mp3" },
+        { "en": "A hot coffee.", "phonetic_sw": "e hot kofi", "sw": "Kahawa ya moto.", "audio_en": "/audio/a_hot_coffee.mp3" },
+        { "en": "An old computer.", "phonetic_sw": "en ould kompyuta", "sw": "Kompyuta ya zamani.", "audio_en": "/audio/an_old_computer.mp3" },
+        { "en": "A good job.", "phonetic_sw": "e gud job", "sw": "Kazi nzuri.", "audio_en": "/audio/a_good_job.mp3" }
+      ],
+      "translate_exercises": [
+        { "sw": "Kalamu ndogo", "answer_en": "Small pen" },
+        { "sw": "Mkutano mgumu", "answer_en": "Hard meeting" },
+        { "sw": "Maji ya baridi", "answer_en": "Cold water" }
+      ],
+      "listen_match": [
+        { "audio_en": "/audio/a_big_table.mp3", "phrase_en": "A big table", "answer_emoji": "🪑" }
+      ]
+    },
+    {
+      "id": "4-7",
+      "type": "prepositions_lab",
+      "title": "Somo la 9: Mahali Vitu Vilipo (Prepositions of Place)",
+      "title_sw": "Mahali Vitu Vilipo",
+      "instruction_sw": "Sasa unajua kusema 'kalamu ndogo'. Leo tutajifunza maneno yanayoonyesha mahali kitu kilipo.",
+      "instruction_en": "You can say 'small pen'. Now learn words that show WHERE things are.",
+      "sofia_hint": "In Swahili you add '-ni' at the end of a word (mezani = on the table). In English, use a short word BEFORE the noun.",
+      "sofia_hint_sw": "Kwa Kiswahili unaongeza '-ni' mwishoni (mezani). Kwa Kiingereza, tumia neno KABLA ya jina la kitu.",
+      "prepositions": [
+        { "word": "In", "phonetic_sw": "in", "translation_sw": "Ndani ya", "emoji": "📦", "audio_en": "/audio/in.mp3" },
+        { "word": "On", "phonetic_sw": "on", "translation_sw": "Juu ya", "emoji": "🔝", "audio_en": "/audio/on.mp3" },
+        { "word": "Under", "phonetic_sw": "anda", "translation_sw": "Chini ya", "emoji": "⬇️", "audio_en": "/audio/under.mp3" },
+        { "word": "Next to", "phonetic_sw": "nekst tu", "translation_sw": "Pembeni ya", "emoji": "↔️", "audio_en": "/audio/next_to.mp3" },
+        { "word": "Between", "phonetic_sw": "bitwin", "translation_sw": "Katikati ya", "emoji": "🔀", "audio_en": "/audio/between.mp3" },
+        { "word": "Behind", "phonetic_sw": "bihaind", "translation_sw": "Nyuma ya", "emoji": "🔙", "audio_en": "/audio/behind.mp3" }
+      ],
+      "prep_sentences": [
+        { "en": "The pen is in the box.", "phonetic_sw": "ze pen iz in ze boks", "sw": "Kalamu ipo ndani ya sanduku.", "preposition": "in", "audio_en": "/audio/pen_in_box.mp3" },
+        { "en": "The cat is on the chair.", "phonetic_sw": "ze kat iz on ze chea", "sw": "Paka yupo juu ya kiti.", "preposition": "on", "audio_en": "/audio/cat_on_chair.mp3" },
+        { "en": "The computer is on the table.", "phonetic_sw": "ze kompyuta iz on ze teibo", "sw": "Kompyuta ipo juu ya meza.", "preposition": "on", "audio_en": "/audio/computer_on_table.mp3" },
+        { "en": "The key is under the book.", "phonetic_sw": "ze kii iz anda ze buk", "sw": "Funguo ipo chini ya kitabu.", "preposition": "under", "audio_en": "/audio/key_under_book.mp3" },
+        { "en": "I am in the office.", "phonetic_sw": "ai em in ze ofisi", "sw": "Mimi niko ndani ya ofisi.", "preposition": "in", "audio_en": "/audio/i_am_in_office.mp3" }
+      ],
+      "live_playground": {
+        "object": "🍎",
+        "object_name_en": "apple",
+        "object_name_sw": "tofaa",
+        "positions": [
+          { "id": "on", "label_en": "On the table", "label_sw": "Juu ya meza", "sentence_en": "The apple is on the table.", "audio_en": "/audio/apple_on_table.mp3" },
+          { "id": "under", "label_en": "Under the table", "label_sw": "Chini ya meza", "sentence_en": "The apple is under the table.", "audio_en": "/audio/apple_under_table.mp3" },
+          { "id": "next", "label_en": "Next to the table", "label_sw": "Pembeni ya meza", "sentence_en": "The apple is next to the table.", "audio_en": "/audio/apple_next_table.mp3" }
+        ]
+      },
+      "prep_fill_blanks": [
+        { "sentence_sw": "Maji yako yako ndani ya kikombe.", "template_en": "The water is ___ the cup.", "answer": "In", "options": ["In", "On", "Under"] },
+        { "sentence_sw": "Kitabu kipo juu ya kitanda.", "template_en": "The book is ___ the bed.", "answer": "On", "options": ["In", "On", "Under"] },
+        { "sentence_sw": "Viatu vipo chini ya meza.", "template_en": "The shoes are ___ the table.", "answer": "Under", "options": ["In", "On", "Under"] }
+      ],
+      "translate_exercises": [
+        { "sw": "Mbwa yupo nyuma ya mlango.", "answer_en": "The dog is behind the door." },
+        { "sw": "Kalamu ipo pembeni ya kompyuta.", "answer_en": "The pen is next to the computer." },
+        { "sw": "Wao wapo ndani ya nyumba.", "answer_en": "They are in the house." }
+      ],
+      "sofia_in_on_tip": "Kumbuka: 'On' ni juu ya kitu kinachogusa, 'In' ni ndani ya kitu."
+    },
+    {
+      "id": "4-8",
+      "type": "time_days_lab",
+      "title": "Somo la 10: Muda na Siku (Time and Days)",
+      "title_sw": "Muda na Siku",
+      "instruction_sw": "Leo tutajifunza jinsi ya kutaja siku za wiki na jinsi ya kusema muda. Hii itakusaidia kupanga miadi na kuelewa ratiba zako.",
+      "instruction_en": "Learn days of the week and how to tell time. Essential for scheduling interviews and managing your workday.",
+      "sofia_hint": "Days of the week always start with a Capital Letter in English. Use 'on' for days (on Monday) and 'at' for specific times (at 9 AM).",
+      "sofia_hint_sw": "Siku za wiki zinaanza na herufi kubwa kwa Kiingereza. Tumia 'on' kwa siku (on Monday) na 'at' kwa wakati maalum (at 9 AM).",
+      "days": [
+        { "day": "Monday", "phonetic_sw": "mandei", "translation_sw": "Jumatatu", "audio_en": "/audio/monday.mp3", "slow_motion": false },
+        { "day": "Tuesday", "phonetic_sw": "tyuzdei", "translation_sw": "Jumanne", "audio_en": "/audio/tuesday.mp3", "slow_motion": false },
+        { "day": "Wednesday", "phonetic_sw": "wenzdei", "translation_sw": "Jumatano", "audio_en": "/audio/wednesday.mp3", "slow_motion": true },
+        { "day": "Thursday", "phonetic_sw": "thazdei", "translation_sw": "Alhamisi", "audio_en": "/audio/thursday.mp3", "slow_motion": true },
+        { "day": "Friday", "phonetic_sw": "fraidei", "translation_sw": "Ijumaa", "audio_en": "/audio/friday.mp3", "slow_motion": false },
+        { "day": "Saturday", "phonetic_sw": "satadei", "translation_sw": "Jumamosi", "audio_en": "/audio/saturday.mp3", "slow_motion": false },
+        { "day": "Sunday", "phonetic_sw": "sandei", "translation_sw": "Jumapili", "audio_en": "/audio/sunday.mp3", "slow_motion": false }
+      ],
+      "time_parts": [
+        { "part": "Morning", "phonetic_sw": "moning", "translation_sw": "Asubuhi", "emoji": "🌅", "audio_en": "/audio/morning.mp3" },
+        { "part": "Afternoon", "phonetic_sw": "aftanuni", "translation_sw": "Mchana", "emoji": "☀️", "audio_en": "/audio/afternoon.mp3" },
+        { "part": "Evening", "phonetic_sw": "ivning", "translation_sw": "Jioni", "emoji": "🌆", "audio_en": "/audio/evening.mp3" },
+        { "part": "Night", "phonetic_sw": "nait", "translation_sw": "Usiku", "emoji": "🌙", "audio_en": "/audio/night.mp3" }
+      ],
+      "time_note_sw": "Kumbuka: mfumo wa saa wa Kiingereza unahesabu kuanzia saa moja (1:00) asubuhi. Tofauti na Kiswahili ambapo saa moja asubuhi ni saa saba.",
+      "sentence_examples": [
+        { "en": "Today is Monday.", "phonetic_sw": "tudei iz mandei", "sw": "Leo ni Jumatatu.", "audio_en": "/audio/today_is_monday.mp3" },
+        { "en": "I work on Tuesday.", "phonetic_sw": "ai wok on tyuzdei", "sw": "Ninafanya kazi Jumanne.", "audio_en": "/audio/i_work_on_tuesday.mp3" },
+        { "en": "The meeting is at 10 o'clock.", "phonetic_sw": "ze miting iz at ten oklok", "sw": "Mkutano upo saa nne (10:00).", "audio_en": "/audio/meeting_at_ten.mp3" },
+        { "en": "I sleep at night.", "phonetic_sw": "ai slip at nait", "sw": "Ninalala usiku.", "audio_en": "/audio/i_sleep_at_night.mp3" },
+        { "en": "See you on Friday!", "phonetic_sw": "si yu on fraidei", "sw": "Tuonane Ijumaa!", "audio_en": "/audio/see_you_friday.mp3" }
+      ],
+      "day_order_exercise": {
+        "prompt_sw": "Panga siku hizi kuanzia ya kwanza hadi ya mwisho:",
+        "prompt_en": "Order these days from first to last:",
+        "scrambled": ["Wednesday", "Monday", "Tuesday"],
+        "correct_order": ["Monday", "Tuesday", "Wednesday"]
+      },
+      "translate_exercises": [
+        { "sw": "Mkutano ni Jumatano.", "answer_en": "The meeting is on Wednesday." },
+        { "sw": "Mimi nafanya kazi asubuhi.", "answer_en": "I work in the morning." },
+        { "sw": "Leo ni Ijumaa.", "answer_en": "Today is Friday." }
+      ],
+      "clock_hours": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    },
+    {
+      "id": "4-9",
+      "type": "family_lab",
+      "title": "Somo la 11: Familia na Watu (Family and People)",
+      "title_sw": "Familia na Watu",
+      "instruction_sw": "Leo tutajifunza majina ya watu wa familia na jinsi ya kusema huyu ni nani kwako.",
+      "instruction_en": "Learn family member names and possessive words to describe relationships.",
+      "sofia_hint": "Use 'His' for a man and 'Her' for a woman. Use 'My', 'Your', 'Our' to show who owns something.",
+      "sofia_hint_sw": "Tumia 'His' kwa mwanaume na 'Her' kwa mwanamke. Tumia 'My', 'Your', 'Our' kuonyesha kumiliki.",
+      "family_members": [
+        { "word": "Father", "phonetic_sw": "faza", "translation_sw": "Baba", "emoji": "👨", "tree_pos": "parent", "audio_en": "/audio/father.mp3" },
+        { "word": "Mother", "phonetic_sw": "maza", "translation_sw": "Mama", "emoji": "👩", "tree_pos": "parent", "audio_en": "/audio/mother.mp3" },
+        { "word": "Son", "phonetic_sw": "san", "translation_sw": "Mtoto wa kiume", "emoji": "👦", "tree_pos": "child", "audio_en": "/audio/son.mp3" },
+        { "word": "Daughter", "phonetic_sw": "dota", "translation_sw": "Mtoto wa kike", "emoji": "👧", "tree_pos": "child", "audio_en": "/audio/daughter.mp3" },
+        { "word": "Brother", "phonetic_sw": "braza", "translation_sw": "Kaka", "emoji": "🧑", "tree_pos": "sibling", "audio_en": "/audio/brother.mp3" },
+        { "word": "Sister", "phonetic_sw": "sista", "translation_sw": "Dada", "emoji": "👧", "tree_pos": "sibling", "audio_en": "/audio/sister.mp3" },
+        { "word": "Grandfather", "phonetic_sw": "grandfaza", "translation_sw": "Babu", "emoji": "👴", "tree_pos": "grandparent", "audio_en": "/audio/grandfather.mp3" },
+        { "word": "Grandmother", "phonetic_sw": "grandmaza", "translation_sw": "Bibi", "emoji": "👵", "tree_pos": "grandparent", "audio_en": "/audio/grandmother.mp3" }
+      ],
+      "possessives": [
+        { "word": "My", "phonetic_sw": "mai", "translation_sw": "Yangu", "gender": "any", "audio_en": "/audio/my.mp3" },
+        { "word": "Your", "phonetic_sw": "yo", "translation_sw": "Yako", "gender": "any", "audio_en": "/audio/your.mp3" },
+        { "word": "His", "phonetic_sw": "hiz", "translation_sw": "Yake (kiume)", "gender": "male", "audio_en": "/audio/his.mp3" },
+        { "word": "Her", "phonetic_sw": "ha", "translation_sw": "Yake (kike)", "gender": "female", "audio_en": "/audio/her.mp3" },
+        { "word": "Our", "phonetic_sw": "awa", "translation_sw": "Yetu", "gender": "any", "audio_en": "/audio/our.mp3" }
+      ],
+      "sentence_examples": [
+        { "en": "This is my father.", "phonetic_sw": "zis iz mai faza", "sw": "Huyu ni baba yangu.", "audio_en": "/audio/this_is_my_father.mp3" },
+        { "en": "Her sister is a teacher.", "phonetic_sw": "ha sista iz e ticha", "sw": "Dada yake ni mwalimu.", "audio_en": "/audio/her_sister_is_teacher.mp3" },
+        { "en": "My brother works on Monday.", "phonetic_sw": "mai braza woks on mandei", "sw": "Kaka yangu anafanya kazi Jumatatu.", "audio_en": "/audio/my_brother_works.mp3" },
+        { "en": "How is your mother?", "phonetic_sw": "hau iz yo maza", "sw": "Mama yako hajambo?", "audio_en": "/audio/how_is_your_mother.mp3" },
+        { "en": "Our family is big.", "phonetic_sw": "awa familia iz big", "sw": "Familia yetu ni kubwa.", "audio_en": "/audio/our_family_is_big.mp3" }
+      ],
+      "sentence_builder": {
+        "col1": ["My", "Your", "His", "Her", "Our"],
+        "col2": ["Mother", "Father", "Brother", "Sister"],
+        "col3": ["is here.", "works.", "sleeps.", "is a teacher."]
+      },
+      "possessive_quiz": [
+        { "image_desc": "A man with a bicycle", "image_emoji": "🚴‍♂️", "correct": "His", "options": ["His", "Her"], "feedback_sw": "Tumia 'His' kwa mwanaume na 'Her' kwa mwanamke." },
+        { "image_desc": "A woman with a bag", "image_emoji": "👜", "correct": "Her", "options": ["His", "Her"], "feedback_sw": "Tumia 'Her' kwa mwanamke." }
+      ],
+      "relationship_exercises": [
+        { "sw": "Baba wa baba yangu ni nani?", "answer_en": "Grandfather" },
+        { "sw": "Mtoto wa kike wa mama yangu ni nani?", "answer_en": "Sister" },
+        { "sw": "Mimi ni nani kwa baba yangu (kama wewe ni wa kiume)?", "answer_en": "Son" }
+      ],
+      "translate_exercises": [
+        { "sw": "Kaka yangu yupo ofisini.", "answer_en": "My brother is in the office." },
+        { "sw": "Huyu ni dada yako.", "answer_en": "This is your sister." },
+        { "sw": "Mama yetu ni mzuri.", "answer_en": "Our mother is good." }
+      ]
+    },
+    {
+      "id": "4-10",
+      "type": "multiple_choice",
+      "title": "Module 4 Final Assessment",
+      "title_sw": "Tathmini ya Mwisho ya Moduli 4",
+      "questions": [
+        {
+          "prompt": "Which subject pronoun means 'Mimi'?",
+          "prompt_sw": "Ni subject pronoun ipi inamaanisha 'Mimi'?",
+          "options": ["You", "I", "He", "They"],
+          "options_sw": ["You (wewe)", "I (mimi)", "He (yeye wa kiume)", "They (wao)"],
+          "correct": 1
+        },
+        {
+          "prompt": "What is the Swahili meaning of 'Talk'?",
+          "prompt_sw": "Neno 'Talk' kwa Kiswahili ni nini?",
+          "options": ["Kusikiliza", "Kuzungumza", "Kusaidia", "Kukimbia"],
+          "options_sw": ["Kusikiliza", "Kuzungumza", "Kusaidia", "Kukimbia"],
+          "correct": 1
+        },
+        {
+          "prompt": "Choose the correct object pronoun in: 'We will help ___.'",
+          "prompt_sw": "Chagua object pronoun sahihi kwenye sentensi: 'We will help ___.'",
+          "options": ["they", "them", "their", "theirs"],
+          "options_sw": ["they", "them", "their", "theirs"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which sentence is correct?",
+          "prompt_sw": "Ni sentensi ipi sahihi?",
+          "options": ["Me am working.", "I am working.", "I is working.", "Mine am working."],
+          "options_sw": ["Me am working.", "I am working.", "I is working.", "Mine am working."],
+          "correct": 1
+        },
+        {
+          "prompt": "'She eats an apple' means:",
+          "prompt_sw": "'She eats an apple' inamaanisha:",
+          "options": ["Yeye anakunywa maji", "Yeye anakula tofaa", "Yeye anakimbia", "Yeye anasafisha"],
+          "options_sw": ["Yeye anakunywa maji", "Yeye anakula tofaa", "Yeye anakimbia", "Yeye anasafisha"],
+          "correct": 1
+        }
+      ]
+    }
+  ]
+}

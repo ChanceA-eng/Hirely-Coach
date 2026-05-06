@@ -295,17 +295,6 @@ export default function TargetingArrayPage() {
       setIntakeTitle((current) => current || String(data.title || ""));
       setIntakeCompany((current) => current || String(data.company || ""));
       setIntakeDescription((current) => current || sanitizeText(String(data.description || "")));
-      void fetch("/api/user/notification-state", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          event: "job-ready",
-          jobTitle: String(data.title || "Role"),
-          company: String(data.company || "Company"),
-        }),
-      }).catch(() => {
-        // Non-blocking notification enrichment
-      });
       setIntakeMessage(data.description ? "Listing scraped. Review and save the packet." : "Title found, but paste the full description manually.");
     } catch (fetchError) {
       setIntakeMessage(fetchError instanceof Error ? fetchError.message : "Could not read that listing.");

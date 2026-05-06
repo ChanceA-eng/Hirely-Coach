@@ -1,0 +1,31 @@
+{
+  "subject_pronouns": [
+    { "en": "I", "phonetic_sw": "ai", "sw": "Mimi", "audio_en": "/audio/i.mp3", "example_en": "I am ready.", "example_audio_en": "/audio/i_am_ready.mp3" },
+    { "en": "You", "phonetic_sw": "yu", "sw": "Wewe", "audio_en": "/audio/you.mp3", "example_en": "You are welcome.", "example_audio_en": "/audio/you_are_welcome.mp3" },
+    { "en": "He", "phonetic_sw": "hi", "sw": "Yeye (wa kiume)", "audio_en": "/audio/he.mp3", "example_en": "He is my friend.", "example_audio_en": "/audio/he_is_my_friend.mp3" },
+    { "en": "She", "phonetic_sw": "shi", "sw": "Yeye (wa kike)", "audio_en": "/audio/she.mp3", "example_en": "She is my teacher.", "example_audio_en": "/audio/she_is_my_teacher.mp3" },
+    { "en": "It", "phonetic_sw": "it", "sw": "Yeye (kitu/hai)", "audio_en": "/audio/it.mp3", "example_en": "It is on the table.", "example_audio_en": "/audio/it_is_on_the_table.mp3" },
+    { "en": "We", "phonetic_sw": "wi", "sw": "Sisi", "audio_en": "/audio/we.mp3", "example_en": "We are learning.", "example_audio_en": "/audio/we_are_learning.mp3" },
+    { "en": "They", "phonetic_sw": "zei", "sw": "Wao", "audio_en": "/audio/they.mp3", "example_en": "They are here.", "example_audio_en": "/audio/they_are_here.mp3" }
+  ],
+  "object_pronouns": [
+    { "en": "Me", "phonetic_sw": "mi", "sw": "Mimi" },
+    { "en": "You", "phonetic_sw": "yu", "sw": "Wewe" },
+    { "en": "Him", "phonetic_sw": "him", "sw": "Yeye (wa kiume)" },
+    { "en": "Her", "phonetic_sw": "har", "sw": "Yeye (wa kike)" },
+    { "en": "It", "phonetic_sw": "it", "sw": "Yeye (kitu/hai)" },
+    { "en": "Us", "phonetic_sw": "az", "sw": "Sisi" },
+    { "en": "Them", "phonetic_sw": "zem", "sw": "Wao" }
+  ],
+  "verb_core": [
+    { "en": "Eat", "phonetic_sw": "it", "sw": "Kula" },
+    { "en": "Drink", "phonetic_sw": "dringk", "sw": "Kunywa" },
+    { "en": "Run", "phonetic_sw": "ran", "sw": "Kukimbia" },
+    { "en": "Cook", "phonetic_sw": "kuk", "sw": "Kupika" },
+    { "en": "Clean", "phonetic_sw": "klin", "sw": "Kusafisha" },
+    { "en": "Work", "phonetic_sw": "wark", "sw": "Kufanya kazi" },
+    { "en": "Talk", "phonetic_sw": "tolk", "sw": "Kuzungumza" },
+    { "en": "Listen", "phonetic_sw": "lisen", "sw": "Kusikiliza" },
+    { "en": "Help", "phonetic_sw": "help", "sw": "Kusaidia" }
+  ]
+}

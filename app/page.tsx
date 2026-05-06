@@ -10,56 +10,56 @@ const POWER_PILLARS = [
     variant: "alignment",
     title: "The Alignment Engine",
     subtitle: "AI Resume Optimizer",
-    description: "Don't just edit—align. Paste any job URL and our AI surgically restructures your resume to match the hiring DNA of the role. Achieve 100% alignment before the recruiter even opens your file.",
+    description: "Most resumes are ignored because they don't match the job. Paste a link to any job and our AI helps you rewrite your resume to match exactly what the company is looking for. Stop guessing. Be the perfect match every time.",
     href: "/canvas",
   },
   {
     variant: "simulation",
-    title: "Tactical Simulation",
-    subtitle: "Adaptive Interview Prep",
-    description: "Face the pressure before it's real. Toggle between Casual, Professional, and Surgical intensities. Our AI simulates real-time executive pushback based on your specific target company and resume.",
+    title: "Interview Practice",
+    subtitle: "Practice Interviews",
+    description: "Interviews are scary and high-pressure. Practice with an AI that talks like a real boss. Choose your level — Casual for basic practice, Professional for real job tests, or Surgical for the hardest questions.",
     href: "/voice/interview",
   },
   {
     variant: "impact",
     title: "The Impact Log",
     subtitle: "Career Progress Tracker",
-    description: "Work that isn't tracked is work that isn't rewarded. Log your Weekly Wins to earn Impact Points (IP) and climb the 8-Level Accelerator. Turn a year of effort into a quantified, data-backed evidence vault.",
+    description: "People forget their hard work when it's time for a promotion. Write down your Weekly Wins in our easy log. Earn Impact Points (IP) to level up your profile from Candidate to Professional.",
     href: "/growthhub",
   },
   {
     variant: "asset",
     title: "The Asset Generator",
-    subtitle: "AI Portfolio Builder",
-    description: "From simulation to submission. Automatically generate high-impact follow-up emails and interactive portfolios that reflect your interview performance and ledger wins.",
+    subtitle: "Professional Portfolio Builder",
+    description: "Writing professional emails and portfolios takes too much time. Our AI uses your interview practice and your Wins to write perfect follow-up emails and a professional website for you.",
     href: "/feedback",
   },
 ];
 
 const METRICS = [
   {
-    category: "Knowledge & Accuracy",
+    category: "Knowledge and Accuracy",
     items: [
-      { name: "Answer Correctness", desc: "Are your answers technically accurate and complete?" },
-      { name: "Reasoning Quality", desc: "Is your thinking process logical and well-structured?" },
-      { name: "Question Understanding", desc: "Do you fully understand what's being asked before answering?" },
+      { name: "Answer Correctness", desc: "Are your answers correct and complete?" },
+      { name: "Reasoning Quality", desc: "Do your ideas follow a clear order?" },
+      { name: "Question Understanding", desc: "Do you understand the question before you answer?" },
     ],
   },
   {
-    category: "Communication & Delivery",
+    category: "Communication and Delivery",
     items: [
-      { name: "Communication Clarity", desc: "Are you concise, structured, and easy to follow?" },
-      { name: "Behavioral Story Quality", desc: "Do your stories have ownership, actions, and measurable impact?" },
-      { name: "Confidence Calibration", desc: "Do you project balanced confidence without over- or underclaiming?" },
+      { name: "Communication Clarity", desc: "Is your speaking clear and easy to follow?" },
+      { name: "Behavioral Story Quality", desc: "Do your stories show your actions and results?" },
+      { name: "Confidence Calibration", desc: "Do you sound calm and confident?" },
     ],
   },
   {
     category: "Interview Strategy",
     items: [
-      { name: "Role Alignment Coverage", desc: "Are you mapping your experience to what this role needs?" },
-      { name: "Depth Under Follow-ups", desc: "Can you maintain quality when the interviewer pushes deeper?" },
-      { name: "Time Management", desc: "Are you delivering enough signal within the time limit?" },
-      { name: "Recovery Ability", desc: "How do you handle questions outside your comfort zone?" },
+      { name: "Role Alignment Coverage", desc: "Do your examples match what this job needs?" },
+      { name: "Depth Under Follow-ups", desc: "Can you answer follow-up questions well?" },
+      { name: "Time Management", desc: "Do you answer clearly within the time limit?" },
+      { name: "Recovery Ability", desc: "How do you handle hard questions?" },
     ],
   },
 ];
@@ -68,58 +68,58 @@ const STEPS = [
   {
     num: "01",
     title: "Upload your resume & target role",
-    body: "Takes 60 seconds. Share your resume and the job URL — our Command Center ingests everything and begins alignment analysis.",
+    body: "Takes 60 seconds. Share your resume and the job link — we read everything and start matching your profile to what the company wants.",
     badge: "Foundation",
   },
   {
     num: "02",
     title: "Get your Alignment Score and tailored profile",
-    body: "See exactly where your profile matches the role's hiring DNA. Get AI-powered restructuring suggestions before you even interview.",
+    body: "See exactly where your resume matches the job. Get AI suggestions to improve it before you go to the interview.",
     badge: "Signal",
   },
   {
     num: "03",
-    title: "Practice, log wins, and ascend",
-    body: "Run Tactical Simulations, earn Impact Points, and automatically generate portfolio-quality evidence. Track your climb from Candidate to Professional.",
+    title: "Practice interviews, log your wins, and level up",
+    body: "Run Interview Practice sessions, earn Impact Points, and let Hirely build your career portfolio. Track your rise from Candidate to Professional.",
     badge: "Mastery",
   },
 ];
 
 const PROBLEMS = [
   {
-    title: "Your profile is invisible to the hiring algorithm",
-    body: "Generic resumes never align with the specific role. You're competing with 500 identical applicants.",
+    title: "Your resume is being ignored",
+    body: "Most resumes don't match the job posting. Recruiters move on in seconds.",
   },
   {
-    title: "Interview prep is disconnected from your career growth",
-    body: "You practice interviews in isolation. Your wins never get tracked, quantified, or leveraged for your next move.",
+    title: "Interviews feel scary and high-pressure",
+    body: "You practice alone but there's no feedback. You don't know what you're doing wrong.",
   },
   {
-    title: "No data = no evidence for your next promotion",
-    body: "Your impact stays in your head. When it's time to ask for the next level, you can't prove what you've built.",
+    title: "You forget your hard work when it matters most",
+    body: "When it's time for a promotion or a new job, you can't remember — or prove — what you've done.",
   },
   {
-    title: "Career decisions are reactive, not strategic",
-    body: "You chase opportunities instead of architecting your path. No clarity on what role comes next or how to get there.",
+    title: "Writing emails and portfolios wastes your time",
+    body: "You spend hours trying to sound professional. It's exhausting and the results aren't great.",
   },
 ];
 
 const SOLUTIONS = [
   {
-    title: "AI Alignment Engine restructures your profile",
-    body: "We parse the job's DNA and rebuild your resume to match it—positioning you as the clear choice before the interview.",
+    title: "Your Resume Optimizer matches you to the job",
+    body: "Paste any job link. Our AI rewrites your resume to match what the company is looking for. Be the perfect match before the recruiter even opens your file.",
   },
   {
-    title: "Tactical Simulation connected to your Impact Log",
-    body: "Every interview sharpens your response library. Every win gets logged. Your career is quantified and always current.",
+    title: "Practice interviews with a real AI coach",
+    body: "Our AI talks like a real boss and gives you honest feedback. Pick your level: Casual, Professional, or Surgical. Build real confidence.",
   },
   {
-    title: "Impact Points unlock the 8-Level Accelerator",
-    body: "Track and verify your climb from Candidate → Contributor → Leader → Executive. Prove it to recruiters and hiring managers.",
+    title: "Your Impact Log saves your wins for you",
+    body: "Write down what you did each week. Earn Impact Points (IP) and level up from Candidate to Professional. Prove your value when it counts.",
   },
   {
-    title: "Career OS automates your ascension path",
-    body: "You get clarity on your next role, the specific skills to demonstrate, and AI-powered tools to get there faster.",
+    title: "Your AI writes your emails and portfolio for you",
+    body: "After each practice session, Hirely writes your follow-up emails and builds your professional portfolio. Look like an expert without the hard work.",
   },
 ];
 
@@ -127,22 +127,22 @@ const CAPABILITIES = [
   {
     title: "The Alignment Engine",
     subtitle: "Resume Optimization",
-    description: "Paste any job URL. Our AI analyzes the hiring DNA and restructures your resume to match—positioning you as the ideal candidate before the interview even starts.",
+    description: "Paste any job link. Our AI reads what the company wants and rewrites your resume to match. Look like the right person before the interview even starts.",
   },
   {
-    title: "Tactical Simulation.",
-    subtitle: "Adaptive Interview Pressure",
-    description: "Run interviews at Casual, Professional, or Surgical intensity levels. The AI adapts in real-time, targeting gaps and simulating executive pushback specific to your target role.",
+    title: "Interview Practice.",
+    subtitle: "AI Mock Interviews",
+    description: "Practice with an AI that acts like a real interviewer. Pick Casual for easy practice, Professional for job-ready pressure, or Surgical for the hardest questions. Get a Score Card after every session.",
   },
   {
     title: "Impact Log & IP System.",
-    subtitle: "Career Quantification",
-    description: "Log weekly wins, earn Impact Points, and climb the 8-Level Accelerator. Turn your work into quantified, data-backed evidence that unlocks your next opportunity.",
+    subtitle: "Achievement Tracking",
+    description: "Write down your Weekly Wins and earn Impact Points (IP). Follow your 8-level career growth plan and keep a record of your value — ready for your next promotion or salary talk.",
   },
   {
     title: "AI Asset Generator.",
-    subtitle: "Portfolio Automation",
-    description: "From your interview performance and impact ledger, Hirely auto-generates high-impact follow-up emails, portfolio pieces, and evidence collateral.",
+    subtitle: "Professional Portfolio Builder",
+    description: "After each interview, Hirely writes your follow-up emails and builds your career portfolio using your practice sessions and Impact Log. Look like a pro without the hard work.",
   },
 ];
 
@@ -150,19 +150,22 @@ const CORE_FEATURES = [
   {
     variant: "alignment",
     title: "The Alignment Engine",
-    description: "Don't just edit—align. Paste any job URL and our AI surgically restructures your resume to match the role's hiring DNA. 100% alignment guaranteed.",
+    description: "Paste a link to any job. Our AI reads what the company wants and helps you rewrite your resume to match.",
+    simpleEnglish: "Stop guessing. Be the perfect match every time.",
     href: "/canvas",
   },
   {
     variant: "simulation",
-    title: "Tactical Simulation",
-    description: "Face the pressure before it's real. Toggle between intensity levels. Our AI simulates real-time executive pushback based on your target company.",
+    title: "Interview Practice",
+    description: "Practice with an AI that talks like a real boss. Pick your level: Casual, Professional, or Surgical.",
+    simpleEnglish: "Build your confidence before the real meeting.",
     href: "/voice/interview",
   },
   {
     variant: "impact",
     title: "The Impact Log",
-    description: "Work that isn't tracked is work that isn't rewarded. Log wins, earn Impact Points (IP), and climb the 8-Level Accelerator.",
+    description: "Write down your Weekly Wins. Earn Impact Points (IP) and level up your career profile.",
+    simpleEnglish: "Keep a record of your value so you can ask for a higher salary.",
     href: "/growthhub",
   },
 ];
@@ -225,11 +228,11 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const faqs = [
-    { q: "How does the Alignment Engine work?", a: "Paste any job URL. Our AI analyzes the job posting's hiring DNA and automatically restructures your resume to match, positioning you as the ideal candidate before you even interview." },
-    { q: "What are Impact Points (IP)?", a: "Impact Points are a quantified currency for your career wins. Log weekly achievements, earn IP, and climb the 8-Level Accelerator—turning a year of work into data-backed evidence for raises, promotions, and leadership positions." },
-    { q: "What is the difference between Casual, Professional, and Surgical interview intensities?", a: "Casual is practice-mode with gentle feedback. Professional is interview-ready simulation. Surgical is maximum pressure: executive-level pushback, rapid-fire follow-ups, and zero mercy. Use Surgical to prepare for your toughest competition." },
-    { q: "How does the Asset Generator work?", a: "After each interview, our AI analyzes your performance and impact log, then auto-generates high-impact follow-up emails, portfolio snippets, and career collateral that prove your value to recruiters and hiring managers." },
-    { q: "How quickly can I start?", a: "Most users create an account and run their first simulation in under 2 minutes. Upload your resume and job description—that's it. The Command Center takes it from there." },
+    { q: "How does Hirely Coach help me get more job interviews?", a: "Hirely Coach helps you match your resume to each job, practice interviews, and track your wins so recruiters can see your value." },
+    { q: "How does the Alignment Engine work?", a: "Paste a job link. Hirely reads the role and helps you rewrite your resume to match it." },
+    { q: "What is the difference between Casual, Professional, and Surgical interview levels?", a: "Casual is easy practice. Professional feels like a real interview. Surgical is the hardest level with fast follow-up questions." },
+    { q: "What is the Impact Log?", a: "The Impact Log is where you save your Weekly Wins. You earn Impact Points and build proof for interviews, raises, and promotions." },
+    { q: "How quickly can I start?", a: "Most users start in under two minutes. Upload your resume and job description, then begin." },
   ];
 
   return (
@@ -240,8 +243,8 @@ export default function Home() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "Hirely Coach - The Career OS",
-            "description": "An AI-powered Career Operating System for professional growth, interview preparation, and career advancement.",
+            "name": "Hirely Coach",
+            "description": "AI-powered career tools for resume optimization, interview practice, and achievement tracking. Improve your resume, practice real interviews, and get better jobs.",
             "url": "https://hirelycoach.com",
             "applicationCategory": "CareerDevelopment",
             "offers": {
@@ -254,6 +257,19 @@ export default function Home() {
               "ratingValue": "4.8",
               "ratingCount": "150"
             }
+          })
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Hirely Coach",
+            "url": "https://hirelycoach.com",
+            "description": "We help job seekers improve their resume, practice real interviews, and track their achievements with simple, AI-powered tools.",
+            "sameAs": ["https://hirelycoach.com"]
           })
         }}
       />
@@ -280,27 +296,22 @@ export default function Home() {
             <div className="gh-terminal-box">
               <p className="gh-eyebrow">The Career OS</p>
               <h1 className="gh-first-h1" style={{ maxWidth: 700 }}>
-                Master Your Career Journey with Surgical Precision.
+                The Best Way to Build Your Career.
               </h1>
               <p className="gh-first-sub">
-                The all-in-one Command Center to optimize your profile, simulate high-stakes interviews, and automate your professional impact.
+                Hirely Coach helps you get the job and grow your career. Use our AI tools to fix your resume, practice interviews, and track your work success in one place.
               </p>
               <div className="lp-hero-cta-row">
                 <Link href={isSignedIn ? "/voice/interview" : "/voice"} className="global-auth-btn global-auth-btn--strong lp-hero-cta-btn">
-                  Try Hirely Coach Now
+                  Launch your interview now
                 </Link>
-                <SignedOut>
-                  <SignUpButton mode="modal">
-                    <button className="global-auth-btn lp-hero-cta-btn" type="button">Create free account</button>
-                  </SignUpButton>
-                </SignedOut>
               </div>
               <div className="gh-first-badges">
-                <span>AI Alignment Engine</span>
+                <span>AI Resume Optimization</span>
                 <span>•</span>
-                <span>Tactical Simulation</span>
+                <span>Interview Practice</span>
                 <span>•</span>
-                <span>Impact Quantification</span>
+                <span>Achievement Tracking</span>
               </div>
             </div>
             <aside className="gh-blueprint-panel" aria-hidden="true">
@@ -321,9 +332,9 @@ export default function Home() {
         <section className="gh-body" id="features">
           <div>
             <p className="gh-eyebrow">The Power Pillars</p>
-            <h2 className="gh-h1 gh-preview-title">Four command-center modules that work as one system</h2>
+            <h2 className="gh-h1 gh-preview-title">Four career tools that work together as one system</h2>
             <p className="gh-first-sub" style={{ maxWidth: 760, marginBottom: 24 }}>
-              Optimize your profile, practice with surgical precision, quantify your impact, and generate interview-to-opportunity assets.
+              <strong>Improve your resume</strong>, practice interviews, track your wins, and build your career portfolio in one place.
             </p>
             <div className="gh-action-grid">
               {CORE_FEATURES.map((feature, idx) => (
@@ -340,6 +351,7 @@ export default function Home() {
                     </div>
                     <h3 className="gh-card-title">{feature.title}</h3>
                     <p className="gh-card-desc">{feature.description}</p>
+                    <p className="gh-card-simple">{feature.simpleEnglish}</p>
                   </div>
                 </article>
               ))}
@@ -350,7 +362,7 @@ export default function Home() {
             <section className="gh-sidebar-card glass-card" style={{ animation: "gh-modal-slide-in 0.35s ease both" }}>
               <p className="gh-sidebar-label">Why This Works</p>
               <p className="gh-sidebar-body">
-                Your career is a journey, not a series of accidents. Each module feeds the next — from AI resume alignment to STARR-structured mock interviews to impact tracking and asset generation.
+                Your tools work together. Update your resume, practice interviews, log wins, and build assets from one connected workflow.
               </p>
               <div className="gh-quick-stats">
                 <div className="stat-row"><span className="stat-label">Profile Alignment</span><span className="stat-value">100%</span></div>
@@ -362,27 +374,27 @@ export default function Home() {
         </section>
 
         {/* ── STARR + MOCK INTERVIEW HIGHLIGHT ── */}
-        <section className="lp-section">
-          <p className="gh-eyebrow">STARR Lab & Mock Interviews</p>
-          <h2 className="gh-h1">The interview simulator that actually challenges you.</h2>
+        <section className="lp-section" id="interview-practice">
+          <p className="gh-eyebrow">STARR Lab &amp; AI Mock Interviews</p>
+          <h2 className="gh-h1">AI Interview Coach that actually challenges you.</h2>
           <p className="lp-section-sub">
-            Go beyond generic practice. Hirely&apos;s STARR Lab enforces Situation, Task, Action, Result, and Reflection structure until your answers are automatic. Then run a live mock interview at Casual, Professional, or Surgical intensity — with real-time executive pushback based on your specific resume and target role.
+            Learn to answer with the STARR method. Then practice with your AI interview coach. Pick Casual, Professional, or Surgical based on your goal.
           </p>
           <div className="lp-steps" style={{ marginTop: 32 }}>
             <div className="lp-step glass-card">
               <div className="lp-step-top"><span className="lp-step-badge">STARR Lab</span></div>
               <h3 className="lp-step-title">Structure your stories until they&apos;re automatic.</h3>
-              <p className="lp-step-body">Interactive drills build STARR fluency under timed pressure. When nerves hit, your answers stay tight.</p>
+              <p className="lp-step-body">Short drills help you build strong stories. You stay clear even when you feel nervous.</p>
             </div>
             <div className="lp-step glass-card">
               <div className="lp-step-top"><span className="lp-step-badge">Mock Interview</span></div>
               <h3 className="lp-step-title">Simulate the real interview before it&apos;s real.</h3>
-              <p className="lp-step-body">Live voice simulation with adaptive follow-up pressure. Choose your intensity — Casual for practice, Surgical for maximum pressure.</p>
+              <p className="lp-step-body">Practice with live follow-up questions. Start easy, then move up to harder levels.</p>
             </div>
             <div className="lp-step glass-card">
               <div className="lp-step-top"><span className="lp-step-badge">10-Point Scorecard</span></div>
               <h3 className="lp-step-title">Know exactly what&apos;s costing you the offer.</h3>
-              <p className="lp-step-body">Every session scored across logic, storytelling, confidence, depth, and role alignment. No guessing.</p>
+              <p className="lp-step-body">See clear scores after each session. You know what to fix next.</p>
             </div>
           </div>
         </section>
@@ -390,9 +402,9 @@ export default function Home() {
         {/* ── PROBLEM / SOLUTION ── */}
         <section className="lp-section" id="why">
           <p className="gh-eyebrow">The Career OS Advantage</p>
-          <h2 className="gh-h1">The career platforms you&apos;ve tried got the incentives wrong.</h2>
+          <h2 className="gh-h1">Why job seekers struggle and how Hirely helps</h2>
           <p className="lp-section-sub">
-            Most treat interviews and job applications as separate problems. We treat them as one career architecture challenge—connecting every simulation, achievement, and asset into a quantified growth system.
+            Most tools are separate. Hirely connects resume updates, interview practice, and win tracking in one system.
           </p>
 
           <div className="lp-ps-grid">
@@ -420,9 +432,9 @@ export default function Home() {
         {/* ── CAPABILITIES ── */}
         <section className="lp-section" id="capabilities">
           <p className="gh-eyebrow">The System</p>
-          <h2 className="gh-h1">Four integrated systems that automate your ascension</h2>
+          <h2 className="gh-h1">Four integrated career tools in one platform</h2>
           <p className="lp-section-sub">
-            Hirely Coach is built as a career architecture platform: align your profile, practice under pressure with STARR-structured mock interviews, track your impact, and auto-generate career collateral.
+            <strong>Hirely Coach</strong> helps you improve your resume, practice interviews, log wins, and generate career proof in one dashboard.
           </p>
 
           <div className="lp-metrics-grid">
@@ -443,10 +455,14 @@ export default function Home() {
 
         {/* ── METRICS ── */}
         <section className="lp-section lp-section-alt" id="metrics">
-          <p className="gh-eyebrow">Diagnostic Engine</p>
-          <h2 className="gh-h1">You're scored across 10 metrics that real hiring teams use</h2>
+          <p className="gh-eyebrow">Your Score Card</p>
+          <h2 className="gh-h1">Know exactly what to improve after every session</h2>
           <p className="lp-section-sub">
-            Every session produces a diagnostic scorecard. No hidden gaps. No guessing. Know exactly what's working and what's costing you the offer.
+            Every practice session gives you a clear <strong>Score Card</strong> with simple results:<br />
+            <span aria-label="Checkmark">✅</span> <strong>Alignment:</strong> Does your resume match the job?<br />
+            <span aria-label="Checkmark">✅</span> <strong>Clarity:</strong> Is your speaking easy to understand?<br />
+            <span aria-label="Checkmark">✅</span> <strong>Logic:</strong> Do your answers make sense?<br />
+            No guessing. No vague feedback.
           </p>
 
           <div className="lp-metrics-grid">
@@ -470,9 +486,9 @@ export default function Home() {
         {/* ── HOW IT WORKS ── */}
         <section className="lp-section" id="how">
           <p className="gh-eyebrow">The Path to Ascension</p>
-          <h2 className="gh-h1">From profile to promotion in 3 integrated steps</h2>
+          <h2 className="gh-h1">From profile to promotion in 3 simple steps</h2>
           <p className="lp-section-sub">
-            No complexity. No friction. Your career is optimized and tracked in real time.
+            <strong>Upload your resume. Practice interviews. Track your wins.</strong> It takes less than 2 minutes to get started.
           </p>
 
           <div className="lp-steps">
@@ -497,15 +513,15 @@ export default function Home() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginTop: 40, marginBottom: 40 }}>
             <div className="glass-card" style={{ padding: 24 }}>
               <p style={{ fontSize: "2.5rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>40%</p>
-              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>Users see a 40% increase in Clarity scores within their first 3 simulations</p>
+              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>Many users improve Clarity scores by 40% in their first 3 sessions.</p>
             </div>
             <div className="glass-card" style={{ padding: 24 }}>
               <p style={{ fontSize: "2.5rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>8 Levels</p>
-              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>The Accelerator tracks your rise from Candidate to C-Suite Executive</p>
+              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>Track your growth from Candidate to Executive.</p>
             </div>
             <div className="glass-card" style={{ padding: 24 }}>
               <p style={{ fontSize: "2.5rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>100%</p>
-              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>Profile alignment with your target role's hiring requirements</p>
+              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>See how well your profile matches your target role.</p>
             </div>
           </div>
 
@@ -514,10 +530,27 @@ export default function Home() {
           </p>
         </section>
 
+        {/* ── WHY WE EXIST ── */}
+        <section className="lp-section" id="about" style={{ textAlign: "center" }}>
+          <p className="gh-eyebrow">Our Mission</p>
+          <h2 className="gh-h1">Why Hirely Coach Exists</h2>
+          <p className="lp-section-sub" style={{ maxWidth: 640, margin: "0 auto 24px" }}>
+            We help job seekers <strong>speak clearly</strong>, <strong>show their value</strong>, and <strong>get better jobs</strong> using simple, AI-powered tools. No jargon. No guesswork.
+          </p>
+          <p className="lp-section-sub" style={{ maxWidth: 640, margin: "0 auto 32px", fontSize: "0.92rem", color: "#64748b" }}>
+            After improving your resume, try our{" "}
+            <a href="#interview-practice" style={{ color: "#10b981", textDecoration: "underline" }}>AI interview practice</a>{" "}
+            to prepare for real questions. After each session, use the{" "}
+            <a href="/growthhub" style={{ color: "#10b981", textDecoration: "underline" }}>Impact Log</a>{" "}
+            to track your wins and build your career story.
+          </p>
+        </section>
+
         {/* ── FAQ ── */}
         <section className="lp-section">
           <p className="gh-eyebrow">FAQ</p>
           <h2 className="gh-h1">Want to know more?</h2>
+          <p className="lp-section-sub">Common questions with clear answers.</p>
           <div className="lp-faq">
             {faqs.map((faq, i) => (
               <div
@@ -537,22 +570,21 @@ export default function Home() {
 
         {/* ── FINAL CTA ── */}
         <section className="lp-cta-section">
-          <span className="gh-eyebrow">Stop Applying. Start Ascending.</span>
-          <h2 className="gh-h1">Your career is a journey, not a series of accidents.</h2>
+          <span className="gh-eyebrow">Don&apos;t just work. Grow.</span>
+          <h2 className="gh-h1">Are you ready to move to the next level?</h2>
           <p className="lp-cta-sub">
-            Hirely Coach is the command center that replaces the stress of job hunting with the precision of career architecture.
+            <strong>Hirely Coach</strong> gives you the tools to plan your future. Fix your resume, practice your talking skills, and save your best work results.
           </p>
           <div className="lp-cta-actions">
             <SignedOut>
               <SignUpButton mode="modal">
-                <button className="global-auth-btn global-auth-btn--strong lp-cta-preview-btn" type="button">Try Hirely Coach Now</button>
+                <button className="global-auth-btn global-auth-btn--strong lp-cta-preview-btn" type="button">Launch your interview now</button>
               </SignUpButton>
             </SignedOut>
             <Link href={isSignedIn ? "/voice/interview" : "/voice"} className="global-auth-btn global-auth-btn--strong lp-cta-preview-btn" style={{ display: isSignedIn ? undefined : "none" }}>
-              Try Hirely Coach Now
+              Launch your interview now
             </Link>
           </div>
-          <p className="lp-cta-note">Ready to ascend?</p>
         </section>
       </main>
 
@@ -565,9 +597,9 @@ export default function Home() {
           </div>
           <div className="lp-footer-cols">
             <div className="lp-footer-col lp-footer-col--product">
-              <p className="lp-footer-col-label">Command Center</p>
-              <Link href="/canvas">Alignment Engine</Link>
-              <Link href="/voice/interview">Tactical Simulation</Link>
+                <p className="lp-footer-col-label">Career Tools</p>
+                <Link href="/canvas">Resume Optimizer</Link>
+                <Link href="/voice/interview">Interview Practice</Link>
               <Link href="/growthhub">Impact Log</Link>
             </div>
             <div className="lp-footer-col lp-footer-col--account">

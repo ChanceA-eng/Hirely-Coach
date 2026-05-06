@@ -19,7 +19,6 @@ const LEVEL_SEQUENCE: ProgressTier["title"][] = [
   "Novice",
   "Apprentice",
   "Candidate",
-  "Professional",
   "Expert",
   "Executive",
   "Advanced",

@@ -1,0 +1,311 @@
+{
+  "module": 11,
+  "title": "Interview Essentials",
+  "title_sw": "Misingi ya Mahojiano",
+  "description": "The words, phrases, and conversations you need to walk into any interview with confidence.",
+  "description_sw": "Maneno, misemo, na mazungumzo unayohitaji kuingia mahojiano yoyote kwa ujasiri.",
+  "sofia_intro": "Module 11 is your interview toolkit. These are the words recruiters use every single day — and now you will use them too.",
+  "sofia_intro_sw": "Moduli ya 11 ni kifaa chako cha mahojiano. Haya ndio maneno ambayo waajiri hutumia kila siku — na sasa wewe pia utayatumia.",
+  "lessons": [
+    {
+      "id": "11-1",
+      "type": "vocabulary_grid",
+      "title": "Interview Vocabulary",
+      "title_sw": "Msamiati wa Mahojiano",
+      "sofia_hint": "Click each word to hear it. These are the words every recruiter expects you to know.",
+      "sofia_hint_sw": "Bonyeza kila neno kulisikia. Haya ndio maneno ambayo kila mwajiri anatarajia ujue.",
+      "words": [
+        { "word": "Resume", "sw": "Wasifu wa kazi", "emoji": "📄", "example": "Send your resume by email.", "audio_url": "/audio/resume.mp3" },
+        { "word": "Application", "sw": "Ombi la kazi", "emoji": "📝", "example": "Fill in the application form.", "audio_url": "/audio/application.mp3" },
+        { "word": "Qualification", "sw": "Sifa za kazi", "emoji": "🎓", "example": "I have the right qualifications.", "audio_url": "/audio/qualification.mp3" },
+        { "word": "Experience", "sw": "Uzoefu", "emoji": "⭐", "example": "I have five years of experience.", "audio_url": "/audio/experience.mp3" },
+        { "word": "Strength", "sw": "Nguvu / Sifa nzuri", "emoji": "💪", "example": "My strength is teamwork.", "audio_url": "/audio/strength.mp3" },
+        { "word": "Weakness", "sw": "Udhaifu", "emoji": "🔍", "example": "I work on my weaknesses every day.", "audio_url": "/audio/weakness.mp3" },
+        { "word": "Reference", "sw": "Kumbukumbu / Mtoa hakikisho", "emoji": "🤝", "example": "Please provide two references.", "audio_url": "/audio/reference.mp3" },
+        { "word": "Offer", "sw": "Ofa ya kazi", "emoji": "🎯", "example": "I received a job offer.", "audio_url": "/audio/offer.mp3" },
+        { "word": "Availability", "sw": "Upatikanaji", "emoji": "📅", "example": "My availability starts Monday.", "audio_url": "/audio/availability.mp3" },
+        { "word": "Salary expectation", "sw": "Matarajio ya mshahara", "emoji": "💵", "example": "My salary expectation is competitive.", "audio_url": "/audio/salary_expectation.mp3" }
+      ]
+    },
+    {
+      "id": "11-2",
+      "type": "multiple_choice",
+      "title": "Interview Word Match",
+      "title_sw": "Kulinganisha Maneno ya Mahojiano",
+      "sofia_hint": "Pick the correct word for each clue. No writing — just click!",
+      "sofia_hint_sw": "Chagua neno sahihi kwa kila kidokezo. Hakuna kuandika — bonyeza tu!",
+      "questions": [
+        {
+          "prompt": "Which word means 'Uzoefu'?",
+          "prompt_sw": "Neno gani linamaanisha 'Uzoefu'?",
+          "options": ["Resume", "Reference", "Experience", "Offer"],
+          "options_sw": ["Resume", "Reference", "Experience", "Offer"],
+          "correct": 2
+        },
+        {
+          "prompt": "Which word means 'Wasifu wa kazi'?",
+          "prompt_sw": "Neno gani linamaanisha 'Wasifu wa kazi'?",
+          "options": ["Application", "Resume", "Strength", "Qualification"],
+          "options_sw": ["Application", "Resume", "Strength", "Qualification"],
+          "correct": 1
+        },
+        {
+          "prompt": "'My strength is teamwork' — what does 'strength' mean here?",
+          "prompt_sw": "'My strength is teamwork' — 'strength' inamaanisha nini hapa?",
+          "options": ["Udhaifu", "Uzoefu", "Sifa nzuri", "Ombi"],
+          "options_sw": ["Udhaifu", "Uzoefu", "Sifa nzuri", "Ombi"],
+          "correct": 2
+        },
+        {
+          "prompt": "Which word means 'Ofa ya kazi'?",
+          "prompt_sw": "Neno gani linamaanisha 'Ofa ya kazi'?",
+          "options": ["Offer", "Availability", "Application", "Reference"],
+          "options_sw": ["Offer", "Availability", "Application", "Reference"],
+          "correct": 0
+        },
+        {
+          "prompt": "Which word means 'Sifa za kazi'?",
+          "prompt_sw": "Neno gani linamaanisha 'Sifa za kazi'?",
+          "options": ["Resume", "Weakness", "Qualification", "Salary expectation"],
+          "options_sw": ["Resume", "Weakness", "Qualification", "Salary expectation"],
+          "correct": 2
+        },
+        {
+          "prompt": "'Upatikanaji' means:",
+          "prompt_sw": "'Upatikanaji' inamaanisha:",
+          "options": ["Weakness", "Availability", "Experience", "Reference"],
+          "options_sw": ["Weakness", "Availability", "Experience", "Reference"],
+          "correct": 1
+        }
+      ]
+    },
+    {
+      "id": "11-3",
+      "type": "dialogue",
+      "title": "Interview Dialogues",
+      "title_sw": "Mazungumzo ya Mahojiano",
+      "sofia_hint": "These are real interview conversations. Listen carefully and repeat each line.",
+      "sofia_hint_sw": "Hizi ni mazungumzo halisi ya mahojiano. Sikiliza kwa makini na ujibu kila mstari.",
+      "dialogues": [
+        {
+          "title": "The Classic Interview Opening",
+          "title_sw": "Ufunguzi wa Kawaida wa Mahojiano",
+          "lines": [
+            { "speaker": "Recruiter", "en": "Good morning. Thank you for coming in today.", "sw": "Habari za asubuhi. Asante kwa kuja leo.", "audio_url": "/audio/interview_open_1.mp3" },
+            { "speaker": "You", "en": "Good morning. Thank you for having me.", "sw": "Habari za asubuhi. Asante kwa kunikaribisho.", "audio_url": "/audio/interview_open_2.mp3" },
+            { "speaker": "Recruiter", "en": "Please tell me a little about yourself.", "sw": "Tafadhali nipe maelezo kidogo kuhusu wewe.", "audio_url": "/audio/interview_open_3.mp3" },
+            { "speaker": "You", "en": "I have three years of experience in customer service and I am very motivated to grow.", "sw": "Nina miaka mitatu ya uzoefu kwenye huduma za wateja na niko na motisha kubwa kukua.", "audio_url": "/audio/interview_open_4.mp3" }
+          ]
+        },
+        {
+          "title": "Discussing Strengths",
+          "title_sw": "Kuzungumza Kuhusu Nguvu",
+          "lines": [
+            { "speaker": "Recruiter", "en": "What is your biggest strength?", "sw": "Nguvu yako kubwa zaidi ni nini?", "audio_url": "/audio/strengths_1.mp3" },
+            { "speaker": "You", "en": "My biggest strength is communication. I listen carefully and respond clearly.", "sw": "Nguvu yangu kubwa zaidi ni mawasiliano. Nasikiliza kwa makini na najibu wazi.", "audio_url": "/audio/strengths_2.mp3" },
+            { "speaker": "Recruiter", "en": "Good. What about your weakness?", "sw": "Vizuri. Na kuhusu udhaifu wako?", "audio_url": "/audio/strengths_3.mp3" },
+            { "speaker": "You", "en": "I sometimes focus too much on details, but I am learning to balance speed and quality.", "sw": "Wakati mwingine ninajikita sana kwenye maelezo, lakini ninajifunza kuweka usawa kati ya kasi na ubora.", "audio_url": "/audio/strengths_4.mp3" }
+          ]
+        },
+        {
+          "title": "Closing the Interview",
+          "title_sw": "Kufunga Mahojiano",
+          "lines": [
+            { "speaker": "Recruiter", "en": "Do you have any questions for us?", "sw": "Je, una maswali yoyote kwetu?", "audio_url": "/audio/close_1.mp3" },
+            { "speaker": "You", "en": "Yes. What does a typical day look like in this role?", "sw": "Ndiyo. Siku ya kawaida inaonekanaje katika jukumu hili?", "audio_url": "/audio/close_2.mp3" },
+            { "speaker": "Recruiter", "en": "Great question. We will email you the details. Thank you for your time.", "sw": "Swali zuri. Tutakutumia maelezo kwa barua pepe. Asante kwa muda wako.", "audio_url": "/audio/close_3.mp3" },
+            { "speaker": "You", "en": "Thank you. I look forward to hearing from you.", "sw": "Asante. Ninasubiri kupata habari kutoka kwenu.", "audio_url": "/audio/close_4.mp3" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "11-4",
+      "type": "listening",
+      "title": "Interview Listening",
+      "title_sw": "Kusikiliza Mahojiano",
+      "exercises": [
+        {
+          "audio_url": "/audio/int_1.mp3",
+          "transcript": "We are looking for someone with at least two years of experience and strong communication skills.",
+          "transcript_sw": "Tunatafuta mtu aliye na uzoefu wa miaka miwili au zaidi na ujuzi imara wa mawasiliano.",
+          "question": "What is one requirement?",
+          "question_sw": "Sehemu moja ya mahitaji ni ipi?",
+          "options": ["A driving license", "Two years of experience", "A master's degree", "Five references"],
+          "correct": 1
+        },
+        {
+          "audio_url": "/audio/int_2.mp3",
+          "transcript": "The salary for this position starts at forty thousand shillings per month, with a review after three months.",
+          "transcript_sw": "Mshahara wa nafasi hii huanza shilingi arobaini elfu kwa mwezi, na tathmini baada ya miezi mitatu.",
+          "question": "When is the salary reviewed?",
+          "question_sw": "Mshahara unakaguliwa lini?",
+          "options": ["After one month", "After six months", "After three months", "Never"],
+          "correct": 2
+        },
+        {
+          "audio_url": "/audio/int_3.mp3",
+          "transcript": "We value teamwork, punctuality, and a positive attitude above all else.",
+          "transcript_sw": "Tuthamini ushirikiano wa timu, kufika kwa wakati, na mtazamo mzuri kuliko yote.",
+          "question": "Which quality is NOT mentioned?",
+          "question_sw": "Sifa ipi HAIKUTAJWA?",
+          "options": ["Teamwork", "Punctuality", "Creativity", "Positive attitude"],
+          "correct": 2
+        },
+        {
+          "audio_url": "/audio/int_4.mp3",
+          "transcript": "Please bring two copies of your resume and a valid ID to the interview.",
+          "transcript_sw": "Tafadhali lete nakala mbili za wasifu wako na kitambulisho halali kwenye mahojiano.",
+          "question": "How many copies of the resume should you bring?",
+          "question_sw": "Unapaswa kuleta nakala ngapi za wasifu?",
+          "options": ["One", "Two", "Three", "Four"],
+          "correct": 1
+        }
+      ]
+    },
+    {
+      "id": "11-5",
+      "type": "vocabulary_grid",
+      "title": "Workplace Phrases and Abbreviations",
+      "title_sw": "Misemo na Vifupisho vya Mahali pa Kazi",
+      "sofia_hint": "These short phrases are used in every office. Click to hear them!",
+      "sofia_hint_sw": "Misemo hii mifupi inatumika katika kila ofisi. Bonyeza kuisikia!",
+      "words": [
+        { "word": "ASAP", "sw": "Haraka iwezekanavyo", "emoji": "⚡", "example": "Please respond ASAP.", "audio_url": "/audio/asap.mp3" },
+        { "word": "EOD", "sw": "Mwisho wa siku", "emoji": "🌙", "example": "Submit the report by EOD.", "audio_url": "/audio/eod.mp3" },
+        { "word": "FYI", "sw": "Kwa maelezo yako", "emoji": "ℹ️", "example": "FYI: the meeting moved to 3 PM.", "audio_url": "/audio/fyi.mp3" },
+        { "word": "Follow up", "sw": "Fuatilia", "emoji": "🔄", "example": "I will follow up on Monday.", "audio_url": "/audio/follow_up.mp3" },
+        { "word": "On board", "sw": "Kukubali / Kuungana", "emoji": "✅", "example": "Is everyone on board?", "audio_url": "/audio/on_board.mp3" },
+        { "word": "Action item", "sw": "Kazi itakayofanywa", "emoji": "📌", "example": "Your action item is the report.", "audio_url": "/audio/action_item.mp3" },
+        { "word": "Touch base", "sw": "Kuwasiliana / Kukutana kwa haraka", "emoji": "🤙", "example": "Let us touch base tomorrow.", "audio_url": "/audio/touch_base.mp3" },
+        { "word": "Circle back", "sw": "Kurudi kujadili baadaye", "emoji": "🔁", "example": "I will circle back after the meeting.", "audio_url": "/audio/circle_back.mp3" },
+        { "word": "Bandwidth", "sw": "Uwezo / Muda uliopo", "emoji": "📶", "example": "I do not have the bandwidth right now.", "audio_url": "/audio/bandwidth.mp3" },
+        { "word": "Deliverable", "sw": "Kitu kinachohitajika kukamilishwa", "emoji": "📦", "example": "What is the key deliverable?", "audio_url": "/audio/deliverable.mp3" }
+      ]
+    },
+    {
+      "id": "11-6",
+      "type": "multiple_choice",
+      "title": "Workplace Phrases Quiz",
+      "title_sw": "Mchezo wa Misemo ya Kazi",
+      "sofia_hint": "Pick the correct phrase or meaning. Short answers only!",
+      "sofia_hint_sw": "Chagua msemo au maana sahihi. Majibu mafupi tu!",
+      "questions": [
+        {
+          "prompt": "What does 'ASAP' mean?",
+          "prompt_sw": "'ASAP' inamaanisha nini?",
+          "options": ["Later today", "Next week", "As soon as possible", "End of month"],
+          "options_sw": ["Baadaye leo", "Wiki ijayo", "Haraka iwezekanavyo", "Mwisho wa mwezi"],
+          "correct": 2
+        },
+        {
+          "prompt": "'EOD' stands for:",
+          "prompt_sw": "'EOD' inamaanisha:",
+          "options": ["End of Day", "Email or Document", "Early or Done", "Every Office Day"],
+          "options_sw": ["Mwisho wa Siku", "Barua pepe au Hati", "Mapema au Imekamilika", "Kila Siku ya Ofisi"],
+          "correct": 0
+        },
+        {
+          "prompt": "'FYI: the meeting moved' — what does FYI mean?",
+          "prompt_sw": "'FYI: the meeting moved' — FYI inamaanisha nini?",
+          "options": ["For Your Invoice", "For Your Information", "Follow Your Instructions", "Find Your Item"],
+          "options_sw": ["Kwa Ankara Yako", "Kwa Maelezo Yako", "Fuata Maelekezo Yako", "Tafuta Kitu Chako"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which phrase means 'Fuatilia'?",
+          "prompt_sw": "Msemo gani unamaanisha 'Fuatilia'?",
+          "options": ["Touch base", "On board", "Follow up", "Circle back"],
+          "options_sw": ["Touch base", "On board", "Follow up", "Circle back"],
+          "correct": 2
+        },
+        {
+          "prompt": "'I do not have the bandwidth right now' means:",
+          "prompt_sw": "'I do not have the bandwidth right now' inamaanisha:",
+          "options": ["No internet", "No time or capacity", "No office space", "No money"],
+          "options_sw": ["Hakuna mtandao", "Hakuna muda au uwezo", "Hakuna nafasi ofisini", "Hakuna pesa"],
+          "correct": 1
+        },
+        {
+          "prompt": "'Let us touch base tomorrow' means:",
+          "prompt_sw": "'Let us touch base tomorrow' inamaanisha:",
+          "options": ["Meet briefly tomorrow", "Play sport tomorrow", "Work late tomorrow", "Email tomorrow"],
+          "options_sw": ["Kukutana kwa haraka kesho", "Kucheza mchezo kesho", "Kufanya kazi usiku kesho", "Tuma barua pepe kesho"],
+          "correct": 0
+        },
+        {
+          "prompt": "Which word means 'Kitu kinachohitajika kukamilishwa'?",
+          "prompt_sw": "Neno gani linamaanisha 'Kitu kinachohitajika kukamilishwa'?",
+          "options": ["Action item", "Bandwidth", "Deliverable", "On board"],
+          "options_sw": ["Action item", "Bandwidth", "Deliverable", "On board"],
+          "correct": 2
+        }
+      ]
+    },
+    {
+      "id": "11-7",
+      "type": "multiple_choice",
+      "title": "Module 11 Final Assessment",
+      "title_sw": "Tathmini ya Mwisho ya Moduli 11",
+      "is_graduation_gate": true,
+      "questions": [
+        {
+          "prompt": "Which word means 'Ombi la kazi'?",
+          "prompt_sw": "Neno gani linamaanisha 'Ombi la kazi'?",
+          "options": ["Resume", "Application", "Reference", "Strength"],
+          "options_sw": ["Resume", "Application", "Reference", "Strength"],
+          "correct": 1
+        },
+        {
+          "prompt": "'My availability starts Monday' — what does availability mean?",
+          "prompt_sw": "'My availability starts Monday' — 'availability' inamaanisha nini?",
+          "options": ["Upatikanaji", "Uzoefu", "Matarajio", "Udhaifu"],
+          "options_sw": ["Upatikanaji", "Uzoefu", "Matarajio", "Udhaifu"],
+          "correct": 0
+        },
+        {
+          "prompt": "Best way to close an interview:",
+          "prompt_sw": "Njia bora ya kufunga mahojiano:",
+          "options": ["Say nothing", "Ask a question", "Leave quickly", "Demand salary"],
+          "options_sw": ["Usiseme chochote", "Uliza swali", "Ondoka haraka", "Dai mshahara"],
+          "correct": 1
+        },
+        {
+          "prompt": "What does 'circle back' mean?",
+          "prompt_sw": "'Circle back' inamaanisha nini?",
+          "options": ["Sit in a circle", "Return to discuss later", "Go back home", "Start over"],
+          "options_sw": ["Kaa kwenye mzunguko", "Rudi kujadili baadaye", "Rudi nyumbani", "Anza upya"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which phrase means 'Haraka iwezekanavyo'?",
+          "prompt_sw": "Msemo gani unamaanisha 'Haraka iwezekanavyo'?",
+          "options": ["EOD", "FYI", "ASAP", "On board"],
+          "options_sw": ["EOD", "FYI", "ASAP", "On board"],
+          "correct": 2
+        },
+        {
+          "prompt": "When a recruiter says 'Tell me about your weakness', the best answer mentions:",
+          "prompt_sw": "Mwajiri akisema 'Nieleze kuhusu udhaifu wako', jibu bora linataja:",
+          "options": ["A weakness and how you improve it", "You have no weaknesses", "Your salary expectation", "Another job offer"],
+          "options_sw": ["Udhaifu na jinsi unavyouboresha", "Huna udhaifu", "Matarajio yako ya mshahara", "Ofa nyingine ya kazi"],
+          "correct": 0
+        },
+        {
+          "prompt": "'Please bring two copies of your resume' — how many copies?",
+          "prompt_sw": "'Please bring two copies of your resume' — nakala ngapi?",
+          "options": ["One", "Two", "Three", "Four"],
+          "options_sw": ["Moja", "Mbili", "Tatu", "Nne"],
+          "correct": 1
+        },
+        {
+          "prompt": "Which word means 'Mtoa hakikisho'?",
+          "prompt_sw": "Neno gani linamaanisha 'Mtoa hakikisho'?",
+          "options": ["Offer", "Qualification", "Reference", "Weakness"],
+          "options_sw": ["Offer", "Qualification", "Reference", "Weakness"],
+          "correct": 2
+        }
+      ]
+    }
+  ]
+}

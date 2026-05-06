@@ -1,0 +1,159 @@
+{
+  "module": 12,
+  "title": "Mtihani wa Kutoka — Exit Exam",
+  "title_sw": "First Day at Work Simulation",
+  "description": "The final test. Prove you can hold a real professional conversation using everything you have learned.",
+  "description_sw": "Mtihani wa mwisho. Thibitisha kwamba unaweza kuwa na mazungumzo halisi ya kazi ukitumia kila kitu ulichojifunza.",
+  "sofia_intro": "Hongera! Umefika mwisho wa misingi. Sasa, utazungumza na bosi wako wa kwanza. Kumbuka kila kitu ulichojifunza: Jina lako, saa, sehemu za ofisi, na hisia zako. Usiogope, jaribu kuongea!",
+  "sofia_intro_sw": "Congratulations! You have reached the end of the Foundation. Now, you will speak to your first boss. Remember everything you learned: Your name, time, office vocabulary, and your feelings. Don't be afraid — just try!",
+  "lessons": [
+    {
+      "id": "12-1",
+      "type": "ai_conversation",
+      "title": "Maongezi ya Majaribio",
+      "title_sw": "The Simulation — First Day at Work",
+      "sofia_hint": "Zungumza na bosi wako wa kwanza! Tumia jina lako, maneno ya ofisi, na hisia zako. Jibu kila swali kwa ujasiri.",
+      "sofia_hint_sw": "Talk to your first boss! Use your name, office words, and feelings. Answer every question with confidence.",
+      "context_sw": "Uko ofisini kwa mara ya kwanza. Bosi (AI) anakuuliza maswali.",
+      "context_en": "You are in the office for the first time. Your boss (AI) is asking you questions.",
+      "turns": [
+        {
+          "id": "turn-1",
+          "boss_message": "Hello! Welcome to the team. What is your name and your job?",
+          "boss_audio": "/audio/boss_1.mp3",
+          "response_mode": "voice",
+          "expected_keywords": ["name", "developer", "i am", "my name"],
+          "hint_sw": "Sema: 'My name is [Jina lako] and I am a developer.'",
+          "hint_en": "Say: 'My name is [Your name] and I am a developer.'",
+          "success_response": "Nice to meet you! Great to have you on the team.",
+          "success_audio": "/audio/boss_1_success.mp3",
+          "skills_checked": ["Greetings", "Self-Introduction"]
+        },
+        {
+          "id": "turn-2",
+          "boss_message": "Great. Can you write the report today?",
+          "boss_audio": "/audio/boss_2.mp3",
+          "response_mode": "type",
+          "expected_answer": "Yes, I can write the report.",
+          "hint_sw": "Andika: 'Yes, I can write the report.'",
+          "hint_en": "Type: 'Yes, I can write the report.'",
+          "success_response": "Excellent! I like your enthusiasm.",
+          "success_audio": "/audio/boss_2_success.mp3",
+          "skills_checked": ["Office Verbs"]
+        },
+        {
+          "id": "turn-3",
+          "boss_message": "Where is the meeting? Is it in the office?",
+          "boss_audio": "/audio/boss_3.mp3",
+          "response_mode": "voice",
+          "expected_keywords": ["meeting", "office", "yes", "in the"],
+          "hint_sw": "Sema: 'Yes, the meeting is in the office.'",
+          "hint_en": "Say: 'Yes, the meeting is in the office.'",
+          "success_response": "Correct! The conference room is on the second floor.",
+          "success_audio": "/audio/boss_3_success.mp3",
+          "skills_checked": ["Prepositions", "Office Locations"]
+        },
+        {
+          "id": "turn-4",
+          "boss_message": "What time is it now?",
+          "boss_audio": "/audio/boss_4.mp3",
+          "response_mode": "type",
+          "expected_answer": "It is 9:00.",
+          "expected_answer_alt": ["It is 9 o'clock.", "It is nine o'clock.", "It is 9:00 AM."],
+          "hint_sw": "Andika wakati: 'It is 9:00.' (au wakati wa sasa)",
+          "hint_en": "Type the time: 'It is 9:00.'",
+          "success_response": "Perfect timing! Let us begin the meeting.",
+          "success_audio": "/audio/boss_4_success.mp3",
+          "skills_checked": ["Time Vocabulary"]
+        },
+        {
+          "id": "turn-5",
+          "boss_message": "Last question — are you tired or happy today?",
+          "boss_audio": "/audio/boss_5.mp3",
+          "response_mode": "voice",
+          "expected_keywords": ["happy", "i am", "work hard", "excited"],
+          "hint_sw": "Sema: 'I am happy and I work hard.'",
+          "hint_en": "Say: 'I am happy and I work hard.'",
+          "success_response": "That is the spirit! Welcome to your first day. You are going to do great.",
+          "success_audio": "/audio/boss_5_success.mp3",
+          "skills_checked": ["Feelings", "Work Ethic Phrases"]
+        }
+      ]
+    },
+    {
+      "id": "12-2",
+      "type": "fill_blank",
+      "title": "Mazoezi ya Mwisho — Final Mastery Test",
+      "title_sw": "Complete the sentences without any help",
+      "sofia_hint": "Huu ni mtihani wa mwisho wa kuandika. Kamilisha sentensi hizi bila kusaidiwa na herufi za kwanza.",
+      "sofia_hint_sw": "This is your final typing test. Complete these sentences without any letter hints.",
+      "blanks": [
+        {
+          "sentence_sw": "Ninafanya kazi siku ya...",
+          "template": "I work on ________.",
+          "answer": "Monday",
+          "hint_sw": "Siku ya kwanza ya wiki",
+          "emoji": "📅"
+        },
+        {
+          "sentence_sw": "Kompyuta ipo juu ya...",
+          "template": "The computer is ________ the table.",
+          "answer": "on",
+          "hint_sw": "Kutoka 'prepositions' — kitu kiko juu ya mwingine",
+          "emoji": "💻"
+        },
+        {
+          "sentence_sw": "Ninahitaji kutuma barua pepe...",
+          "template": "I need to ________ an email.",
+          "answer": "send",
+          "hint_sw": "Kitenzi cha kutuma barua pepe",
+          "emoji": "📧"
+        },
+        {
+          "sentence_sw": "Kichwa changu kinauma...",
+          "template": "My ________ hurts.",
+          "answer": "head",
+          "hint_sw": "Sehemu ya mwili iliyo juu",
+          "emoji": "🤕"
+        },
+        {
+          "sentence_sw": "Pinda kushoto hapa...",
+          "template": "________ left here.",
+          "answer": "Turn",
+          "hint_sw": "Neno la maelekezo — kugeuka",
+          "emoji": "↰"
+        },
+        {
+          "sentence_sw": "Nina furaha leo...",
+          "template": "I am ________ today.",
+          "answer": "happy",
+          "hint_sw": "Hisia nzuri — kinyume cha 'sad'",
+          "emoji": "😊"
+        }
+      ]
+    },
+    {
+      "id": "12-3",
+      "type": "certificate",
+      "title": "Cheti cha Msingi",
+      "title_sw": "Foundation Certificate",
+      "is_graduation_gate": true,
+      "sofia_message": "Umekamilisha masomo yote 18! Sasa uko tayari kuanza safari yako ya kikazi na Hirely Coach.",
+      "sofia_message_sw": "You have completed all lessons in Foundation Mode! You are now ready to begin your career journey with Hirely Coach.",
+      "skills_mastered": [
+        { "skill": "Greetings & Self-Introduction", "skill_sw": "Salamu na Kujitambulisha", "emoji": "👋", "color": "#34d399" },
+        { "skill": "Office Verbs & Actions", "skill_sw": "Vitenzi vya Ofisi", "emoji": "💼", "color": "#818cf8" },
+        { "skill": "Prepositions & Locations", "skill_sw": "Mahali pa Vitu", "emoji": "📍", "color": "#f59e0b" },
+        { "skill": "Time & Days", "skill_sw": "Wakati na Siku", "emoji": "⏰", "color": "#f97316" },
+        { "skill": "Feelings & Emotions", "skill_sw": "Hisia", "emoji": "😊", "color": "#ec4899" },
+        { "skill": "Directions & Community", "skill_sw": "Maelekezo", "emoji": "🗺️", "color": "#06b6d4" },
+        { "skill": "Weather Vocabulary", "skill_sw": "Hali ya Hewa", "emoji": "🌤️", "color": "#8b5cf6" },
+        { "skill": "Interview Language", "skill_sw": "Lugha ya Mahojiano", "emoji": "🎯", "color": "#f472b6" }
+      ],
+      "next_step": "Hirely Coach — Professional Mode",
+      "next_step_sw": "Hirely Coach — Hali ya Kitaalamu",
+      "next_step_url": "/coach",
+      "confetti": true
+    }
+  ]
+}

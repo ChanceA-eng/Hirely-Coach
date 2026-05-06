@@ -35,10 +35,6 @@ export const HARD_GATES: Partial<Record<ProgressTier["title"], HardGate>> = {
     requirement: "Score 80+ on a Behavioral Simulation",
     promotionMessage: "Promotion Pending: Reach 80+ on a Behavioral Simulation for Candidate.",
   },
-  Professional: {
-    requirement: "Log 5 wins in the Impact Ledger",
-    promotionMessage: "Promotion Pending: Log 5 Impact Ledger wins to advance to Professional.",
-  },
   Expert: {
     requirement: "Log 1 Process Improvement win verified by HC",
     promotionMessage: "Promotion Pending: Add one HC-verified Process Improvement win for Expert.",
@@ -71,14 +67,14 @@ const IP_REBALANCE_KEY = "hirely.ipRebalance.v1";
 const HIGHEST_RESUME_SCORE_KEY = "hirely.optimizer.highscore.v1";
 
 export const LEVELS: ProgressTier[] = [
-  { title: "Novice",        minIp: 0 },
-  { title: "Apprentice",    minIp: 250 },
-  { title: "Candidate",     minIp: 750 },
-  { title: "Professional",  minIp: 1100 },
-  { title: "Expert",        minIp: 1750 },
-  { title: "Executive",     minIp: 3500 },
-  { title: "Advanced",      minIp: 6000 },
-  { title: "Master",        minIp: 12000 },
+  { title: "Novice", minIp: 0 },
+  { title: "Apprentice", minIp: 250 },
+  { title: "Candidate", minIp: 750 },
+  { title: "Professional", minIp: 1250 },
+  { title: "Expert", minIp: 1500 },
+  { title: "Executive", minIp: 3000 },
+  { title: "Advanced", minIp: 5000 },
+  { title: "Master", minIp: 10000 },
 ];
 
 export const PROMOTION_SUPPORT_MIN_TIER: ProgressTier["title"] = "Executive";
@@ -263,7 +259,7 @@ export function isApprenticeUnlocked(ip: number): boolean {
 }
 
 export function isExecutiveUnlocked(ip: number): boolean {
-  return ip >= 3500;
+  return ip >= 3000;
 }
 
 // ─── Gate checkers (UI passes in the required counts) ────────────────────────

@@ -1,0 +1,47 @@
+[
+  {
+    "letter": "I",
+    "phonetic": "ai",
+    "letter_audio": "/audio/i.mp3",
+    "example_word": "I am ready",
+    "example_phonetic": "ai am redi",
+    "example_audio": "/audio/i_am_ready.mp3",
+    "translation": "Mimi niko tayari"
+  },
+  {
+    "letter": "You",
+    "phonetic": "yu",
+    "letter_audio": "/audio/you.mp3",
+    "example_word": "You are welcome",
+    "example_phonetic": "yu a welkam",
+    "example_audio": "/audio/you_are_welcome.mp3",
+    "translation": "Wewe umekaribishwa"
+  },
+  {
+    "letter": "He",
+    "phonetic": "hi",
+    "letter_audio": "/audio/he.mp3",
+    "example_word": "He is my friend",
+    "example_phonetic": "hi iz mai frend",
+    "example_audio": "/audio/he_is_my_friend.mp3",
+    "translation": "Yeye ni rafiki yangu"
+  },
+  {
+    "letter": "She",
+    "phonetic": "shi",
+    "letter_audio": "/audio/she.mp3",
+    "example_word": "She is my teacher",
+    "example_phonetic": "shi iz mai ticha",
+    "example_audio": "/audio/she_is_my_teacher.mp3",
+    "translation": "Yeye ni mwalimu wangu"
+  },
+  {
+    "letter": "They",
+    "phonetic": "zei",
+    "letter_audio": "/audio/they.mp3",
+    "example_word": "They are here",
+    "example_phonetic": "zei a hia",
+    "example_audio": "/audio/they_are_here.mp3",
+    "translation": "Wao wako hapa"
+  }
+]

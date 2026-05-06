@@ -50,8 +50,10 @@ export async function PATCH(request: Request) {
     forcedTier?: number | null;
     forcedCourseLevel?: number | null;
     promotionSupportUnlock?: boolean;
+    foundationUnlockedModules?: number[];
     impactPointsDelta?: number;
     snapshotAction?: "save" | "restore";
+    resetOnboarding?: boolean;
   };
 
   if (!body.targetUserId) {
@@ -64,14 +66,14 @@ export async function PATCH(request: Request) {
   const currentPrivateMetadata = (user.privateMetadata ?? {}) as Record<string, unknown>;
   const currentProgress = (currentPublicMetadata.interviewProgress ?? {}) as Record<string, unknown>;
   const forcedTier =
-    typeof body.forcedTier === "number" && body.forcedTier >= 1 && body.forcedTier <= 8
+    typeof body.forcedTier === "number" && body.forcedTier >= 1 && body.forcedTier <= 7
       ? body.forcedTier
       : null;
   const forcedCourseLevel =
-    typeof body.forcedCourseLevel === "number" && body.forcedCourseLevel >= 1 && body.forcedCourseLevel <= 8
+    typeof body.forcedCourseLevel === "number" && body.forcedCourseLevel >= 1 && body.forcedCourseLevel <= 7
       ? body.forcedCourseLevel
       : null;
-  const fullTierSet = [1, 2, 3, 4, 5, 6, 7, 8];
+  const fullTierSet = [1, 2, 3, 4, 5, 6, 7];
 
   const snapshot = currentPrivateMetadata.adminCommandSnapshot as Record<string, unknown> | undefined;
 
@@ -85,6 +87,14 @@ export async function PATCH(request: Request) {
     ...(body.founderNote !== undefined ? { founderNote: body.founderNote } : {}),
     ...(body.impactPointsDelta !== undefined ? { adminImpactPointsDelta: body.impactPointsDelta } : {}),
   };
+
+  if (body.resetOnboarding) {
+    const currentFoundationProfile = (currentPublicMetadata.foundation_profile ?? {}) as Record<string, unknown>;
+    nextPublicMetadata.foundation_profile = {
+      ...currentFoundationProfile,
+      onboarding_complete: false,
+    };
+  }
 
   const nextPrivateMetadata: Record<string, unknown> = {
     ...currentPrivateMetadata,
@@ -116,6 +126,15 @@ export async function PATCH(request: Request) {
       ...(body.forcedTier !== undefined ? { forcedTier } : {}),
       ...(body.forcedCourseLevel !== undefined ? { forcedCourseLevel } : {}),
       ...(body.promotionSupportUnlock !== undefined ? { promotionSupportUnlock: body.promotionSupportUnlock } : {}),
+      ...(body.foundationUnlockedModules !== undefined
+        ? {
+            foundationUnlockedModules: Array.isArray(body.foundationUnlockedModules)
+              ? body.foundationUnlockedModules
+                  .map(Number)
+                  .filter((moduleNum) => Number.isFinite(moduleNum) && moduleNum >= 1 && moduleNum <= 12)
+              : [],
+          }
+        : {}),
       updatedAt: Date.now(),
     };
 
@@ -123,7 +142,8 @@ export async function PATCH(request: Request) {
       body.masterUnlock !== undefined ||
       body.forcedTier !== undefined ||
       body.forcedCourseLevel !== undefined ||
-      body.promotionSupportUnlock !== undefined
+      body.promotionSupportUnlock !== undefined ||
+      body.foundationUnlockedModules !== undefined
     ) {
       nextPublicMetadata.interviewAdminOverride = nextOverride;
     }
@@ -133,7 +153,7 @@ export async function PATCH(request: Request) {
         ...currentProgress,
         hasCompletedInterview: true,
         completedTiers: fullTierSet,
-        highestCompletedTier: 8,
+        highestCompletedTier: 7,
       };
     } else if (forcedTier) {
       const unlockedTiers = fullTierSet.slice(0, forcedTier);

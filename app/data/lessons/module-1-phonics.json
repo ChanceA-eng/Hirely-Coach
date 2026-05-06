@@ -1,0 +1,1036 @@
+{
+  "module": 1,
+  "title": "The English Alphabet",
+  "title_sw": "Alfabeti ya Kiingereza",
+  "description": "Learn the English alphabet one letter at a time.",
+  "description_sw": "Jifunze alfabeti ya Kiingereza herufi moja moja.",
+  "sofia_intro": "Welcome to lesson one! Today we will learn the alphabet.",
+  "sofia_intro_sw": "Karibu kwenye somo la kwanza! Leo tutajifunza alfabeti.",
+  "lessons": [
+    {
+      "id": "1-1",
+      "type": "phonetic_card",
+      "title": "The Alphabet - A",
+      "title_sw": "Herufi A",
+      "instruction_sw": "herufi A ina somekana kama kiswahili (ei) na kama (a) kulingana na neno au msemwa.",
+      "instruction_en": "The letter A can sound like short (a) or long (ei) depending on the word.",
+      "sofia_hint_sw": "Bonyeza sauti ya kila kundi, kisha bonyeza kila neno kusikia matamshi.",
+      "sounds": [
+        {
+          "label": "a",
+          "phonetic_sw": "Mfano 1. (a)",
+          "audio_url": "/audio/slot_a_short.mp3",
+          "examples": [
+            {
+              "word": "Apple",
+              "phonetic_sw": "apo",
+              "sw": "Tofaa",
+              "emoji": "??",
+              "audio_url": "/audio/word_apple.mp3"
+            },
+            {
+              "word": "Cat",
+              "phonetic_sw": "kat",
+              "sw": "Paka",
+              "emoji": "??",
+              "audio_url": "/audio/word_cat.mp3"
+            },
+            {
+              "word": "Father",
+              "phonetic_sw": "faza",
+              "sw": "Baba",
+              "emoji": "??",
+              "audio_url": "/audio/word_father.mp3"
+            }
+          ]
+        },
+        {
+          "label": "ei",
+          "phonetic_sw": "Mfano 2. (ei)",
+          "audio_url": "/audio/slot_a_long.mp3",
+          "examples": [
+            {
+              "word": "Cake",
+              "phonetic_sw": "keik",
+              "sw": "Keki",
+              "emoji": "??",
+              "audio_url": "/audio/word_cake.mp3"
+            },
+            {
+              "word": "Fate",
+              "phonetic_sw": "feit",
+              "sw": "Hatima",
+              "emoji": "?",
+              "audio_url": "/audio/word_fate.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "A",
+      "audio_en": "/audio/slot_a_short.mp3"
+    },
+    {
+      "id": "1-2",
+      "type": "phonetic_card",
+      "title": "The Alphabet - B",
+      "title_sw": "Herufi B",
+      "instruction_sw": "Herufi B inatamkwa (bi).",
+      "sounds": [
+        {
+          "label": "bi",
+          "phonetic_sw": "(bi)",
+          "audio_url": "/audio/letter_b.mp3",
+          "examples": [
+            {
+              "word": "Book",
+              "phonetic_sw": "buk",
+              "sw": "Kitabu",
+              "emoji": "??",
+              "audio_url": "/audio/word_book.mp3"
+            },
+            {
+              "word": "Ball",
+              "phonetic_sw": "bol",
+              "sw": "Mpira",
+              "emoji": "?",
+              "audio_url": "/audio/word_ball.mp3"
+            },
+            {
+              "word": "Banana",
+              "phonetic_sw": "banana",
+              "sw": "Ndizi",
+              "emoji": "??",
+              "audio_url": "/audio/word_banana.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "B",
+      "audio_en": "/audio/letter_b.mp3"
+    },
+    {
+      "id": "1-3",
+      "type": "phonetic_card",
+      "title": "The Alphabet - C",
+      "title_sw": "Herufi C",
+      "instruction_sw": "Herufi C ina somekana kama (k) na kama (si) kulingana na neno au msemwa.",
+      "sounds": [
+        {
+          "label": "k",
+          "phonetic_sw": "Mfano 1. (k)",
+          "audio_url": "/audio/slot_c_k.mp3",
+          "examples": [
+            {
+              "word": "Cup",
+              "phonetic_sw": "kap",
+              "sw": "Kikombe",
+              "emoji": "?",
+              "audio_url": "/audio/word_cup.mp3"
+            },
+            {
+              "word": "Car",
+              "phonetic_sw": "kar",
+              "sw": "Gari",
+              "emoji": "??",
+              "audio_url": "/audio/word_car.mp3"
+            }
+          ]
+        },
+        {
+          "label": "si",
+          "phonetic_sw": "Mfano 2. (si)",
+          "audio_url": "/audio/slot_c_si.mp3",
+          "examples": [
+            {
+              "word": "Decide",
+              "phonetic_sw": "disaid",
+              "sw": "Kuamua",
+              "emoji": "??",
+              "audio_url": "/audio/word_decide.mp3"
+            },
+            {
+              "word": "Exciting",
+              "phonetic_sw": "exsaiting",
+              "sw": "Kuchamsha",
+              "emoji": "?",
+              "audio_url": "/audio/word_exciting.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "C",
+      "audio_en": "/audio/slot_c_k.mp3"
+    },
+    {
+      "id": "1-4",
+      "type": "phonetic_card",
+      "title": "The Alphabet - D",
+      "title_sw": "Herufi D",
+      "sounds": [
+        {
+          "label": "di",
+          "phonetic_sw": "(di)",
+          "audio_url": "/audio/letter_d.mp3",
+          "examples": [
+            {
+              "word": "Door",
+              "phonetic_sw": "doar",
+              "sw": "Mlango",
+              "emoji": "??",
+              "audio_url": "/audio/word_door.mp3"
+            },
+            {
+              "word": "Duck",
+              "phonetic_sw": "dauk",
+              "sw": "Bata",
+              "emoji": "??",
+              "audio_url": "/audio/word_duck.mp3"
+            },
+            {
+              "word": "Dog",
+              "phonetic_sw": "dog",
+              "sw": "Mbwa",
+              "emoji": "??",
+              "audio_url": "/audio/word_dog.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "D",
+      "audio_en": "/audio/letter_d.mp3"
+    },
+    {
+      "id": "1-5",
+      "type": "phonetic_card",
+      "title": "The Alphabet - E",
+      "title_sw": "Herufi E",
+      "instruction_sw": "Herufi E ina somekana kama (i) na kama (e) kulingana na neno au msemwa.",
+      "sounds": [
+        {
+          "label": "i",
+          "phonetic_sw": "(i)",
+          "audio_url": "/audio/letter_e.mp3",
+          "examples": [
+            {
+              "word": "Elephant",
+              "phonetic_sw": "elefant",
+              "sw": "Tembo",
+              "emoji": "??",
+              "audio_url": "/audio/word_elephant.mp3"
+            },
+            {
+              "word": "Egg",
+              "phonetic_sw": "eg",
+              "sw": "Yai",
+              "emoji": "??",
+              "audio_url": "/audio/word_egg.mp3"
+            },
+            {
+              "word": "Ear",
+              "phonetic_sw": "iar",
+              "sw": "Sikio",
+              "emoji": "??",
+              "audio_url": "/audio/word_ear.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "E",
+      "audio_en": "/audio/letter_e.mp3"
+    },
+    {
+      "id": "1-6",
+      "type": "phonetic_card",
+      "title": "The Alphabet - F",
+      "title_sw": "Herufi F",
+      "sounds": [
+        {
+          "label": "ef",
+          "phonetic_sw": "(ef)",
+          "audio_url": "/audio/letter_f.mp3",
+          "examples": [
+            {
+              "word": "Flower",
+              "phonetic_sw": "flawa",
+              "sw": "Ua",
+              "emoji": "??",
+              "audio_url": "/audio/word_flower.mp3"
+            },
+            {
+              "word": "Fan",
+              "phonetic_sw": "fen",
+              "sw": "Feni",
+              "emoji": "??",
+              "audio_url": "/audio/word_fan.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "F",
+      "audio_en": "/audio/letter_f.mp3"
+    },
+    {
+      "id": "1-7",
+      "type": "phonetic_card",
+      "title": "The Alphabet - G",
+      "title_sw": "Herufi G",
+      "sounds": [
+        {
+          "label": "ji",
+          "phonetic_sw": "(ji)",
+          "audio_url": "/audio/letter_g.mp3",
+          "examples": [
+            {
+              "word": "Grapes",
+              "phonetic_sw": "grepsi",
+              "sw": "Mzabibu",
+              "emoji": "??",
+              "audio_url": "/audio/word_grapes.mp3"
+            },
+            {
+              "word": "Goat",
+              "phonetic_sw": "gout",
+              "sw": "Mbuzi",
+              "emoji": "??",
+              "audio_url": "/audio/word_goat.mp3"
+            },
+            {
+              "word": "Gift",
+              "phonetic_sw": "gift",
+              "sw": "Zawadi",
+              "emoji": "??",
+              "audio_url": "/audio/word_gift.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "G",
+      "audio_en": "/audio/letter_g.mp3"
+    },
+    {
+      "id": "1-8",
+      "type": "phonetic_card",
+      "title": "The Alphabet - H",
+      "title_sw": "Herufi H",
+      "sounds": [
+        {
+          "label": "eich",
+          "phonetic_sw": "(eich)",
+          "audio_url": "/audio/letter_h.mp3",
+          "examples": [
+            {
+              "word": "Hat",
+              "phonetic_sw": "hat",
+              "sw": "Kofia",
+              "emoji": "??",
+              "audio_url": "/audio/word_hat.mp3"
+            },
+            {
+              "word": "House",
+              "phonetic_sw": "hauz",
+              "sw": "Nyumba",
+              "emoji": "??",
+              "audio_url": "/audio/word_house.mp3"
+            },
+            {
+              "word": "Horse",
+              "phonetic_sw": "horsi",
+              "sw": "Farasi",
+              "emoji": "??",
+              "audio_url": "/audio/word_horse.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "H",
+      "audio_en": "/audio/letter_h.mp3"
+    },
+    {
+      "id": "1-9",
+      "type": "phonetic_card",
+      "title": "The Alphabet - I",
+      "title_sw": "Herufi I",
+      "sounds": [
+        {
+          "label": "ai",
+          "phonetic_sw": "(ai)",
+          "audio_url": "/audio/letter_i.mp3",
+          "examples": [
+            {
+              "word": "Ice cream",
+              "phonetic_sw": "ais krim",
+              "sw": "Aisikrimu",
+              "emoji": "??",
+              "audio_url": "/audio/word_ice_cream.mp3"
+            },
+            {
+              "word": "Insect",
+              "phonetic_sw": "insekt",
+              "sw": "Kidudu",
+              "emoji": "??",
+              "audio_url": "/audio/word_insect.mp3"
+            },
+            {
+              "word": "Igloo",
+              "phonetic_sw": "iglu",
+              "sw": "Nyumba ya barafu",
+              "emoji": "??",
+              "audio_url": "/audio/word_igloo.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "I",
+      "audio_en": "/audio/letter_i.mp3"
+    },
+    {
+      "id": "1-10",
+      "type": "phonetic_card",
+      "title": "The Alphabet - J",
+      "title_sw": "Herufi J",
+      "sounds": [
+        {
+          "label": "jei",
+          "phonetic_sw": "(jei)",
+          "audio_url": "/audio/letter_j.mp3",
+          "examples": [
+            {
+              "word": "Juice",
+              "phonetic_sw": "juis",
+              "sw": "Juisi",
+              "emoji": "??",
+              "audio_url": "/audio/word_juice.mp3"
+            },
+            {
+              "word": "Jam",
+              "phonetic_sw": "jam",
+              "sw": "Matunda majimaji",
+              "emoji": "??",
+              "audio_url": "/audio/word_jam.mp3"
+            },
+            {
+              "word": "Jacket",
+              "phonetic_sw": "jaketi",
+              "sw": "Jaketi",
+              "emoji": "??",
+              "audio_url": "/audio/word_jacket.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "J",
+      "audio_en": "/audio/letter_j.mp3"
+    },
+    {
+      "id": "1-11",
+      "type": "phonetic_card",
+      "title": "The Alphabet - K",
+      "title_sw": "Herufi K",
+      "sounds": [
+        {
+          "label": "kei",
+          "phonetic_sw": "(kei)",
+          "audio_url": "/audio/letter_k.mp3",
+          "examples": [
+            {
+              "word": "Kite",
+              "phonetic_sw": "kait",
+              "sw": "Kishada",
+              "emoji": "??",
+              "audio_url": "/audio/word_kite.mp3"
+            },
+            {
+              "word": "Keys",
+              "phonetic_sw": "kiiz",
+              "sw": "Funguo",
+              "emoji": "??",
+              "audio_url": "/audio/word_keys.mp3"
+            },
+            {
+              "word": "Kangaroo",
+              "phonetic_sw": "kangaruu",
+              "sw": "Kangaruu",
+              "emoji": "??",
+              "audio_url": "/audio/word_kangaroo.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "K",
+      "audio_en": "/audio/letter_k.mp3"
+    },
+    {
+      "id": "1-12",
+      "type": "phonetic_card",
+      "title": "The Alphabet - L",
+      "title_sw": "Herufi L",
+      "sounds": [
+        {
+          "label": "el",
+          "phonetic_sw": "(el)",
+          "audio_url": "/audio/letter_l.mp3",
+          "examples": [
+            {
+              "word": "Lion",
+              "phonetic_sw": "laion",
+              "sw": "Simba",
+              "emoji": "??",
+              "audio_url": "/audio/word_lion.mp3"
+            },
+            {
+              "word": "Lamp",
+              "phonetic_sw": "lamp",
+              "sw": "Taa",
+              "emoji": "??",
+              "audio_url": "/audio/word_lamp.mp3"
+            },
+            {
+              "word": "Leaf",
+              "phonetic_sw": "lif",
+              "sw": "Jani",
+              "emoji": "??",
+              "audio_url": "/audio/word_leaf.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "L",
+      "audio_en": "/audio/letter_l.mp3"
+    },
+    {
+      "id": "1-13",
+      "type": "phonetic_card",
+      "title": "The Alphabet - M",
+      "title_sw": "Herufi M",
+      "sounds": [
+        {
+          "label": "em",
+          "phonetic_sw": "(em)",
+          "audio_url": "/audio/letter_m.mp3",
+          "examples": [
+            {
+              "word": "Moon",
+              "phonetic_sw": "mun",
+              "sw": "Mwezi",
+              "emoji": "??",
+              "audio_url": "/audio/word_moon.mp3"
+            },
+            {
+              "word": "Monkey",
+              "phonetic_sw": "manki",
+              "sw": "Tumbili",
+              "emoji": "??",
+              "audio_url": "/audio/word_monkey.mp3"
+            },
+            {
+              "word": "Milk",
+              "phonetic_sw": "milk",
+              "sw": "Maziwa",
+              "emoji": "??",
+              "audio_url": "/audio/word_milk.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "M",
+      "audio_en": "/audio/letter_m.mp3"
+    },
+    {
+      "id": "1-14",
+      "type": "phonetic_card",
+      "title": "The Alphabet - N",
+      "title_sw": "Herufi N",
+      "sounds": [
+        {
+          "label": "en",
+          "phonetic_sw": "(en)",
+          "audio_url": "/audio/letter_n.mp3",
+          "examples": [
+            {
+              "word": "Nose",
+              "phonetic_sw": "noz",
+              "sw": "Pua",
+              "emoji": "??",
+              "audio_url": "/audio/word_nose.mp3"
+            },
+            {
+              "word": "Net",
+              "phonetic_sw": "net",
+              "sw": "Nyavu",
+              "emoji": "??",
+              "audio_url": "/audio/word_net.mp3"
+            },
+            {
+              "word": "Nest",
+              "phonetic_sw": "nest",
+              "sw": "Kiota",
+              "emoji": "??",
+              "audio_url": "/audio/word_nest.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "N",
+      "audio_en": "/audio/letter_n.mp3"
+    },
+    {
+      "id": "1-15",
+      "type": "phonetic_card",
+      "title": "The Alphabet - O",
+      "title_sw": "Herufi O",
+      "sounds": [
+        {
+          "label": "ou",
+          "phonetic_sw": "(ou)",
+          "audio_url": "/audio/letter_o.mp3",
+          "examples": [
+            {
+              "word": "Orange",
+              "phonetic_sw": "orenj",
+              "sw": "Chungwa",
+              "emoji": "??",
+              "audio_url": "/audio/word_orange.mp3"
+            },
+            {
+              "word": "Owl",
+              "phonetic_sw": "auwl",
+              "sw": "Bundi",
+              "emoji": "??",
+              "audio_url": "/audio/word_owl.mp3"
+            },
+            {
+              "word": "Octopus",
+              "phonetic_sw": "oktopas",
+              "sw": "Pweza",
+              "emoji": "??",
+              "audio_url": "/audio/word_octopus.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "O",
+      "audio_en": "/audio/letter_o.mp3"
+    },
+    {
+      "id": "1-16",
+      "type": "phonetic_card",
+      "title": "The Alphabet - P",
+      "title_sw": "Herufi P",
+      "sounds": [
+        {
+          "label": "pi",
+          "phonetic_sw": "(pi)",
+          "audio_url": "/audio/letter_p.mp3",
+          "examples": [
+            {
+              "word": "Pencil",
+              "phonetic_sw": "pensol",
+              "sw": "Penseli",
+              "emoji": "??",
+              "audio_url": "/audio/word_pencil.mp3"
+            },
+            {
+              "word": "Pig",
+              "phonetic_sw": "pig",
+              "sw": "Nguruwe",
+              "emoji": "??",
+              "audio_url": "/audio/word_pig.mp3"
+            },
+            {
+              "word": "Pizza",
+              "phonetic_sw": "pitsa",
+              "sw": "Pizza",
+              "emoji": "??",
+              "audio_url": "/audio/word_pizza.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "P",
+      "audio_en": "/audio/letter_p.mp3"
+    },
+    {
+      "id": "1-17",
+      "type": "phonetic_card",
+      "title": "The Alphabet - Q",
+      "title_sw": "Herufi Q",
+      "sounds": [
+        {
+          "label": "kiu",
+          "phonetic_sw": "(kiu)",
+          "audio_url": "/audio/letter_q.mp3",
+          "examples": [
+            {
+              "word": "Queen",
+              "phonetic_sw": "kuin",
+              "sw": "Malkia",
+              "emoji": "??",
+              "audio_url": "/audio/word_queen.mp3"
+            },
+            {
+              "word": "Quilt",
+              "phonetic_sw": "kuilt",
+              "sw": "Shuka ya kushonwa",
+              "emoji": "???",
+              "audio_url": "/audio/word_quilt.mp3"
+            },
+            {
+              "word": "Quail",
+              "phonetic_sw": "kweil",
+              "sw": "Kware",
+              "emoji": "??",
+              "audio_url": "/audio/word_quail.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "Q",
+      "audio_en": "/audio/letter_q.mp3"
+    },
+    {
+      "id": "1-18",
+      "type": "phonetic_card",
+      "title": "The Alphabet - R",
+      "title_sw": "Herufi R",
+      "sounds": [
+        {
+          "label": "ar",
+          "phonetic_sw": "(ar)",
+          "audio_url": "/audio/letter_r.mp3",
+          "examples": [
+            {
+              "word": "Rabbit",
+              "phonetic_sw": "rabit",
+              "sw": "Sungura",
+              "emoji": "??",
+              "audio_url": "/audio/word_rabbit.mp3"
+            },
+            {
+              "word": "Rose",
+              "phonetic_sw": "rouz",
+              "sw": "Ua la roze",
+              "emoji": "??",
+              "audio_url": "/audio/word_rose.mp3"
+            },
+            {
+              "word": "Rainbow",
+              "phonetic_sw": "reinbow",
+              "sw": "Upinde wa mvua",
+              "emoji": "??",
+              "audio_url": "/audio/word_rainbow.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "R",
+      "audio_en": "/audio/letter_r.mp3"
+    },
+    {
+      "id": "1-19",
+      "type": "phonetic_card",
+      "title": "The Alphabet - S",
+      "title_sw": "Herufi S",
+      "sounds": [
+        {
+          "label": "es",
+          "phonetic_sw": "(es)",
+          "audio_url": "/audio/letter_s.mp3",
+          "examples": [
+            {
+              "word": "Sun",
+              "phonetic_sw": "san",
+              "sw": "Jua",
+              "emoji": "??",
+              "audio_url": "/audio/word_sun.mp3"
+            },
+            {
+              "word": "Star",
+              "phonetic_sw": "star",
+              "sw": "Nyota",
+              "emoji": "?",
+              "audio_url": "/audio/word_star.mp3"
+            },
+            {
+              "word": "Snake",
+              "phonetic_sw": "snek",
+              "sw": "Nyoka",
+              "emoji": "??",
+              "audio_url": "/audio/word_snake.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "S",
+      "audio_en": "/audio/letter_s.mp3"
+    },
+    {
+      "id": "1-20",
+      "type": "phonetic_card",
+      "title": "The Alphabet - T",
+      "title_sw": "Herufi T",
+      "sounds": [
+        {
+          "label": "ti",
+          "phonetic_sw": "(ti)",
+          "audio_url": "/audio/letter_t.mp3",
+          "examples": [
+            {
+              "word": "Tree",
+              "phonetic_sw": "trii",
+              "sw": "Mti",
+              "emoji": "??",
+              "audio_url": "/audio/word_tree.mp3"
+            },
+            {
+              "word": "Tiger",
+              "phonetic_sw": "taiga",
+              "sw": "Chui",
+              "emoji": "??",
+              "audio_url": "/audio/word_tiger.mp3"
+            },
+            {
+              "word": "Train",
+              "phonetic_sw": "trein",
+              "sw": "Treni",
+              "emoji": "??",
+              "audio_url": "/audio/word_train.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "T",
+      "audio_en": "/audio/letter_t.mp3"
+    },
+    {
+      "id": "1-21",
+      "type": "phonetic_card",
+      "title": "The Alphabet - U",
+      "title_sw": "Herufi U",
+      "sounds": [
+        {
+          "label": "yu",
+          "phonetic_sw": "(yu)",
+          "audio_url": "/audio/letter_u.mp3",
+          "examples": [
+            {
+              "word": "Umbrella",
+              "phonetic_sw": "ambrela",
+              "sw": "Mwavuli",
+              "emoji": "??",
+              "audio_url": "/audio/word_umbrella.mp3"
+            },
+            {
+              "word": "Unicorn",
+              "phonetic_sw": "yunikorn",
+              "sw": "Pembe moja",
+              "emoji": "??",
+              "audio_url": "/audio/word_unicorn.mp3"
+            },
+            {
+              "word": "Uniform",
+              "phonetic_sw": "yuniform",
+              "sw": "Sare",
+              "emoji": "??",
+              "audio_url": "/audio/word_uniform.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "U",
+      "audio_en": "/audio/letter_u.mp3"
+    },
+    {
+      "id": "1-22",
+      "type": "phonetic_card",
+      "title": "The Alphabet - V",
+      "title_sw": "Herufi V",
+      "sounds": [
+        {
+          "label": "vi",
+          "phonetic_sw": "(vi)",
+          "audio_url": "/audio/letter_v.mp3",
+          "examples": [
+            {
+              "word": "Van",
+              "phonetic_sw": "veni",
+              "sw": "Veni",
+              "emoji": "??",
+              "audio_url": "/audio/word_van.mp3"
+            },
+            {
+              "word": "Violin",
+              "phonetic_sw": "vaiolin",
+              "sw": "Violin",
+              "emoji": "??",
+              "audio_url": "/audio/word_violin.mp3"
+            },
+            {
+              "word": "Vase",
+              "phonetic_sw": "veis",
+              "sw": "Mtungi",
+              "emoji": "??",
+              "audio_url": "/audio/word_vase.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "V",
+      "audio_en": "/audio/letter_v.mp3"
+    },
+    {
+      "id": "1-23",
+      "type": "phonetic_card",
+      "title": "The Alphabet - W",
+      "title_sw": "Herufi W",
+      "sounds": [
+        {
+          "label": "dabo yu",
+          "phonetic_sw": "(dabo yu)",
+          "audio_url": "/audio/letter_w.mp3",
+          "examples": [
+            {
+              "word": "Water",
+              "phonetic_sw": "warae",
+              "sw": "Maji",
+              "emoji": "??",
+              "audio_url": "/audio/word_water.mp3"
+            },
+            {
+              "word": "Whale",
+              "phonetic_sw": "weol",
+              "sw": "Nyangumi",
+              "emoji": "??",
+              "audio_url": "/audio/word_whale.mp3"
+            },
+            {
+              "word": "Window",
+              "phonetic_sw": "windou",
+              "sw": "Dirisha",
+              "emoji": "??",
+              "audio_url": "/audio/word_window.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "W",
+      "audio_en": "/audio/letter_w.mp3"
+    },
+    {
+      "id": "1-24",
+      "type": "phonetic_card",
+      "title": "The Alphabet - X",
+      "title_sw": "Herufi X",
+      "instruction_sw": "Noti: X inakuwa katikati au mwisho wa maneno mara nyingi.",
+      "sounds": [
+        {
+          "label": "eks",
+          "phonetic_sw": "(eks)",
+          "audio_url": "/audio/letter_x.mp3",
+          "examples": [
+            {
+              "word": "Xylophone",
+              "phonetic_sw": "ksailofon",
+              "sw": "Marimba",
+              "emoji": "??",
+              "audio_url": "/audio/word_xylophone.mp3"
+            },
+            {
+              "word": "X-ray",
+              "phonetic_sw": "eksrei",
+              "sw": "Eksrei",
+              "emoji": "??",
+              "audio_url": "/audio/word_x_ray.mp3"
+            },
+            {
+              "word": "Box",
+              "phonetic_sw": "boks",
+              "sw": "Sanduku",
+              "emoji": "??",
+              "audio_url": "/audio/word_box.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "X",
+      "audio_en": "/audio/letter_x.mp3"
+    },
+    {
+      "id": "1-25",
+      "type": "phonetic_card",
+      "title": "The Alphabet - Y",
+      "title_sw": "Herufi Y",
+      "instruction_sw": "Noti: herufi Y inaleta sauti ya 'ye'.",
+      "sounds": [
+        {
+          "label": "wai",
+          "phonetic_sw": "(wai)",
+          "audio_url": "/audio/letter_y.mp3",
+          "examples": [
+            {
+              "word": "Yellow",
+              "phonetic_sw": "yelou",
+              "sw": "Njano",
+              "emoji": "??",
+              "audio_url": "/audio/word_yellow.mp3"
+            },
+            {
+              "word": "Yacht",
+              "phonetic_sw": "yach",
+              "sw": "Boti ya kibinafsi",
+              "emoji": "???",
+              "audio_url": "/audio/word_yacht.mp3"
+            },
+            {
+              "word": "Yoyo",
+              "phonetic_sw": "yoyo",
+              "sw": "Yoyo",
+              "emoji": "??",
+              "audio_url": "/audio/word_yoyo.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "Y",
+      "audio_en": "/audio/letter_y.mp3"
+    },
+    {
+      "id": "1-26",
+      "type": "phonetic_card",
+      "title": "The Alphabet - Z",
+      "title_sw": "Herufi Z",
+      "instruction_sw": "Vidokezo: Jaribu kuimba hizi alfabeti kila siku ili uweze kukumbuka.",
+      "sounds": [
+        {
+          "label": "zi",
+          "phonetic_sw": "(zi)",
+          "audio_url": "/audio/letter_z.mp3",
+          "examples": [
+            {
+              "word": "Zebra",
+              "phonetic_sw": "zibra",
+              "sw": "Punda milia",
+              "emoji": "??",
+              "audio_url": "/audio/word_zebra.mp3"
+            },
+            {
+              "word": "Zoo",
+              "phonetic_sw": "zuu",
+              "sw": "Mbuga",
+              "emoji": "??",
+              "audio_url": "/audio/word_zoo.mp3"
+            },
+            {
+              "word": "Zipper",
+              "phonetic_sw": "zipar",
+              "sw": "Zipu",
+              "emoji": "??",
+              "audio_url": "/audio/word_zipper.mp3"
+            }
+          ]
+        }
+      ],
+      "letter": "Z",
+      "audio_en": "/audio/letter_z.mp3"
+    }
+  ]
+}

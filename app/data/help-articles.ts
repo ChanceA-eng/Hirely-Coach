@@ -48,7 +48,7 @@ export const HELP_CATEGORIES: {
     id: "tools",
     label: "Tools",
     icon: "⌘",
-    description: "The Job Seeder, Simulation flow, and your Impact Log.",
+    description: "The Job Seeder, Interview Practice flow, and your Impact Log.",
     color: "#f59e0b",
   },
   {
