@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -65,7 +65,7 @@ function getVideoEmbed(url: string | null | undefined): { kind: "iframe" | "vide
 
 const CIRC = 339.3; // 2π × 54
 
-export default function FoundationHome() {
+function FoundationHomeContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -387,5 +387,13 @@ export default function FoundationHome() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function FoundationHome() {
+  return (
+    <Suspense fallback={null}>
+      <FoundationHomeContent />
+    </Suspense>
   );
 }
