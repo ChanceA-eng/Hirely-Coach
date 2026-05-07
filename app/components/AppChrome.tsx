@@ -1,10 +1,10 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import Header from "./Header";
-import { getMode, hydrateFoundationState } from "../lib/foundationProgress";
+import { getFoundationProfile, getMode, hydrateFoundationState } from "../lib/foundationProgress";
 
 // Coach-only routes that Foundation users cannot access
 const COACH_ONLY_PREFIXES = [
@@ -41,13 +41,25 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { isSignedIn, isLoaded } = useUser();
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
+
+  const hideHeaderForRoute =
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/onboarding") ||
+    pathname?.startsWith("/interview/complete-sign-up");
 
   const hideHeader =
-    pathname?.startsWith("/admin") ||
-    pathname?.startsWith("/onboarding/track-select");
+    hideHeaderForRoute ||
+    (isSignedIn && onboardingComplete !== true);
 
   // Guard: redirect Foundation-mode users away from Coach routes
   useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setOnboardingComplete(true);
+      return;
+    }
+
     if (!isLoaded || !isSignedIn || !pathname) return;
     let cancelled = false;
 
@@ -61,8 +73,10 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
           profile: payload.foundation_profile,
           override: payload.foundation_override,
         });
+        setOnboardingComplete(Boolean(payload.foundation_profile?.onboarding_complete));
       } catch {
         // Fall back to local mode if cloud read fails
+        setOnboardingComplete(getFoundationProfile().onboardingComplete);
       }
 
       const mode = getMode();

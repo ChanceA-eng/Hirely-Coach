@@ -18,7 +18,7 @@
  *  - If a file is missing, "Audio unavailable" is shown; no error is thrown
  */
 
-import { audioMap } from "@/data/audioMap";
+import { audioMap } from "@/app/data/audioMap";
 
 // ── State callback registry ────────────────────────────────────────────────
 // Components can subscribe to know when audio starts/ends/fails.

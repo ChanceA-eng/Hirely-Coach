@@ -15,6 +15,7 @@ const ADMIN_USER_ID =
   "";
 
 const FOUNDATION_ENTRY = "/foundation/home";
+const COACH_ENTRY = "/growthhub";
 const FOUNDATION_BLOCKED_PREFIXES = [
   "/growthhub",
   "/upload",
@@ -30,7 +31,7 @@ const FOUNDATION_BLOCKED_PREFIXES = [
 function getUserModeFromClaims(claims: unknown): "foundation" | "coach" | null {
   const row = (claims ?? {}) as Record<string, unknown>;
   const publicMetadata = (row.public_metadata ?? row.publicMetadata ?? {}) as Record<string, unknown>;
-  const mode = publicMetadata.current_mode;
+  const mode = publicMetadata.onboarding_path ?? publicMetadata.current_mode;
   return mode === "foundation" || mode === "coach" ? mode : null;
 }
 
@@ -52,19 +53,31 @@ export default clerkMiddleware(async (auth, req) => {
 
   const { userId, sessionClaims } = await auth();
   const mode = getUserModeFromClaims(sessionClaims);
+  const pathname = req.nextUrl.pathname;
+
+  if (userId && pathname.startsWith("/onboarding") && (mode === "foundation" || mode === "coach")) {
+    return NextResponse.redirect(new URL(mode === "foundation" ? FOUNDATION_ENTRY : COACH_ENTRY, req.url));
+  }
 
   if (userId && mode === "foundation") {
     const isBlockedRoute = FOUNDATION_BLOCKED_PREFIXES.some((prefix) =>
-      req.nextUrl.pathname.startsWith(prefix)
+      pathname.startsWith(prefix)
     );
     if (isBlockedRoute) {
       return NextResponse.redirect(new URL(FOUNDATION_ENTRY, req.url));
     }
   }
 
-  if (userId && req.nextUrl.pathname === "/") {
+  if (userId && pathname === "/") {
     return NextResponse.redirect(
-      new URL(mode === "foundation" ? FOUNDATION_ENTRY : "/growthhub", req.url)
+      new URL(
+        mode === "foundation"
+          ? FOUNDATION_ENTRY
+          : mode === "coach"
+            ? COACH_ENTRY
+            : "/onboarding",
+        req.url
+      )
     );
   }
 

@@ -502,7 +502,6 @@ export default function InterviewPage() {
       }
       const generatedFeedback = data.feedback || "AI feedback is not available.";
       setFeedback(generatedFeedback);
-      setStatus("finished");
       const scoreMatch = generatedFeedback.match(/STARR Score:\s*(\d+)\/100/);
       const starrScore = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
       const improvIdx = generatedFeedback.indexOf("### Areas for Improvement");
@@ -544,7 +543,10 @@ export default function InterviewPage() {
 
       if (!isSignedIn) {
         savePendingGuestSession(session, snapshot);
+        setStatus("finished");
+        router.push("/interview/complete-sign-up");
       } else {
+        setStatus("finished");
         syncInterviewProgress(snapshot, { completedTier: selectedTierRef.current }).catch(() => {
           // Non-blocking: local save already completed.
         });
@@ -564,7 +566,7 @@ export default function InterviewPage() {
       setFeedback("");
       setStatus("finished");
     }
-  }, [cleanup, completedTiers, isSignedIn, userId]);
+  }, [cleanup, completedTiers, isSignedIn, router, userId]);
 
   useEffect(() => {
     doGenerateFeedbackRef.current = doGenerateFeedback;

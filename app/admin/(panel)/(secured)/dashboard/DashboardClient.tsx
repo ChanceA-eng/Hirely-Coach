@@ -226,7 +226,6 @@ function GrowthChart({ data }: { data: { date: string; count: number }[] }) {
             />
             {i % 7 === 0 && (
               <text
-                          "Communication Health",
                 x={x + barW / 2}
                 y={H + 14}
                 fontSize={7}

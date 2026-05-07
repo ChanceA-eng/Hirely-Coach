@@ -101,6 +101,10 @@
   margin: 8px 0 24px;
 }
 
+.fs-danger-divider {
+  margin-top: 28px;
+}
+
 .fs-toggle-row {
   display: flex;
   align-items: center;
@@ -177,6 +181,125 @@
   padding: 8px 14px;
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+.fs-danger-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.fs-danger-label {
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #fca5a5;
+  font-weight: 700;
+}
+
+.fs-btn-danger {
+  background: rgba(127, 29, 29, 0.35);
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  color: #fecaca;
+  border-radius: 10px;
+  padding: 11px 18px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter 0.2s, box-shadow 0.2s;
+}
+
+.fs-btn-danger:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.25);
+}
+
+.fs-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  display: grid;
+  place-items: center;
+  z-index: 80;
+  padding: 18px;
+}
+
+.fs-modal-card {
+  width: min(560px, 100%);
+  background: #0b1120;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 14px;
+  padding: 22px;
+}
+
+.fs-modal-title {
+  margin: 0 0 8px;
+  color: #fee2e2;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.fs-modal-copy {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.6;
+  font-size: 0.92rem;
+}
+
+.fs-reset-link {
+  margin-top: 12px;
+  background: transparent;
+  border: none;
+  color: #7dd3fc;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.fs-modal-error {
+  margin: 12px 0 0;
+  color: #fca5a5;
+  font-size: 0.85rem;
+}
+
+.fs-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.fs-modal-cancel {
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  color: #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fs-modal-delete {
+  background: #7f1d1d;
+  border: 1px solid rgba(252, 165, 165, 0.6);
+  color: #fee2e2;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.fs-modal-delete:disabled,
+.fs-modal-cancel:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 @media (max-width: 640px) {

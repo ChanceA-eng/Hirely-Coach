@@ -71,7 +71,8 @@ export async function GET() {
   const meta = (user.publicMetadata ?? {}) as Record<string, unknown>;
 
   return NextResponse.json({
-    current_mode: (meta.current_mode as UserMode) ?? null,
+    current_mode: (meta.current_mode as UserMode) ?? (meta.onboarding_path as UserMode) ?? null,
+    onboarding_path: (meta.onboarding_path as UserMode) ?? (meta.current_mode as UserMode) ?? null,
     foundation_progress: normalizeProgress(meta.foundation_progress),
     foundation_profile: normalizeFoundationProfile(meta.foundation_profile),
     foundation_override: normalizeFoundationOverride((meta.interviewAdminOverride as Record<string, unknown>)?.foundationOverride ?? {
@@ -106,7 +107,10 @@ export async function PUT(req: Request) {
   const meta = (user.publicMetadata ?? {}) as Record<string, unknown>;
 
   const updates: Record<string, unknown> = { ...meta };
-  if (body.current_mode !== undefined) updates.current_mode = body.current_mode;
+  if (body.current_mode !== undefined) {
+    updates.current_mode = body.current_mode;
+    updates.onboarding_path = body.current_mode;
+  }
   if (body.foundation_progress !== undefined) {
     updates.foundation_progress = normalizeProgress(body.foundation_progress);
   }

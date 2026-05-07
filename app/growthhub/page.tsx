@@ -424,7 +424,6 @@ function ActionCard({
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────
-const PROFILE_DONE_KEY = "hirelyProfileDone";
 const MASTERY_UNLOCK_KEY = "hirely.mastery.unlocked.v1";
 const MASTERY_EVENT_PENDING_KEY = "hirely.mastery.event.pending.v1";
 const MASTERY_EVENT_SEEN_KEY = "hirely.mastery.event.seen.v1";
@@ -461,13 +460,6 @@ export default function GrowthHubPage() {
 
   useEffect(() => {
     let cancelled = false;
-
-    // ── Onboarding gate: hard redirect if profile not confirmed ──
-    const profileDone = localStorage.getItem(PROFILE_DONE_KEY);
-    if (!profileDone) {
-      router.replace("/onboarding");
-      return;
-    }
 
     // Migrate any guest interview data that was completed before sign-in.
     if (userId) { migrateGuestDataToUser(userId); }

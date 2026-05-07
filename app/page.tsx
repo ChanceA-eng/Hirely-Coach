@@ -305,6 +305,11 @@ export default function Home() {
                 <Link href={isSignedIn ? "/voice/interview" : "/voice"} className="global-auth-btn global-auth-btn--strong lp-hero-cta-btn">
                   Launch your interview now
                 </Link>
+                {!isSignedIn ? (
+                  <Link href="/sign-up" className="global-auth-btn lp-hero-cta-btn">
+                    Create your free account now
+                  </Link>
+                ) : null}
               </div>
               <div className="gh-first-badges">
                 <span>AI Resume Optimization</span>
@@ -371,6 +376,37 @@ export default function Home() {
               </div>
             </section>
           </aside>
+        </section>
+
+        {/* ── HIRELY FOUNDATION ── */}
+        <section className="lp-section" id="foundation">
+          <p className="gh-eyebrow">A New Path for English Learners</p>
+          <h2 className="gh-h1">Hirely Foundation: 12 Modules, One Goal — Professional English</h2>
+          <p className="lp-section-sub">
+            Not ready for Hirely Coach? <strong>Foundation</strong> is a structured 12-module learning program that teaches you the English skills you need for professional success.
+          </p>
+          <div className="lp-steps" style={{ marginTop: 32, marginBottom: 32 }}>
+            <div className="lp-step glass-card">
+              <div className="lp-step-top"><span className="lp-step-badge">Modules 1-3</span></div>
+              <h3 className="lp-step-title">Master the Fundamentals</h3>
+              <p className="lp-step-body"><strong>Phonics, Grammar, Vocabulary</strong> — Build your foundation with pronunciation, sentence structure, and professional words.</p>
+            </div>
+            <div className="lp-step glass-card">
+              <div className="lp-step-top"><span className="lp-step-badge">Modules 4-9</span></div>
+              <h3 className="lp-step-title">Learn Conversation Skills</h3>
+              <p className="lp-step-body"><strong>Pronouns, Verbs, Dialogue</strong> — Practice real workplace conversations and daily scenarios.</p>
+            </div>
+            <div className="lp-step glass-card">
+              <div className="lp-step-top"><span className="lp-step-badge">Modules 10-12</span></div>
+              <h3 className="lp-step-title">Ace Your Interview</h3>
+              <p className="lp-step-body"><strong>Self-Introduction, Interview Prep, Exit Exam</strong> — Practice how to talk about yourself and handle real job interview questions.</p>
+            </div>
+          </div>
+          <div style={{ textAlign: "center", marginTop: 40 }}>
+            <Link href="/foundation/home" className="global-auth-btn global-auth-btn--strong" style={{ display: "inline-block" }}>
+              Start Foundation Now
+            </Link>
+          </div>
         </section>
 
         {/* ── STARR + MOCK INTERVIEW HIGHLIGHT ── */}
@@ -601,6 +637,7 @@ export default function Home() {
                 <Link href="/canvas">Resume Optimizer</Link>
                 <Link href="/voice/interview">Interview Practice</Link>
               <Link href="/growthhub">Impact Log</Link>
+              <Link href="/foundation/home">Foundation</Link>
             </div>
             <div className="lp-footer-col lp-footer-col--account">
               <p className="lp-footer-col-label">Account</p>

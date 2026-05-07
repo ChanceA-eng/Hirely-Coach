@@ -60,6 +60,7 @@ export const XP_PER_LEVEL = IP_PER_LEVEL;
 const GUEST_STORAGE_KEY = "hirelyCoachInterviewHistory";
 const GUEST_GROWTHHUB_KEY = "hirelyCoachGrowthHub";
 const GUEST_PENDING_SESSION_KEY = "hirelyCoachPendingGuestSession";
+const CLAIMED_GUEST_INTERVIEW_KEY = "hirelyClaimedGuestInterview.v1";
 
 const getHistoryKey = (userId?: string | null) =>
   userId ? `hirelyCoachInterviewHistory:${userId}` : GUEST_STORAGE_KEY;
@@ -175,6 +176,20 @@ export function migrateGuestDataToUser(userId: string): GuestMigrationResult {
   }
 
   if (pendingGuestData?.session) {
+    try {
+      window.localStorage.setItem(
+        CLAIMED_GUEST_INTERVIEW_KEY,
+        JSON.stringify({
+          sessionId: pendingGuestData.session.id,
+          createdAt: pendingGuestData.session.createdAt,
+        })
+      );
+    } catch {
+      // ignore storage failures
+    }
+  }
+
+  if (pendingGuestData?.session) {
     guestHistory.unshift(pendingGuestData.session);
   }
 
@@ -222,6 +237,29 @@ export function savePendingGuestSession(session: InterviewSession, snapshot: Gro
     GUEST_PENDING_SESSION_KEY,
     JSON.stringify({ session, snapshot })
   );
+}
+
+export function hasPendingGuestSession(): boolean {
+  if (typeof window === "undefined") return false;
+  return Boolean(window.sessionStorage.getItem(GUEST_PENDING_SESSION_KEY));
+}
+
+export function getClaimedGuestInterview(): { sessionId: string; createdAt: number } | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(CLAIMED_GUEST_INTERVIEW_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { sessionId?: string; createdAt?: number };
+    if (!parsed.sessionId || !parsed.createdAt) return null;
+    return { sessionId: parsed.sessionId, createdAt: parsed.createdAt };
+  } catch {
+    return null;
+  }
+}
+
+export function clearClaimedGuestInterview() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(CLAIMED_GUEST_INTERVIEW_KEY);
 }
 
 // ─── Training progress ─────────────────────────────────────────────────────

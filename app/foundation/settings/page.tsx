@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import "./page.css";
 
 type FoundationSettings = {
@@ -27,9 +28,13 @@ function defaultSettings(): FoundationSettings {
 }
 
 export default function FoundationSettingsPage() {
+  const router = useRouter();
   const { user } = useUser();
   const [settings, setSettings] = useState<FoundationSettings>(defaultSettings);
   const [status, setStatus] = useState<"idle" | "saved">("idle");
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     const base = defaultSettings();
@@ -60,6 +65,81 @@ export default function FoundationSettingsPage() {
     e.preventDefault();
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     setStatus("saved");
+  }
+
+  async function handleResetProgress() {
+    try {
+      const modeResponse = await fetch("/api/user/mode", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          current_mode: "foundation",
+          foundation_profile: { onboarding_complete: true, total_xp: 0, language_pref: "en" },
+          foundation_progress: { completedLessons: [], completedModules: [], assessmentScores: {} },
+        }),
+      });
+
+      if (!modeResponse.ok) {
+        setDeleteError("Could not reset your progress right now. Please try again.");
+        return;
+      }
+
+      const keysToClear = [
+        "hirely.foundation.progress",
+        "hirely.foundation.override",
+        "hirely.foundation.pending-xp",
+        "hirelyCoachInterviewHistory",
+        "hirelyCoachGrowthHub",
+        "hirelyImpactLog",
+      ];
+      keysToClear.forEach((key) => window.localStorage.removeItem(key));
+
+      setConfirmDeleteOpen(false);
+      router.push("/foundation/home");
+    } catch {
+      setDeleteError("Could not reset your progress right now. Please try again.");
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (deleting) return;
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      const response = await fetch("/api/user/delete-account", { method: "POST" });
+      if (!response.ok) {
+        const data = (await response.json().catch(() => ({ error: "" }))) as { error?: string };
+        setDeleteError(data.error || "Unable to delete account right now. Please try again.");
+        setDeleting(false);
+        return;
+      }
+
+      const data = (await response.json().catch(() => ({ redirectTo: "/" }))) as {
+        redirectTo?: string;
+      };
+
+      const keysToClear = [
+        "hirely.foundation.settings",
+        "hirely.foundation.profile",
+        "hirely.foundation.progress",
+        "hirely.foundation.override",
+        "hirely.foundation.pending-xp",
+        "hirely.mode",
+        "hirelyCoachInterviewHistory",
+        "hirelyCoachGrowthHub",
+        "hirelyCoachPendingGuestSession",
+        "hirelyImpactLog",
+      ];
+      keysToClear.forEach((key) => {
+        window.localStorage.removeItem(key);
+        window.sessionStorage.removeItem(key);
+      });
+
+      window.location.href = data.redirectTo || "/";
+    } catch {
+      setDeleteError("Unable to delete account right now. Please try again.");
+      setDeleting(false);
+    }
   }
 
   return (
@@ -160,7 +240,63 @@ export default function FoundationSettingsPage() {
             <button className="fs-btn-primary" type="submit">Save settings</button>
             {status === "saved" && <span className="fs-save-toast">Saved</span>}
           </div>
+
+          <hr className="fs-divider fs-danger-divider" />
+
+          <div className="fs-danger-zone">
+            <p className="fs-danger-label">Danger Zone</p>
+            <button
+              type="button"
+              className="fs-btn-danger"
+              onClick={() => {
+                setDeleteError("");
+                setConfirmDeleteOpen(true);
+              }}
+            >
+              Delete My Account
+            </button>
+          </div>
         </form>
+
+        {confirmDeleteOpen ? (
+          <div className="fs-modal-backdrop" role="dialog" aria-modal="true" aria-label="Delete account confirmation">
+            <div className="fs-modal-card">
+              <h2 className="fs-modal-title">Delete your account?</h2>
+              <p className="fs-modal-copy">
+                Are you sure? This will permanently remove your learning progress and all your data.
+                This cannot be undone.
+              </p>
+              <button
+                type="button"
+                className="fs-reset-link"
+                onClick={() => void handleResetProgress()}
+              >
+                Just want to start over? Reset Progress
+              </button>
+
+              {deleteError ? <p className="fs-modal-error">{deleteError}</p> : null}
+
+              <div className="fs-modal-actions">
+                <button
+                  type="button"
+                  className="fs-modal-cancel"
+                  onClick={() => setConfirmDeleteOpen(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="fs-modal-delete"
+                  onClick={() => void handleDeleteAccount()}
+                  disabled={deleting}
+                >
+                  {deleting ? "Deleting..." : "Delete My Account"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

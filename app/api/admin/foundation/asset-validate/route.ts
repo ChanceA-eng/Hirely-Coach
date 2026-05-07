@@ -119,7 +119,15 @@ export async function GET() {
     const jsonExists = fs.existsSync(jsonPath);
 
     if (!jsonExists) {
-      reports.push({ moduleNum, jsonFile, jsonExists: false, lessonCount: 0, audioAssets: [], status: "missing_json" });
+      reports.push({
+        moduleNum,
+        jsonFile,
+        jsonExists: false,
+        lessonCount: 0,
+        audioAssets: [],
+        contentIssues: 0,
+        status: "missing_json",
+      });
       continue;
     }
 

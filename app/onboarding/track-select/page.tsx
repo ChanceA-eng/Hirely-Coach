@@ -1,18 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useClerk, useUser } from "@clerk/nextjs";
 import { setFoundationOnboardingComplete, setMode } from "../../lib/foundationProgress";
+import { loadInterviewHistory, migrateGuestDataToUser } from "../../lib/interviewStorage";
+import { syncInterviewProgress } from "../../lib/interviewProgress";
+
+type ModePayload = {
+  current_mode: "foundation" | "coach" | null;
+  foundation_profile?: { onboarding_complete?: boolean };
+};
 
 export default function TrackSelectPage() {
   const router = useRouter();
-  const { isLoaded } = useUser();
+  const { userId } = useAuth();
+  const { isLoaded, isSignedIn } = useUser();
   const [selecting, setSelecting] = useState<"foundation" | "coach" | null>(null);
+  const { signOut } = useClerk();
+  const [checkingGate, setCheckingGate] = useState(true);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      router.replace("/sign-in");
+      return;
+    }
+
+    fetch("/api/user/mode")
+      .then((res) => res.json() as Promise<ModePayload>)
+      .then((payload) => {
+        if (payload.foundation_profile?.onboarding_complete && payload.current_mode) {
+          router.replace(payload.current_mode === "foundation" ? "/foundation/home" : "/growthhub");
+          return;
+        }
+        setCheckingGate(false);
+      })
+      .catch(() => {
+        setCheckingGate(false);
+      });
+  }, [isLoaded, isSignedIn, router]);
+
+  async function handleLogout() {
+    if (selecting) return;
+    await signOut({ redirectUrl: "/" });
+  }
 
   async function choose(track: "foundation" | "coach") {
     setSelecting(track);
     try {
+      // Check if user has actual interview results (interview-first user)
+      const interviewHistory = userId ? loadInterviewHistory(userId) : [];
+      const hasInterviewResults = interviewHistory.length > 0;
+
+      // If interview-first: migrate guest data to user account
+      if (userId && hasInterviewResults) {
+        const migration = migrateGuestDataToUser(userId);
+        if (migration.latestSnapshot) {
+          await syncInterviewProgress(migration.latestSnapshot).catch(() => {
+            // Non-blocking: local migration already completed.
+          });
+        }
+      }
+
       // Persist to Clerk metadata
       await fetch("/api/user/mode", {
         method: "PUT",
@@ -26,17 +76,48 @@ export default function TrackSelectPage() {
       setMode(track);
       setFoundationOnboardingComplete(true);
 
+      // Interview-first users: go to feedback page
+      if (hasInterviewResults) {
+        if (track === "foundation") {
+          router.push("/foundation/interview-results");
+        } else {
+          router.push("/growthhub/interview-results");
+        }
+        return;
+      }
+
+      // Signup-first users: skip feedback, go straight home
       if (track === "foundation") {
         router.push("/foundation/home");
       } else {
-        router.push("/onboarding/create-profile");
+        router.push("/growthhub");
       }
     } catch {
       setSelecting(null);
     }
   }
 
-  if (!isLoaded) return null;
+  if (!isLoaded || checkingGate) {
+    return (
+      <div className="ts-root">
+        <div className="ts-loading" aria-live="polite">Loading your path...</div>
+        <style>{`
+          .ts-root {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #0f172a 50%, #0a0a0a 100%);
+            display: grid;
+            place-items: center;
+          }
+          .ts-loading {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="ts-root">
@@ -127,6 +208,10 @@ export default function TrackSelectPage() {
           <strong> Foundation Graduate badge</strong> and <strong>+150 bonus Impact Points</strong>.
           Earn your place with confidence.
         </p>
+
+        <button type="button" className="ts-logout" onClick={() => void handleLogout()}>
+          Log Out
+        </button>
       </div>
 
       <style>{`
@@ -325,6 +410,22 @@ export default function TrackSelectPage() {
         }
         .ts-note strong {
           color: #818cf8;
+        }
+        .ts-logout {
+          border: none;
+          background: transparent;
+          color: #94a3b8;
+          font-size: 0.92rem;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+          cursor: pointer;
+          padding: 0;
+          opacity: 0.9;
+          transition: color 0.2s ease, opacity 0.2s ease;
+        }
+        .ts-logout:hover {
+          color: #cbd5e1;
+          opacity: 1;
         }
       `}</style>
     </div>
