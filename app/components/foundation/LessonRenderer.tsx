@@ -9,7 +9,6 @@ import { completeLesson, saveAssessmentScore, PASS_THRESHOLD, rewardLessonMaster
 import { createSofiaUtterance, warmSofiaVoices } from "../../lib/sofiaVoice";
 import { logFoundationEvent } from "../../lib/foundationTelemetryClient";
 import { toAudioSrc } from "../../lib/audioPath";
-import { playAudioUrl } from "../../lib/playAudio";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -444,6 +443,7 @@ interface LessonRendererProps {
   lesson: LessonData;
   moduleNum: number;
   onComplete?: (lessonId: string) => void;
+  onModulePassed?: (moduleNum: number, lessonId: string) => void;
   onGraduationGate?: (score: number) => void;
   showSwahili?: boolean;
 }
@@ -497,6 +497,7 @@ export default function LessonRenderer({
   lesson,
   moduleNum,
   onComplete,
+  onModulePassed,
   onGraduationGate,
   showSwahili = false,
 }: LessonRendererProps) {
@@ -627,6 +628,7 @@ export default function LessonRenderer({
           moduleNum={moduleNum}
           showSwahili={showSwahili}
           onComplete={wrappedOnComplete}
+          onModulePassed={onModulePassed}
           onGraduationGate={onGraduationGate}
         />
       )}
@@ -1652,10 +1654,38 @@ function AlphabetGridSection({ lesson, onComplete }: { lesson: LessonData; onCom
     };
   }, []);
 
-  async function playAudio(url: string, key: string): Promise<void> {
+  function speakFallback(text: string, key: string): Promise<void> {
+    if (typeof window === "undefined" || !("speechSynthesis" in window) || !text.trim()) {
+      setActiveAudioKey(null);
+      return Promise.resolve();
+    }
+
+    warmSofiaVoices();
+    const utterance = createSofiaUtterance(text, { lang: "en-US", rate: 0.92 });
+    setActiveAudioKey(key);
+
+    return new Promise<void>((resolve) => {
+      const done = () => {
+        setActiveAudioKey((prev) => (prev === key ? null : prev));
+        resolve();
+      };
+
+      utterance.onend = done;
+      utterance.onerror = done;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    });
+  }
+
+  async function playAudio(url: string, key: string, spoken = ""): Promise<void> {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+    }
+
+    if (!url?.trim()) {
+      await speakFallback(spoken, key);
+      return;
     }
 
     const audio = new Audio(toAudioSrc(url) || "");
@@ -1669,8 +1699,12 @@ function AlphabetGridSection({ lesson, onComplete }: { lesson: LessonData; onCom
       };
 
       audio.onended = done;
-      audio.onerror = done;
-      audio.play().catch(done);
+      audio.onerror = () => {
+        void speakFallback(spoken, key).then(resolve);
+      };
+      audio.play().catch(() => {
+        void speakFallback(spoken, key).then(resolve);
+      });
     });
   }
 
@@ -1695,7 +1729,7 @@ function AlphabetGridSection({ lesson, onComplete }: { lesson: LessonData; onCom
 
     for (const row of rows) {
       if (stopRequestedRef.current) break;
-      await playAudio(row.audio_letter_en, `letter:${row.letter}`);
+      await playAudio(row.audio_letter_en, `letter:${row.letter}`, row.letter);
       if (stopRequestedRef.current) break;
       await delay(1000);
     }
@@ -1747,17 +1781,17 @@ function AlphabetGridSection({ lesson, onComplete }: { lesson: LessonData; onCom
                     <span className="ag-phonetic">({row.letter_phonetic_sw})</span>
                   </td>
                   <td>
-                    <button className={`ag-word-btn ${wordActive ? "ag-word-btn--active" : ""}`} onClick={() => void playAudio(row.audio_example_en, wordKey)}>
+                    <button className={`ag-word-btn ${wordActive ? "ag-word-btn--active" : ""}`} onClick={() => void playAudio(row.audio_example_en, wordKey, row.example_word_en)}>
                       {row.example_word_en} ({row.example_phonetic_sw})
                     </button>
                   </td>
                   <td>{row.translation_sw}</td>
                   <td>
                     <div className="ag-audio-actions">
-                      <button className="ag-audio-btn" onClick={() => void playAudio(row.audio_letter_en, letterKey)} aria-label={`Cheza sauti ya herufi ${row.letter}`}>
+                      <button className="ag-audio-btn" onClick={() => void playAudio(row.audio_letter_en, letterKey, row.letter)} aria-label={`Cheza sauti ya herufi ${row.letter}`}>
                         {letterActive ? "⏸" : "🔊"}
                       </button>
-                      <button className="ag-audio-btn" onClick={() => void playAudio(row.audio_example_en, wordKey)} aria-label={`Cheza sauti ya neno ${row.example_word_en}`}>
+                      <button className="ag-audio-btn" onClick={() => void playAudio(row.audio_example_en, wordKey, row.example_word_en)} aria-label={`Cheza sauti ya neno ${row.example_word_en}`}>
                         {wordActive ? "⏸" : "🔊"}
                       </button>
                     </div>
@@ -2588,7 +2622,7 @@ function AdjectiveLabSection({ lesson, showSwahili, onComplete }: { lesson: Less
 
 // ── Multiple Choice (Assessment) ───────────────────────────────────────────
 
-function MultipleChoiceSection({ lesson, moduleNum, showSwahili, onComplete, onGraduationGate }: { lesson: LessonData; moduleNum: number; showSwahili: boolean; onComplete?: (id: string) => void; onGraduationGate?: (score: number) => void }) {
+function MultipleChoiceSection({ lesson, moduleNum, showSwahili, onComplete, onModulePassed, onGraduationGate }: { lesson: LessonData; moduleNum: number; showSwahili: boolean; onComplete?: (id: string) => void; onModulePassed?: (moduleNum: number, lessonId: string) => void; onGraduationGate?: (score: number) => void }) {
   const questions = lesson.questions ?? [];
   const [answers, setAnswers] = useState<(number | null)[]>(Array(questions.length).fill(null));
   const [submitted, setSubmitted] = useState(false);
@@ -2601,13 +2635,18 @@ function MultipleChoiceSection({ lesson, moduleNum, showSwahili, onComplete, onG
 
   function submit() {
     if (answers.some((a) => a === null)) return;
+    const nextScore = Math.round((answers.filter((a, i) => a === questions[i].correct).length / questions.length) * 100);
+    const passedAssessment = nextScore >= PASS_THRESHOLD;
     setSubmitted(true);
-    saveAssessmentScore(moduleNum, score);
+    saveAssessmentScore(moduleNum, nextScore);
     if (!lesson.is_graduation_gate) {
-      completeLesson(lesson.id);
-      onComplete?.(lesson.id);
+      if (passedAssessment) {
+        completeLesson(lesson.id);
+        onModulePassed?.(moduleNum, lesson.id);
+        onComplete?.(lesson.id);
+      }
     } else if (lesson.is_graduation_gate) {
-      onGraduationGate?.(score);
+      onGraduationGate?.(nextScore);
     }
   }
 

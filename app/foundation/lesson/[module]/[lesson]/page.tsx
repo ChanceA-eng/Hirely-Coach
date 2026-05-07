@@ -12,6 +12,21 @@ import {
   isAllModulesComplete,
 } from "../../../../lib/foundationProgress";
 
+const FOUNDATION_MODULES = [
+  { num: 1, title: "Alfabeti za Mafanikio", firstLesson: "1-1" },
+  { num: 2, title: "Nambari na Rangi", firstLesson: "2-1" },
+  { num: 3, title: "Maabara ya Ustadi wa Sauti", firstLesson: "3-1" },
+  { num: 4, title: "Vitenzi na Viwakilishi", firstLesson: "4-1" },
+  { num: 5, title: "Chakula na Ununuzi", firstLesson: "5-1" },
+  { num: 6, title: "Maneno ya Kitaalamu", firstLesson: "6-1" },
+  { num: 7, title: "Ujasiri wa Mazungumzo", firstLesson: "7-1" },
+  { num: 8, title: "Hali ya Hewa na Hisia", firstLesson: "8-1" },
+  { num: 9, title: "Maelekezo na Mtaani", firstLesson: "9-1" },
+  { num: 10, title: "Kujitambulisha", firstLesson: "10-1" },
+  { num: 11, title: "Misingi ya mahojiano", firstLesson: "11-1" },
+  { num: 12, title: "Mtihani wa Kutoka", firstLesson: "12-1" },
+] as const;
+
 // Lazy-load lesson data based on module number
 async function loadModule(moduleNum: number) {
   const modules: Record<number, () => Promise<{ default: unknown }>> = {
@@ -82,6 +97,18 @@ const LESSON_UI = {
   },
 } as const;
 
+function detectDeviceType(): string {
+  const ua = navigator.userAgent;
+  const samsung = ua.match(/SM-[A-Z0-9]+/i);
+  if (samsung?.[0]) return `Samsung ${samsung[0].toUpperCase()}`;
+  if (/iPhone/i.test(ua)) return "iPhone";
+  if (/iPad/i.test(ua)) return "iPad";
+  if (/Android/i.test(ua)) return "Android Device";
+  if (/Windows/i.test(ua)) return "Windows";
+  if (/Macintosh|Mac OS X/i.test(ua)) return "Mac";
+  return "Unknown Device";
+}
+
 export default function LessonPage() {
   const params = useParams();
   const router = useRouter();
@@ -91,6 +118,14 @@ export default function LessonPage() {
   const [moduleData, setModuleData] = useState<ModuleData | null>(null);
   const [languagePref, setLanguagePref] = useState<"en" | "sw">(getFoundationLanguagePref());
   const [showSw, setShowSw] = useState(getFoundationLanguagePref() === "sw");
+  const [completionModalOpen, setCompletionModalOpen] = useState(false);
+  const [moduleSurveyOpen, setModuleSurveyOpen] = useState(false);
+  const [completedModuleForSurvey, setCompletedModuleForSurvey] = useState<number | null>(null);
+  const [surveyClarity, setSurveyClarity] = useState<number>(0);
+  const [surveyPronunciationHelped, setSurveyPronunciationHelped] = useState<"yes" | "no" | "">("");
+  const [surveyConfusing, setSurveyConfusing] = useState("");
+  const [surveySaving, setSurveySaving] = useState(false);
+  const [surveyError, setSurveyError] = useState("");
 
   const copy = LESSON_UI[languagePref];
 
@@ -145,6 +180,64 @@ export default function LessonPage() {
     }
   }
 
+  function handleModulePassed(completedModuleNum: number) {
+    setCompletedModuleForSurvey(completedModuleNum);
+    setSurveyClarity(0);
+    setSurveyPronunciationHelped("");
+    setSurveyConfusing("");
+    setSurveyError("");
+    setModuleSurveyOpen(true);
+  }
+
+  const nextModule = FOUNDATION_MODULES.find((entry) => entry.num === moduleNum + 1) ?? null;
+
+  async function submitModuleSurvey() {
+    if (!completedModuleForSurvey) return;
+    if (!surveyClarity || !surveyPronunciationHelped || surveyConfusing.trim().length < 2) {
+      setSurveyError("Please complete all 3 questions before continuing.");
+      return;
+    }
+
+    setSurveySaving(true);
+    setSurveyError("");
+    try {
+      const response = await fetch("/api/beta-feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "module_milestone",
+          category: "translation_quality",
+          sentiment_score: surveyClarity,
+          user_comment: surveyConfusing.trim(),
+          module_number: completedModuleForSurvey,
+          swahili_instruction_clarity: surveyClarity,
+          pronunciation_guide_helpful: surveyPronunciationHelped === "yes",
+          confusing_notes: surveyConfusing.trim(),
+          url: window.location.href,
+          user_agent: navigator.userAgent,
+          viewport_size: `${window.innerWidth}x${window.innerHeight}`,
+          screen_resolution: `${window.screen.width}x${window.screen.height}`,
+          device_type: detectDeviceType(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit module feedback");
+      }
+
+      setModuleSurveyOpen(false);
+      if (nextModule) {
+        setCompletionModalOpen(true);
+      } else {
+        router.push("/foundation");
+      }
+    } catch {
+      setSurveyError("Could not save your survey right now. Please try again.");
+    } finally {
+      setSurveySaving(false);
+    }
+  }
+
   function handleGraduationGate(score: number) {
     if (score >= 80) {
       router.push("/foundation/graduate");
@@ -196,6 +289,7 @@ export default function LessonPage() {
         lesson={lesson as Parameters<typeof LessonRenderer>[0]["lesson"]}
         moduleNum={moduleNum}
         onComplete={handleComplete}
+        onModulePassed={handleModulePassed}
         onGraduationGate={handleGraduationGate}
         showSwahili={showSw}
       />
@@ -222,6 +316,104 @@ export default function LessonPage() {
           </Link>
         )}
       </div>
+
+      {moduleSurveyOpen && (
+        <div className="lp-survey-shell" role="dialog" aria-modal="true" aria-labelledby="module-survey-title">
+          <div className="lp-survey-card">
+            <p className="lp-completion-eyebrow">30-Second Survey</p>
+            <h2 id="module-survey-title" className="lp-completion-title">Before your success animation, tell us how this module felt.</h2>
+
+            <div className="lp-survey-block">
+              <p className="lp-survey-label">1) On a scale of 1-5, how clear were the Swahili instructions?</p>
+              <div className="lp-survey-scale" role="radiogroup" aria-label="Swahili instruction clarity">
+                {[1, 2, 3, 4, 5].map((score) => (
+                  <button
+                    key={score}
+                    type="button"
+                    className={`lp-survey-chip ${surveyClarity === score ? "lp-survey-chip--on" : ""}`}
+                    onClick={() => setSurveyClarity(score)}
+                  >
+                    {score}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="lp-survey-block">
+              <p className="lp-survey-label">2) Did the pronunciation guide help you speak the words out loud?</p>
+              <div className="lp-survey-scale">
+                <button
+                  type="button"
+                  className={`lp-survey-chip ${surveyPronunciationHelped === "yes" ? "lp-survey-chip--on" : ""}`}
+                  onClick={() => setSurveyPronunciationHelped("yes")}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  className={`lp-survey-chip ${surveyPronunciationHelped === "no" ? "lp-survey-chip--on" : ""}`}
+                  onClick={() => setSurveyPronunciationHelped("no")}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+
+            <div className="lp-survey-block">
+              <label className="lp-survey-label" htmlFor="module-survey-confusing">
+                3) Was there anything confusing on this page?
+              </label>
+              <textarea
+                id="module-survey-confusing"
+                className="lp-survey-textarea"
+                placeholder="Tell us what felt confusing or type 'No'."
+                value={surveyConfusing}
+                onChange={(event) => setSurveyConfusing(event.target.value)}
+              />
+            </div>
+
+            {surveyError && <p className="lp-survey-error">{surveyError}</p>}
+
+            <button type="button" className="lp-nav-btn lp-nav-btn--grad" onClick={() => void submitModuleSurvey()} disabled={surveySaving}>
+              {surveySaving ? "Saving..." : "Submit Survey"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {completionModalOpen && nextModule && (
+        <div className="lp-completion-shell" role="dialog" aria-modal="true" aria-labelledby="module-complete-title">
+          <button
+            type="button"
+            className="lp-completion-backdrop"
+            aria-label="Close completion modal"
+            onClick={() => setCompletionModalOpen(false)}
+          />
+          <div className="lp-completion-card">
+            <button
+              type="button"
+              className="lp-completion-close"
+              aria-label="Close completion modal"
+              onClick={() => setCompletionModalOpen(false)}
+            >
+              ×
+            </button>
+            <p className="lp-completion-eyebrow">Module Complete</p>
+            <h2 id="module-complete-title" className="lp-completion-title">Great work. You unlocked the next module.</h2>
+            <p className="lp-completion-copy">
+              Module {moduleNum + 1}, <strong>{nextModule.title}</strong>, is ready now.
+            </p>
+            <div className="lp-completion-actions">
+              <Link href={`/foundation/lesson/${nextModule.num}/${nextModule.firstLesson}`} className="lp-nav-btn lp-nav-btn--grad">
+                Start {nextModule.title} Now
+              </Link>
+              <button type="button" className="lp-nav-btn lp-nav-btn--prev" onClick={() => setCompletionModalOpen(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .lp-loading {
@@ -298,6 +490,7 @@ export default function LessonPage() {
           display: flex;
           align-items: center;
           gap: 0.75rem;
+          flex-wrap: wrap;
           padding-top: 0.5rem;
           border-top: 1px solid rgba(255,255,255,0.05);
         }
@@ -329,6 +522,163 @@ export default function LessonPage() {
           margin-left: auto;
         }
         .lp-nav-btn--grad:hover { background: rgba(52,211,153,0.2); }
+        .lp-completion-shell {
+          position: fixed;
+          inset: 0;
+          z-index: 90;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+        }
+        .lp-completion-backdrop {
+          position: absolute;
+          inset: 0;
+          border: 0;
+          background: rgba(2, 6, 23, 0.72);
+        }
+        .lp-completion-card {
+          position: relative;
+          width: min(100%, 28rem);
+          border-radius: 1.25rem;
+          border: 1px solid rgba(52,211,153,0.18);
+          background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
+          box-shadow: 0 28px 80px rgba(2, 6, 23, 0.55);
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.9rem;
+        }
+        .lp-completion-close {
+          position: absolute;
+          top: 0.85rem;
+          right: 0.85rem;
+          width: 2rem;
+          height: 2rem;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.05);
+          color: #cbd5e1;
+          font-size: 1.15rem;
+          cursor: pointer;
+        }
+        .lp-completion-eyebrow {
+          margin: 0;
+          font-size: 0.72rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.11em;
+          color: #34d399;
+        }
+        .lp-completion-title {
+          margin: 0;
+          font-size: clamp(1.3rem, 4vw, 1.8rem);
+          line-height: 1.1;
+          color: #f8fafc;
+        }
+        .lp-completion-copy {
+          margin: 0;
+          color: #cbd5e1;
+        }
+        .lp-completion-actions {
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+        .lp-survey-shell {
+          position: fixed;
+          inset: 0;
+          z-index: 95;
+          background: rgba(2, 6, 23, 0.86);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+        }
+        .lp-survey-card {
+          width: min(100%, 32rem);
+          border-radius: 1rem;
+          border: 1px solid rgba(52,211,153,0.22);
+          background: rgba(2, 6, 23, 0.98);
+          box-shadow: 0 24px 60px rgba(2, 6, 23, 0.55);
+          padding: 1rem;
+          display: grid;
+          gap: 0.8rem;
+        }
+        .lp-survey-block {
+          display: grid;
+          gap: 0.4rem;
+        }
+        .lp-survey-label {
+          margin: 0;
+          color: #d1d5db;
+          font-size: 0.82rem;
+          font-weight: 600;
+        }
+        .lp-survey-scale {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+        .lp-survey-chip {
+          border-radius: 999px;
+          border: 1px solid rgba(148,163,184,0.35);
+          background: rgba(15, 23, 42, 0.82);
+          color: #cbd5e1;
+          font-size: 0.78rem;
+          font-weight: 700;
+          padding: 0.35rem 0.75rem;
+          cursor: pointer;
+        }
+        .lp-survey-chip--on {
+          border-color: rgba(52,211,153,0.6);
+          color: #d1fae5;
+          background: rgba(16,185,129,0.15);
+        }
+        .lp-survey-textarea {
+          width: 100%;
+          min-height: 5.5rem;
+          border-radius: 0.65rem;
+          border: 1px solid rgba(148,163,184,0.35);
+          background: rgba(15, 23, 42, 0.86);
+          color: #e2e8f0;
+          font-size: 0.8rem;
+          padding: 0.6rem;
+          resize: vertical;
+        }
+        .lp-survey-error {
+          margin: 0;
+          color: #fca5a5;
+          font-size: 0.76rem;
+        }
+        @media (max-width: 768px) {
+          .lp-wrap {
+            padding: 1rem 1rem 7rem;
+            gap: 1rem;
+          }
+          .lp-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+          }
+          .lp-nav-btn {
+            width: 100%;
+            text-align: center;
+            padding: 0.8rem 1rem;
+          }
+          .lp-nav-btn--next,
+          .lp-nav-btn--grad {
+            margin-left: 0;
+          }
+          .lp-completion-card {
+            padding: 1.25rem;
+          }
+          .lp-completion-actions > * {
+            width: 100%;
+          }
+          .lp-survey-card {
+            padding: 0.9rem;
+          }
+        }
       `}</style>
     </div>
   );

@@ -126,6 +126,32 @@ export default function FoundationCommandCenter() {
       setNotifications(inboxRes.notifications);
       setUnreadCount(inboxRes.unreadCount);
 
+      // Auto-seed welcome notification for brand-new learners
+      if (initialLoadRef.current && inboxRes.notifications.length === 0) {
+        void fetch("/api/user/foundation-inbox", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "append",
+            notification: {
+              title: "Karibu Foundation! 🎉",
+              body: "Somo lako la kwanza linasubiri. Gusa hapa kuanza safari yako ya kujifunza.",
+              href: "/foundation/home",
+              category: "inbox",
+              payload: {
+                title: "Karibu Foundation!",
+                body: "Your first lesson is waiting. Tap to start your learning journey.",
+                data: { screen: "LessonView", params: { module: 1 } },
+                sound: "default",
+                priority: "high",
+              },
+            },
+          }),
+        })
+          .then(() => void loadState())
+          .catch(() => {});
+      }
+
       if (initialLoadRef.current) {
         initialLoadRef.current = false;
         lastUnreadRef.current = inboxRes.unreadCount;

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 :root {
   color-scheme: light;
@@ -19,7 +19,7 @@
   box-sizing: border-box;
 }
 
-/* ── Global readability rules (accessibility + SEO) ── */
+/* ΓöÇΓöÇ Global readability rules (accessibility + SEO) ΓöÇΓöÇ */
 p {
   line-height: 1.6;
 }
@@ -886,16 +886,16 @@ textarea::placeholder {
   }
 }
 
-/* ═══════════════════════════════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    LANDING PAGE  (lp-*)
-═══════════════════════════════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 
 .lp-root {
   min-height: 100vh;
   color: var(--text-strong);
 }
 
-/* ── Nav ── */
+/* ΓöÇΓöÇ Nav ΓöÇΓöÇ */
 .lp-nav {
   position: sticky;
   top: 0;
@@ -1015,7 +1015,7 @@ textarea::placeholder {
   color: #a78bfa !important;
 }
 
-/* ── Hero ── */
+/* ΓöÇΓöÇ Hero ΓöÇΓöÇ */
 .lp-hero {
   max-width: 1200px;
   margin: 0 auto;
@@ -1188,6 +1188,12 @@ textarea::placeholder {
   margin-top: 36px;
 }
 
+.lp-hero-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
 .lp-btn-primary {
   display: inline-flex;
   align-items: center;
@@ -1261,7 +1267,7 @@ textarea::placeholder {
   flex-shrink: 0;
 }
 
-/* ── Feature showcase reel ── */
+/* ΓöÇΓöÇ Feature showcase reel ΓöÇΓöÇ */
 .lp-showcase {
   margin-top: 34px;
   padding: 18px;
@@ -1458,7 +1464,7 @@ textarea::placeholder {
   text-align: right;
 }
 
-/* ── Sections ── */
+/* ΓöÇΓöÇ Sections ΓöÇΓöÇ */
 .lp-section {
   max-width: 1200px;
   margin: 0 auto;
@@ -1522,7 +1528,7 @@ textarea::placeholder {
   background: rgba(15, 23, 42, 0.38);
 }
 
-/* ── Problem / Solution ── */
+/* ΓöÇΓöÇ Problem / Solution ΓöÇΓöÇ */
 .lp-two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1600,7 +1606,7 @@ textarea::placeholder {
   letter-spacing: 0.04em;
 }
 
-/* ── Metrics Grid ── */
+/* ΓöÇΓöÇ Metrics Grid ΓöÇΓöÇ */
 .lp-metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1649,7 +1655,7 @@ textarea::placeholder {
   line-height: 1.6;
 }
 
-/* ── Problem / Solution ── */
+/* ΓöÇΓöÇ Problem / Solution ΓöÇΓöÇ */
 .lp-ps-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1735,7 +1741,7 @@ textarea::placeholder {
   }
 }
 
-/* ── Steps ── */
+/* ΓöÇΓöÇ Steps ΓöÇΓöÇ */
 .lp-steps {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1788,7 +1794,7 @@ textarea::placeholder {
   color: #64748b;
 }
 
-/* ── Analyze card ── */
+/* ΓöÇΓöÇ Analyze card ΓöÇΓöÇ */
 .lp-analyze-card {
   padding: 40px;
   display: grid;
@@ -1859,7 +1865,7 @@ textarea::placeholder {
   padding-bottom: 12px;
 }
 
-/* ── FAQ ── */
+/* ΓöÇΓöÇ FAQ ΓöÇΓöÇ */
 .lp-faq {
   max-width: 740px;
   display: flex;
@@ -1907,7 +1913,7 @@ textarea::placeholder {
   color: #64748b;
 }
 
-/* ── CTA section ── */
+/* ΓöÇΓöÇ CTA section ΓöÇΓöÇ */
 .lp-cta-section {
   text-align: center;
   padding: 100px 24px;
@@ -1965,7 +1971,7 @@ textarea::placeholder {
   color: #475569;
 }
 
-/* ── Footer ── */
+/* ΓöÇΓöÇ Footer ΓöÇΓöÇ */
 .lp-footer {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(7, 11, 22, 0.8);
@@ -2043,7 +2049,7 @@ textarea::placeholder {
   color: #94a3b8;
 }
 
-/* ── ReadinessPulse (global nav widget) ── */
+/* ΓöÇΓöÇ ReadinessPulse (global nav widget) ΓöÇΓöÇ */
 .nav-hub-shortcut {
   display: inline-flex;
   align-items: center;
@@ -2099,7 +2105,7 @@ textarea::placeholder {
   white-space: nowrap;
 }
 
-/* ── Responsive ── */
+/* ΓöÇΓöÇ Responsive ΓöÇΓöÇ */
 @media (max-width: 960px) {
   .lp-hero {
     grid-template-columns: 1fr;
@@ -2121,6 +2127,16 @@ textarea::placeholder {
 @media (max-width: 640px) {
   .lp-nav-links a:not(.lp-nav-cta) {
     display: none;
+  }
+
+  .lp-hero-cta-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .lp-hero-cta-row a,
+  .lp-hero-cta-row button {
+    width: 100%;
   }
 
   .lp-h1 {
@@ -2149,9 +2165,9 @@ textarea::placeholder {
   }
 }
 
-/* ═══════════════════════════════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
   MOCK INTERVIEW PAGE  (vi-*)
-═══════════════════════════════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 
 .lp-hero--centered {
   display: block;
@@ -2553,9 +2569,9 @@ textarea::placeholder {
   }
 }
 
-/* ═══════════════════════════════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    INTERVIEW SESSION PAGE  (iv-*)
-═══════════════════════════════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 
 .iv-session {
   max-width: 780px;
@@ -2947,10 +2963,10 @@ textarea::placeholder {
   line-height: 1.6;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   GLOBAL DESIGN TOKENS  – GrowthHub Standard
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+   GLOBAL DESIGN TOKENS  ΓÇô GrowthHub Standard
    Applied to every page for consistent dark-mode spatial aesthetic.
-═══════════════════════════════════════════════════════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 
 /* -- Shared entry animation ------------------------------------------ */
 @keyframes fadeInUp {

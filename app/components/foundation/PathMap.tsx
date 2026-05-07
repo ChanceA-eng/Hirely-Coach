@@ -260,7 +260,7 @@ export default function PathMap() {
                         <button
                           type="button"
                           className="pm-btn pm-btn--video"
-                          onClick={() => router.push(`/foundation?video=${mod.num}`)}
+                          onClick={() => router.push(`/foundation/home?video=${mod.num}`)}
                         >
                           Watch Video
                         </button>

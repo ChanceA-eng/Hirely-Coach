@@ -7,6 +7,7 @@ import mammoth from "mammoth";
 import CoachTooltip from "@/app/components/CoachTooltip";
 import JobsClient from "@/app/admin/jobs/JobsClient";
 import FoundationAdminTab from "./FoundationAdminTab";
+import UserVoiceDashboard from "../feedback/UserVoiceDashboard";
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
 
@@ -20,7 +21,7 @@ type AdminUser = {
 };
 
 type DbStats = { total: number } | null;
-type Tab = "overview" | "users" | "refinery" | "advanced" | "foundation";
+type Tab = "overview" | "users" | "refinery" | "advanced" | "foundation" | "userVoice";
 type StarrLabTierConfig = {
   tier: number;
   title: string;
@@ -713,6 +714,15 @@ export default function DashboardClient() {
               icon: (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                   <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+                </svg>
+              ),
+            },
+            {
+              id: "userVoice",
+              label: "User Voice",
+              icon: (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
                 </svg>
               ),
             },
@@ -1648,6 +1658,20 @@ export default function DashboardClient() {
                   <span style={S.sectionSub}>Lesson editor · Analytics · Health · Video manager · Notifications</span>
                 </div>
                 <FoundationAdminTab />
+              </div>
+            </motion.div>
+          )}
+
+          {tab === "userVoice" && (
+            <motion.div
+              key="userVoice"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22 }}
+            >
+              <div style={S.section}>
+                <UserVoiceDashboard />
               </div>
             </motion.div>
           )}

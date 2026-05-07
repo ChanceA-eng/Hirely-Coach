@@ -1026,6 +1026,67 @@ export default function GrowthHubPage() {
                     </motion.div>
                   )}
 
+                  <motion.div
+                    className="gh-sidebar-card glass-card gh-impact-box gh-impact-box--priority"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8 }}
+                  >
+                    <p className="gh-stats-title">Impact Log</p>
+                    <p className="gh-sidebar-body">
+                      {alumniStatus
+                        ? "You've reached Mastery, but the market is evolving. Log your latest win to maintain your Authority Score."
+                        : "Think about your week. What's one thing you're proud of? Tell us what you did, the numbers involved, and the final result. We'll store this in your Archive to help you prove your value later."}
+                    </p>
+                    <div className="gh-impact-form">
+                      <label className="gh-impact-label" htmlFor="gh-impact-action">The Action</label>
+                      <textarea
+                        id="gh-impact-action"
+                        className="gh-impact-input"
+                        value={impactAction}
+                        onChange={(event) => setImpactAction(event.target.value)}
+                        placeholder="What did you complete or lead this week?"
+                      />
+                      <label className="gh-impact-label" htmlFor="gh-impact-proof">The Proof</label>
+                      <textarea
+                        id="gh-impact-proof"
+                        className="gh-impact-input"
+                        value={impactProof}
+                        onChange={(event) => setImpactProof(event.target.value)}
+                        placeholder="How many people helped? Time or money saved? Metrics?"
+                      />
+                      <label className="gh-impact-label" htmlFor="gh-impact-result">The Result</label>
+                      <textarea
+                        id="gh-impact-result"
+                        className="gh-impact-input"
+                        value={impactResult}
+                        onChange={(event) => setImpactResult(event.target.value)}
+                        placeholder="What was the final positive outcome?"
+                      />
+                      <button className="gh-impact-save" onClick={saveImpactLogEntry}>
+                        Save to Impact Log
+                      </button>
+                      {impactMessage && <p className="gh-impact-message">{impactMessage}</p>}
+                    </div>
+
+                    <div className="gh-impact-preview">
+                      <p className="gh-impact-preview-label">Recent Wins</p>
+                      {impactEntries.length === 0 ? (
+                        <p className="gh-sidebar-body gh-sidebar-body--spaced">
+                          No wins logged yet.
+                        </p>
+                      ) : (
+                        impactEntries.slice(0, 2).map((entry) => (
+                          <div key={entry.id} className="gh-impact-entry">
+                            <p className="gh-impact-entry-title">{entry.action}</p>
+                            <p className="gh-impact-entry-text">{entry.proof}</p>
+                            <p className="gh-impact-entry-text">{entry.result}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+
                   {history.length > 0 && (
                     <motion.div
                       className="gh-session-list glass-card"
@@ -1179,61 +1240,6 @@ export default function GrowthHubPage() {
                     </div>
                   )}
 
-                  <div className="gh-sidebar-card glass-card gh-impact-box">
-                    <p className="gh-stats-title">Impact Log</p>
-                    <p className="gh-sidebar-body">
-                      {alumniStatus
-                        ? "You've reached Mastery, but the market is evolving. Log your latest win to maintain your Authority Score."
-                        : "Think about your week. What's one thing you're proud of? Tell us what you did, the numbers involved, and the final result. We'll store this in your Archive to help you prove your value later."}
-                    </p>
-                    <div className="gh-impact-form">
-                      <label className="gh-impact-label" htmlFor="gh-impact-action">The Action</label>
-                      <textarea
-                        id="gh-impact-action"
-                        className="gh-impact-input"
-                        value={impactAction}
-                        onChange={(event) => setImpactAction(event.target.value)}
-                        placeholder="What did you complete or lead this week?"
-                      />
-                      <label className="gh-impact-label" htmlFor="gh-impact-proof">The Proof</label>
-                      <textarea
-                        id="gh-impact-proof"
-                        className="gh-impact-input"
-                        value={impactProof}
-                        onChange={(event) => setImpactProof(event.target.value)}
-                        placeholder="How many people helped? Time or money saved? Metrics?"
-                      />
-                      <label className="gh-impact-label" htmlFor="gh-impact-result">The Result</label>
-                      <textarea
-                        id="gh-impact-result"
-                        className="gh-impact-input"
-                        value={impactResult}
-                        onChange={(event) => setImpactResult(event.target.value)}
-                        placeholder="What was the final positive outcome?"
-                      />
-                      <button className="gh-impact-save" onClick={saveImpactLogEntry}>
-                        Save to Impact Log
-                      </button>
-                      {impactMessage && <p className="gh-impact-message">{impactMessage}</p>}
-                    </div>
-
-                    <div className="gh-impact-preview">
-                      <p className="gh-impact-preview-label">Recent Wins</p>
-                      {impactEntries.length === 0 ? (
-                        <p className="gh-sidebar-body gh-sidebar-body--spaced">
-                          No wins logged yet.
-                        </p>
-                      ) : (
-                        impactEntries.slice(0, 2).map((entry) => (
-                          <div key={entry.id} className="gh-impact-entry">
-                            <p className="gh-impact-entry-title">{entry.action}</p>
-                            <p className="gh-impact-entry-text">{entry.proof}</p>
-                            <p className="gh-impact-entry-text">{entry.result}</p>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
                 </motion.aside>
               </div>
             </motion.div>

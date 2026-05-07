@@ -879,6 +879,28 @@
   gap: 14px;
 }
 
+.gh-impact-box--priority {
+  position: relative;
+  border-color: rgba(16, 185, 129, 0.32) !important;
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.24), inset 0 1px 0 rgba(110, 231, 183, 0.08);
+}
+
+.gh-impact-box--priority::before {
+  content: "Priority";
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  background: rgba(6, 95, 70, 0.2);
+  color: #a7f3d0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .gh-impact-form {
   display: flex;
   flex-direction: column;
@@ -898,31 +920,39 @@
   min-height: 76px;
   resize: vertical;
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(15, 23, 42, 0.48);
+  border: 1px solid rgba(94, 234, 212, 0.2);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.74), rgba(15, 23, 42, 0.54));
   color: #e2e8f0;
   padding: 10px 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.gh-impact-input::placeholder {
+  color: #7dd3c7;
 }
 
 .gh-impact-input:focus {
   outline: none;
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+  border-color: rgba(52, 211, 153, 0.7);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.6));
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.14), 0 0 24px rgba(16, 185, 129, 0.12);
 }
 
 .gh-impact-save {
   border: 1px solid rgba(16, 185, 129, 0.34);
-  background: rgba(6, 95, 70, 0.22);
+  background: linear-gradient(135deg, rgba(6, 95, 70, 0.92), rgba(5, 150, 105, 0.68));
   color: #a7f3d0;
   border-radius: 999px;
   padding: 10px 14px;
   font-weight: 800;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 10px 24px rgba(6, 95, 70, 0.22);
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .gh-impact-save:hover {
-  background: rgba(6, 95, 70, 0.35);
+  background: linear-gradient(135deg, rgba(6, 95, 70, 1), rgba(5, 150, 105, 0.82));
+  box-shadow: 0 14px 28px rgba(6, 95, 70, 0.28);
   transform: translateY(-1px);
 }
 

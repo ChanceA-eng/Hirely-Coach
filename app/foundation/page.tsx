@@ -1,10 +1,5 @@
-import { Suspense } from "react";
-import PathMap from "../components/foundation/PathMap";
+import { redirect } from "next/navigation";
 
 export default function FoundationHomePage() {
-  return (
-    <Suspense fallback={null}>
-      <PathMap />
-    </Suspense>
-  );
+  redirect("/foundation/home");
 }

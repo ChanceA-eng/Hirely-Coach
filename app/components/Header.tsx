@@ -18,8 +18,9 @@ const NAV = [
   { href: "/voice?mode=new", label: "Mock Interview" },
   { href: "/training", label: "Accelerator" },
   { href: "/history", label: "History" },
-  { href: "/help", label: "?" },
 ];
+
+const HELP_HREF = "/help";
 
 const UTILITY_NAV = [
   { href: "/#capabilities", label: "Features" },
@@ -29,16 +30,12 @@ const UTILITY_NAV = [
 ];
 
 // ─── Identity Nudge Dropdown ──────────────────────────────────────────────
-function IdentityNudge() {
+function IdentityNudge({ isFoundation }: { isFoundation: boolean }) {
   const { user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const [mode, setModeState] = useState<"foundation" | "coach" | null>(null);
-
-  const isFoundation = pathname?.startsWith("/foundation") ?? false;
 
   const firstName = user?.firstName ?? user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] ?? "Account";
 
@@ -53,14 +50,10 @@ function IdentityNudge() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  useEffect(() => {
-    fetch("/api/user/mode")
-      .then((res) => res.json() as Promise<{ current_mode: "foundation" | "coach" | null }>)
-      .then((payload) => {
-        setModeState(payload.current_mode);
-      })
-      .catch(() => setModeState(getMode()));
-  }, []);
+  // Accent colour differs between modes
+  const accentBg = isFoundation ? "#064e3b" : "#1e1b4b";
+  const accentBorder = isFoundation ? "rgba(16,185,129,0.35)" : "rgba(99,102,241,0.35)";
+  const accentText = isFoundation ? "#a7f3d0" : "#c7d2fe";
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
@@ -89,15 +82,15 @@ function IdentityNudge() {
           style={{
             width: 22,
             height: 22,
-            background: "#064e3b",
-            border: "1px solid rgba(16,185,129,0.35)",
+            background: accentBg,
+            border: `1px solid ${accentBorder}`,
             borderRadius: "50%",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: "0.7rem",
             fontWeight: 700,
-            color: "#a7f3d0",
+            color: accentText,
             flexShrink: 0,
           }}
         >
@@ -136,37 +129,47 @@ function IdentityNudge() {
               zIndex: 200,
             }}
           >
-            <NudgeItem
-              icon="◎"
-              label="Settings"
-              onClick={() => {
-                router.push(isFoundation ? "/foundation/settings" : "/growthhub/profile");
-                setOpen(false);
-              }}
-            />
-            {!isFoundation && (
-              <NudgeItem
-                icon="⌂"
-                label="Go to GrowthHub"
-                onClick={() => { router.push("/growthhub"); setOpen(false); }}
-              />
-            )}
-            {isFoundation && mode === "coach" && (
-              <NudgeItem
-                icon="←"
-                label="Exit Foundation"
-                onClick={() => { router.push("/growthhub"); setOpen(false); }}
-              />
+            {isFoundation ? (
+              /* ── LEARNER MENU (Foundation) ── */
+              <>
+                <div style={{ padding: "4px 12px 8px", fontSize: "0.7rem", fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Learner Menu
+                </div>
+                <NudgeItem
+                  icon="📊"
+                  label="My Progress"
+                  onClick={() => { router.push("/foundation/home"); setOpen(false); }}
+                />
+                <NudgeItem
+                  icon="⚙️"
+                  label="Settings"
+                  onClick={() => { router.push("/foundation/settings"); setOpen(false); }}
+                />
+              </>
+            ) : (
+              /* ── PROFESSIONAL MENU (Hirely / Coach) ── */
+              <>
+                <div style={{ padding: "4px 12px 8px", fontSize: "0.7rem", fontWeight: 700, color: "#818cf8", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Professional Menu
+                </div>
+                <NudgeItem
+                  icon="⌂"
+                  label="GrowthHub"
+                  onClick={() => { router.push("/growthhub"); setOpen(false); }}
+                />
+                <NudgeItem
+                  icon="◎"
+                  label="Profile & Settings"
+                  onClick={() => { router.push("/growthhub/profile"); setOpen(false); }}
+                />
+              </>
             )}
             <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "6px 0" }} />
             <NudgeItem
               icon="→"
-              label="Logout"
+              label="Log Out"
               danger
-              onClick={() => {
-                setOpen(false);
-                signOut({ redirectUrl: "/" });
-              }}
+              onClick={() => { setOpen(false); signOut({ redirectUrl: "/" }); }}
             />
           </motion.div>
         )}
@@ -223,6 +226,34 @@ function NudgeItem({
   );
 }
 
+function HelpNavButton({ active }: { active: boolean }) {
+  return (
+    <Link
+      href={HELP_HREF}
+      aria-label="Help Center"
+      title="Help Center"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 28,
+        height: 28,
+        borderRadius: "50%",
+        background: active ? "rgba(16,185,129,0.18)" : "rgba(255,255,255,0.06)",
+        border: active ? "1px solid rgba(16,185,129,0.45)" : "1px solid rgba(255,255,255,0.1)",
+        color: active ? "#10b981" : "#94a3b8",
+        fontSize: "0.78rem",
+        fontWeight: 800,
+        lineHeight: 1,
+        textDecoration: "none",
+        flexShrink: 0,
+      }}
+    >
+      ?
+    </Link>
+  );
+}
+
 export default function Header() {
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
@@ -231,6 +262,7 @@ export default function Header() {
 
   const isFoundation = pathname?.startsWith("/foundation") ?? false;
   const isLandingPage = pathname === "/";
+  const isHelpRoute = pathname === HELP_HREF || pathname?.startsWith(`${HELP_HREF}/`);
   const showLandingContent = !isSignedIn && isLandingPage;
 
   // Sync mode from API on sign-in
@@ -317,30 +349,6 @@ export default function Header() {
                   </span>
                 </div>
 
-                {mode === "coach" && (
-                  <Link
-                    href="/growthhub"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 5,
-                      fontSize: "0.78rem",
-                      fontWeight: 700,
-                      color: "#94a3b8",
-                      textDecoration: "none",
-                      border: "1px solid rgba(148,163,184,0.2)",
-                      borderRadius: 6,
-                      padding: "0.3rem 0.65rem",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
-                    </svg>
-                    Exit Foundation
-                  </Link>
-                )}
-
                 {/* Notification bell (opens FoundationCommandCenter drawer) */}
                 <button
                   type="button"
@@ -372,35 +380,11 @@ export default function Header() {
                 {NAV.map(({ href, label }) => {
                   const base = href.split("?")[0];
                   const active = pathname === base || pathname.startsWith(base + "/");
-                  const isHelp = label === "?";
                   return (
                     <Link
                       key={href}
                       href={href}
-                      aria-label={isHelp ? "Help Center" : undefined}
-                      title={isHelp ? "Help Center" : undefined}
-                      style={
-                        isHelp
-                          ? {
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              width: 28,
-                              height: 28,
-                              borderRadius: "50%",
-                              background: active ? "rgba(16,185,129,0.18)" : "rgba(255,255,255,0.06)",
-                              border: active ? "1px solid rgba(16,185,129,0.45)" : "1px solid rgba(255,255,255,0.1)",
-                              color: active ? "#10b981" : "#94a3b8",
-                              fontSize: "0.78rem",
-                              fontWeight: 800,
-                              lineHeight: 1,
-                              textDecoration: "none",
-                              flexShrink: 0,
-                            }
-                          : active
-                          ? { color: "#10b981" }
-                          : undefined
-                      }
+                      style={active ? { color: "#10b981" } : undefined}
                     >
                       {label}
                     </Link>
@@ -415,6 +399,7 @@ export default function Header() {
                 Foundation
               </Link>
             )}
+            {!isFoundation && mode === "coach" && <HelpNavButton active={Boolean(isHelpRoute)} />}
           </SignedIn>
 
           <SignedOut>
@@ -431,7 +416,7 @@ export default function Header() {
           </SignedOut>
 
           <SignedIn>
-            <IdentityNudge />
+            <IdentityNudge isFoundation={isFoundation} />
           </SignedIn>
 
         </div>

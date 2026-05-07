@@ -303,11 +303,11 @@ export default function Home() {
               </p>
               <div className="lp-hero-cta-row">
                 <Link href={isSignedIn ? "/voice/interview" : "/voice"} className="global-auth-btn global-auth-btn--strong lp-hero-cta-btn">
-                  Launch your interview now
+                  Try our interview practice
                 </Link>
                 {!isSignedIn ? (
                   <Link href="/sign-up" className="global-auth-btn lp-hero-cta-btn">
-                    Create your free account now
+                    Create your account
                   </Link>
                 ) : null}
               </div>
@@ -383,12 +383,12 @@ export default function Home() {
           <p className="gh-eyebrow">A New Path for English Learners</p>
           <h2 className="gh-h1">Hirely Foundation: 12 Modules, One Goal — Professional English</h2>
           <p className="lp-section-sub">
-            Not ready for Hirely Coach? <strong>Foundation</strong> is a structured 12-module learning program that teaches you the English skills you need for professional success.
+            Want to build a strong English foundation first? <strong>Foundation</strong> is a structured 12-modules learning program that teaches you the English skills you need for professional success.
           </p>
           <div className="lp-steps" style={{ marginTop: 32, marginBottom: 32 }}>
             <div className="lp-step glass-card">
               <div className="lp-step-top"><span className="lp-step-badge">Modules 1-3</span></div>
-              <h3 className="lp-step-title">Master the Fundamentals</h3>
+              <h3 className="lp-step-title">Find your voice</h3>
               <p className="lp-step-body"><strong>Phonics, Grammar, Vocabulary</strong> — Build your foundation with pronunciation, sentence structure, and professional words.</p>
             </div>
             <div className="lp-step glass-card">
@@ -403,7 +403,7 @@ export default function Home() {
             </div>
           </div>
           <div style={{ textAlign: "center", marginTop: 40 }}>
-            <Link href="/foundation/home" className="global-auth-btn global-auth-btn--strong" style={{ display: "inline-block" }}>
+            <Link href={isSignedIn ? "/foundation/home" : "/sign-up"} className="global-auth-btn global-auth-btn--strong" style={{ display: "inline-block" }}>
               Start Foundation Now
             </Link>
           </div>
@@ -495,9 +495,6 @@ export default function Home() {
           <h2 className="gh-h1">Know exactly what to improve after every session</h2>
           <p className="lp-section-sub">
             Every practice session gives you a clear <strong>Score Card</strong> with simple results:<br />
-            <span aria-label="Checkmark">✅</span> <strong>Alignment:</strong> Does your resume match the job?<br />
-            <span aria-label="Checkmark">✅</span> <strong>Clarity:</strong> Is your speaking easy to understand?<br />
-            <span aria-label="Checkmark">✅</span> <strong>Logic:</strong> Do your answers make sense?<br />
             No guessing. No vague feedback.
           </p>
 

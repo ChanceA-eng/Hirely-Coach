@@ -3,16 +3,9 @@
 import { useRef, useState } from "react";
 import { createStrictSofiaUtterance, warmSofiaVoices } from "../../lib/sofiaVoice";
 import { toAudioSrc } from "../../lib/audioPath";
-import { audioMap } from "../../data/audioMap";
 
 interface AudioButtonProps {
-  /** Direct audio URL, e.g. "/audio/word_apple.mp3" (from lesson JSON). */
   audioUrl?: string;
-  /**
-   * audioMap key, e.g. "m1_word_apple". Takes priority over audioUrl.
-   * Use this for any button not driven by lesson JSON data.
-   */
-  audioKey?: string;
   label?: string;
   spokenText?: string;
   size?: "sm" | "md" | "lg";
@@ -20,14 +13,10 @@ interface AudioButtonProps {
 
 /**
  * AudioEngine — a single "Click to Hear" button.
- * Accepts either an audioKey (looked up in the global audioMap) or a raw audioUrl.
- * Falls back to Sofia TTS, then shows "Audio unavailable" if both fail.
+ * Uses the browser's native Audio API. Falls back gracefully if the file
+ * does not exist yet (shows a "coming soon" state rather than erroring).
  */
-export default function AudioEngine({ audioUrl, audioKey, label, spokenText, size = "md" }: AudioButtonProps) {
-  // Resolve the URL: key-based lookup takes priority over raw URL
-  const resolvedUrl = audioKey
-    ? (audioMap[audioKey] ? `/audio/${audioMap[audioKey]}` : undefined)
-    : audioUrl;
+export default function AudioEngine({ audioUrl, label, spokenText, size = "md" }: AudioButtonProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [state, setState] = useState<"idle" | "playing" | "error">("idle");
 
@@ -62,12 +51,12 @@ export default function AudioEngine({ audioUrl, audioKey, label, spokenText, siz
 
   function play() {
     if (state === "playing") return;
-    if (!resolvedUrl) {
+    if (!audioUrl) {
       speakFallback();
       return;
     }
 
-    const resolvedAudioUrl = toAudioSrc(resolvedUrl);
+    const resolvedAudioUrl = toAudioSrc(audioUrl);
     if (!resolvedAudioUrl) {
       setState("error");
       return;

@@ -1,5 +1,13 @@
 "use client";
 
+function normalizeSpeechText(text: string) {
+  const trimmed = text.trim();
+  const explicitLetter = trimmed.match(/^capital\s+([a-z])$/i);
+  if (explicitLetter) return explicitLetter[1].toLowerCase();
+  if (/^[A-Z]$/.test(trimmed)) return trimmed.toLowerCase();
+  return trimmed;
+}
+
 function pickFemaleVoice(langPrefix: string) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return null;
   const voices = window.speechSynthesis.getVoices();
@@ -43,7 +51,7 @@ function pickStrictSofiaVoice(langPrefix: string) {
 }
 
 export function createSofiaUtterance(text: string, opts?: { lang?: string; rate?: number }) {
-  const utterance = new SpeechSynthesisUtterance(text);
+  const utterance = new SpeechSynthesisUtterance(normalizeSpeechText(text));
   const lang = opts?.lang ?? "en-US";
   utterance.lang = lang;
   utterance.rate = opts?.rate ?? 0.92;
@@ -55,7 +63,7 @@ export function createSofiaUtterance(text: string, opts?: { lang?: string; rate?
 }
 
 export function createStrictSofiaUtterance(text: string, opts?: { lang?: string; rate?: number }) {
-  const utterance = new SpeechSynthesisUtterance(text);
+  const utterance = new SpeechSynthesisUtterance(normalizeSpeechText(text));
   const lang = opts?.lang ?? "en-US";
   utterance.lang = lang;
   utterance.rate = opts?.rate ?? 0.92;

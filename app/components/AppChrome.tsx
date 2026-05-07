@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import Header from "./Header";
+import FeedbackPulseWidget from "./FeedbackPulseWidget";
 import { getFoundationProfile, getMode, hydrateFoundationState } from "../lib/foundationProgress";
 
 // Coach-only routes that Foundation users cannot access
@@ -51,6 +52,7 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
   const hideHeader =
     hideHeaderForRoute ||
     (isSignedIn && onboardingComplete !== true);
+  const showFeedbackPulse = !(pathname?.startsWith("/admin"));
 
   // Guard: redirect Foundation-mode users away from Coach routes
   useEffect(() => {
@@ -99,6 +101,7 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
     <>
       {!hideHeader && <Header />}
       {children}
+      {showFeedbackPulse && <FeedbackPulseWidget />}
     </>
   );
 }

@@ -181,7 +181,7 @@ export function buildFoundationVideoUpdate(moduleNum: number): FoundationInboxIt
     title: "Video Update",
     body,
     category: "updates",
-    href: `/foundation?video=${moduleNum}`,
+    href: `/foundation/home?video=${moduleNum}`,
     payload: {
       title: "New Video",
       body: "New video added! Watch to see how to pronounce the words. 🎬",

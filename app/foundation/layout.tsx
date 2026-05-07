@@ -1,10 +1,14 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
+import FoundationCommandCenter from "../components/foundation/FoundationCommandCenter";
 
 export default function FoundationLayout({ children }: { children: ReactNode }) {
   return (
     <div className="fn-shell">
+      <Suspense fallback={null}>
+        <FoundationCommandCenter />
+      </Suspense>
       <main className="fn-main">{children}</main>
 
       <style>{`

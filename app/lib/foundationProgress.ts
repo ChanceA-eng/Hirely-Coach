@@ -25,7 +25,7 @@ const PENDING_XP_KEY = "hirely.foundation.pending-xp";
 const FOUNDATION_IP_BONUS = 150; // Bonus IP awarded on graduation
 const PASS_THRESHOLD = 80; // Minimum score to pass an assessment
 export const TOTAL_MODULES = 12;
-export const TOTAL_MODULE_SEQUENCE = [1, 2, 3, 4, 5, 6] as const;
+export const TOTAL_MODULE_SEQUENCE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 export const TOTAL_FOUNDATION_LESSONS = 80;
 export const FOUNDATION_XP_TYPING = 50;
 export const FOUNDATION_XP_VOICE = 100;
@@ -118,6 +118,15 @@ function saveFoundationOverride(override: FoundationOverride) {
   if (!isBrowser()) return;
   localStorage.setItem(OVERRIDE_KEY, JSON.stringify(override));
   emitFoundationEvent(FOUNDATION_PROGRESS_EVENT);
+}
+
+function unlockFoundationModule(moduleNum: number) {
+  if (moduleNum < 1 || moduleNum > TOTAL_MODULES) return;
+  const override = getFoundationOverride();
+  if (override.unlockedModules.includes(moduleNum)) return;
+  saveFoundationOverride({
+    unlockedModules: [...override.unlockedModules, moduleNum].sort((left, right) => left - right),
+  });
 }
 
 export function hydrateFoundationState(payload: {
@@ -219,17 +228,19 @@ export function saveAssessmentScore(moduleNum: number, score: number) {
   const progress = getFoundationProgress();
   const key = `module-${moduleNum}`;
   const wasComplete = progress.completedModules.includes(moduleNum);
+  const passed = score >= PASS_THRESHOLD;
   progress.assessmentScores[key] = score;
-  if (score >= PASS_THRESHOLD && !progress.completedModules.includes(moduleNum)) {
+  if (passed && !progress.completedModules.includes(moduleNum)) {
     progress.completedModules.push(moduleNum);
   }
   saveProgress(progress);
   syncProgressToCloud(progress).catch(() => {});
 
-  if (score >= PASS_THRESHOLD && !wasComplete) {
+  if (passed && !wasComplete) {
     awardFoundationXp(FOUNDATION_XP_MODULE);
     const nextModule = moduleNum + 1;
     if (nextModule <= TOTAL_MODULES) {
+      unlockFoundationModule(nextModule);
       fetch("/api/user/foundation-inbox", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
