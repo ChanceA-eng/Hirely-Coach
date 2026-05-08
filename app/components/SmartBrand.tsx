@@ -1,26 +1,42 @@
 "use client";
 
-import { useRef } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function SmartBrand({ className }: { className?: string }) {
+  const { isSignedIn } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const [href, setHref] = useState("/");
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isFoundationRoute = pathname?.startsWith("/foundation") ?? false;
 
-  const src = isFoundationRoute
-    ? "/HIrelylogo.Vertical.png"
-    : "/hirelylogo.Horizontal.png";
+  useEffect(() => {
+    if (isFoundationRoute) {
+      setHref("/foundation/home");
+      return;
+    }
 
-  // Native image ratios from provided assets:
-  // foundation vertical: 600x730, standard horizontal: 286x108.
-  const width = isFoundationRoute ? 600 : 286;
-  const height = isFoundationRoute ? 730 : 108;
+    if (isSignedIn) {
+      setHref("/growthhub");
+      return;
+    }
+
+    try {
+      const raw = window.localStorage.getItem("hirelyCoachInterviewHistory");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setHref("/growthhub");
+        }
+      }
+    } catch {
+      // fallback to "/"
+    }
+  }, [isSignedIn, isFoundationRoute]);
 
   // ── Secret Handshake: double-click logo → admin ────────────────────────
   function handleClick(e: React.MouseEvent) {
@@ -40,15 +56,8 @@ export default function SmartBrand({ className }: { className?: string }) {
   }
 
   return (
-    <Link href="/" className={className} onClick={handleClick} style={{ cursor: "pointer" }} aria-label="Go to homepage">
-      <Image
-        src={src}
-        alt={isFoundationRoute ? "Hirely Foundation" : "Hirely Coach"}
-        width={width}
-        height={height}
-        priority
-        className="global-header-brand-logo"
-      />
-    </Link>
+    <a href={href} className={className} onClick={handleClick} style={{ cursor: "pointer" }}>
+      {isFoundationRoute ? "Hirely Foundation" : "Hirely Coach"}
+    </a>
   );
 }
