@@ -24,13 +24,23 @@ export default function DocumentsAdminTab() {
   const [busyKey, setBusyKey] = useState<LegalDocumentKey | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  async function parseResponsePayload(res: Response): Promise<(Partial<DocumentsPayload> & { error?: string }) | null> {
+    const text = await res.text();
+    if (!text.trim()) return null;
+    try {
+      return JSON.parse(text) as Partial<DocumentsPayload> & { error?: string };
+    } catch {
+      return null;
+    }
+  }
+
   async function loadDocuments() {
     const res = await fetch("/api/admin/legal-documents", { cache: "no-store" });
-    const payload = (await res.json()) as Partial<DocumentsPayload> & { error?: string };
+    const payload = await parseResponsePayload(res);
     if (!res.ok) {
-      throw new Error(payload.error || "Failed to load legal documents");
+      throw new Error(payload?.error || "Failed to load legal documents");
     }
-    setDocuments(payload.documents ?? null);
+    setDocuments(payload?.documents ?? null);
   }
 
   useEffect(() => {
@@ -51,12 +61,12 @@ export default function DocumentsAdminTab() {
         method: "POST",
         body: formData,
       });
-      const payload = (await res.json()) as Partial<DocumentsPayload> & { error?: string };
+      const payload = await parseResponsePayload(res);
       if (!res.ok) {
-        throw new Error(payload.error || "Upload failed");
+        throw new Error(payload?.error || `Upload failed (HTTP ${res.status})`);
       }
 
-      setDocuments(payload.documents ?? null);
+      setDocuments(payload?.documents ?? null);
       setMessage(`${documentType === "terms" ? "Terms" : "Privacy"} PDF uploaded.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Upload failed");
@@ -74,12 +84,12 @@ export default function DocumentsAdminTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ documentType }),
       });
-      const payload = (await res.json()) as Partial<DocumentsPayload> & { error?: string };
+      const payload = await parseResponsePayload(res);
       if (!res.ok) {
-        throw new Error(payload.error || "Delete failed");
+        throw new Error(payload?.error || `Delete failed (HTTP ${res.status})`);
       }
 
-      setDocuments(payload.documents ?? null);
+      setDocuments(payload?.documents ?? null);
       setMessage(`${documentType === "terms" ? "Terms" : "Privacy"} PDF removed.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Delete failed");
@@ -125,7 +135,7 @@ export default function DocumentsAdminTab() {
                   <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.8rem" }}>{item.help}</p>
                 </div>
                 {doc?.url ? (
-                  <a href={doc.url} target="_blank" rel="noreferrer" style={{ color: "#93c5fd", fontSize: "0.8rem", textDecoration: "none" }}>
+                  <a href={item.key === "terms" ? "/terms" : "/privacy"} target="_blank" rel="noreferrer" style={{ color: "#93c5fd", fontSize: "0.8rem", textDecoration: "none" }}>
                     Open current PDF
                   </a>
                 ) : (

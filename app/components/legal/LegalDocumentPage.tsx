@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   LEGAL_PLACEHOLDER_COPY,
@@ -12,6 +13,10 @@ export default async function LegalDocumentPage({ documentKey }: { documentKey: 
   const documents = await loadLegalDocuments();
   const content = LEGAL_PLACEHOLDER_COPY[documentKey];
   const uploadedUrl = documents[documentKey].url;
+
+  if (uploadedUrl) {
+    redirect(uploadedUrl);
+  }
 
   return (
     <main
@@ -40,28 +45,6 @@ export default async function LegalDocumentPage({ documentKey }: { documentKey: 
           <p style={{ margin: 0, maxWidth: 700, color: "#cbd5e1", lineHeight: 1.7 }}>{content.intro}</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 18, alignItems: "center" }}>
             <span style={{ fontSize: "0.82rem", color: "#94a3b8" }}>Last updated: {content.lastUpdated}</span>
-            {uploadedUrl && (
-              <a
-                href={uploadedUrl}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "10px 14px",
-                  borderRadius: 999,
-                  textDecoration: "none",
-                  color: "#dcfce7",
-                  background: "rgba(16,185,129,0.14)",
-                  border: "1px solid rgba(16,185,129,0.28)",
-                  fontSize: "0.82rem",
-                  fontWeight: 600,
-                }}
-              >
-                Open uploaded PDF
-              </a>
-            )}
             <Link href="/" style={{ color: "#93c5fd", textDecoration: "none", fontSize: "0.82rem" }}>
               Back to Hirely
             </Link>

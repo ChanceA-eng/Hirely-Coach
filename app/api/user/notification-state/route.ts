@@ -284,6 +284,18 @@ export async function POST(request: Request) {
     );
   }
 
+  if (notificationState.notifications.length === 0) {
+    generated.push(
+      createNotification({
+        type: "Reminder",
+        title: "Welcome to GrowthHub",
+        message: "Your command center is live. Start with one mock interview to unlock personalized coaching.",
+        ctaLabel: "Start Interview",
+        ctaHref: "/voice?mode=new",
+      }, now)
+    );
+  }
+
   const deduped = [...generated, ...notificationState.notifications]
     .filter((item, index, all) => all.findIndex((it) => it.title === item.title && it.message === item.message) === index)
     .sort((left, right) => right.createdAt - left.createdAt)
