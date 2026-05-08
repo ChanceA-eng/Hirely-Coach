@@ -1,6 +1,4 @@
 ﻿"use client";
-export const dynamic = "force-dynamic";
-
 
 import { Suspense, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
@@ -8,11 +6,6 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   FOUNDATION_PROGRESS_EVENT,
-  getFoundationProgress,
-  isModuleUnlocked,
-  isModuleComplete,
-  isAllModulesComplete,
-  getModuleScore,
   TOTAL_MODULE_SEQUENCE,
   type FoundationProgress,
 } from "@/app/lib/foundationProgress";
@@ -54,6 +47,12 @@ function getUnlockedBadges(doneModules: number, streak: number) {
 }
 
 type VideoLock = { moduleNum: number; videoUrl: string | null };
+type FoundationProgressResponse = {
+  foundation_progress?: FoundationProgress;
+  foundation_override?: {
+    unlocked_modules?: number[];
+  };
+};
 
 function getVideoEmbed(url: string | null | undefined): { kind: "iframe" | "video"; src: string } | null {
   if (!url) return null;
@@ -75,6 +74,7 @@ function FoundationHomeContent() {
   const [progress, setProgress] = useState<FoundationProgress | null>(null);
   const [streak, setStreak] = useState(0);
   const [videoLocks, setVideoLocks] = useState<Record<number, VideoLock>>({});
+  const [overrideUnlockedModules, setOverrideUnlockedModules] = useState<number[]>([]);
   const [unlockedBadges, setUnlockedBadges] = useState<typeof AVAILABLE_BADGES[number][]>([]);
 
   // Active video from query param
@@ -84,11 +84,31 @@ function FoundationHomeContent() {
     [activeVideoNum, videoLocks]
   );
 
-  function syncProgress() {
-    const data = getFoundationProgress();
-    setProgress(data);
-    const st = loadStreakState();
-    setUnlockedBadges(getUnlockedBadges(data.completedModules.length, st.streakDays));
+  async function syncProgress() {
+    try {
+      const res = await fetch("/api/foundation/progress", { cache: "no-store" });
+      if (!res.ok) return;
+
+      const payload = (await res.json()) as FoundationProgressResponse;
+      const data = payload.foundation_progress ?? {
+        completedLessons: [],
+        completedModules: [],
+        assessmentScores: {},
+      };
+      const unlockedModules = Array.isArray(payload.foundation_override?.unlocked_modules)
+        ? payload.foundation_override.unlocked_modules
+            .map(Number)
+            .filter((moduleNum) => Number.isFinite(moduleNum) && moduleNum >= 1 && moduleNum <= 12)
+        : [];
+
+      setProgress(data);
+      setOverrideUnlockedModules(unlockedModules);
+
+      const st = loadStreakState();
+      setUnlockedBadges(getUnlockedBadges(data.completedModules.length, st.streakDays));
+    } catch {
+      // Keep the existing UI state if fetch fails temporarily.
+    }
   }
 
   useEffect(() => {
@@ -96,7 +116,7 @@ function FoundationHomeContent() {
     const { streak: st } = applyDailyStreakBonus();
     setStreak(st.streakDays);
 
-    syncProgress();
+    void syncProgress();
 
     // Fetch video lock data from DB
     fetch("/api/foundation/module-locks")
@@ -104,8 +124,11 @@ function FoundationHomeContent() {
       .then((locks) => setVideoLocks(Object.fromEntries(locks.map((l) => [l.moduleNum, l]))))
       .catch(() => {});
 
-    window.addEventListener(FOUNDATION_PROGRESS_EVENT, syncProgress);
-    return () => window.removeEventListener(FOUNDATION_PROGRESS_EVENT, syncProgress);
+    const onProgressChanged = () => {
+      void syncProgress();
+    };
+    window.addEventListener(FOUNDATION_PROGRESS_EVENT, onProgressChanged);
+    return () => window.removeEventListener(FOUNDATION_PROGRESS_EVENT, onProgressChanged);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -115,7 +138,7 @@ function FoundationHomeContent() {
   const totalModules        = TOTAL_MODULE_SEQUENCE.length;
   const doneCount           = completedModulesArr.length;
   const progressPct         = Math.round((doneCount / totalModules) * 100);
-  const allDone             = isAllModulesComplete();
+  const allDone             = TOTAL_MODULE_SEQUENCE.every((m) => completedModulesArr.includes(m));
   const hoursInvested       = Math.round(progress.completedLessons.length * 1.2);
 
   return (
@@ -196,9 +219,12 @@ function FoundationHomeContent() {
           <h2 className="fp-section-title">Learning Path</h2>
           <div className="fp-path">
             {MODULES.map((mod, idx) => {
-              const unlocked = isModuleUnlocked(mod.num);
-              const complete = isModuleComplete(mod.num);
-              const score    = getModuleScore(mod.num);
+              const complete = completedModulesArr.includes(mod.num);
+              const unlocked =
+                mod.num === 1 ||
+                overrideUnlockedModules.includes(mod.num) ||
+                completedModulesArr.includes(mod.num - 1);
+              const score    = progress.assessmentScores[`module-${mod.num}`] ?? null;
               const doneLessons = progress.completedLessons.filter((id) => id.startsWith(`${mod.num}-`)).length;
               const lessonPct   = Math.round((doneLessons / mod.totalLessons) * 100);
               const hasVideo    = !!videoLocks[mod.num]?.videoUrl;
