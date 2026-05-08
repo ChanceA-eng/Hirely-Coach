@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function FoundationHomePage() {
+export default function FoundationPage() {
   redirect("/foundation/home");
 }
