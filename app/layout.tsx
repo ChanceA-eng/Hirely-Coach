@@ -18,6 +18,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Hirely Coach – AI Resume Optimization & Interview Practice",
   description: "Improve your resume, practice real interviews, and track your achievements with Hirely Coach. AI-powered career tools to help you get a better job.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
   keywords: "resume optimization, interview practice, AI career tools, job interview preparation, resume builder, career tracking, mock interview",
   openGraph: {
     title: "Hirely Coach – AI Resume Optimization & Interview Practice",
@@ -48,7 +53,8 @@ export default function RootLayout({
         <ClerkProvider
           appearance={{
             variables: {
-              colorPrimary: "#6366f1",
+              colorPrimary: "#003366",
+              colorSuccess: "#006837",
               colorBackground: "#0a0a0a",
               colorText: "#ffffff",
               colorTextSecondary: "#f3f4f6",
@@ -82,7 +88,7 @@ export default function RootLayout({
                 color: "#f3f4f6",
               },
               formButtonPrimary: {
-                background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                background: "#003366",
                 color: "#ffffff",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
               },
@@ -91,7 +97,7 @@ export default function RootLayout({
                 fontWeight: 500,
               },
               footerActionLink: {
-                color: "#ffffff",
+                color: "#003366",
                 fontWeight: 500,
                 textDecoration: "underline",
               },

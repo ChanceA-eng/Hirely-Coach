@@ -133,7 +133,10 @@ function toManifest(state: LegalDocumentsState): LegalDocumentsManifest {
 }
 
 async function loadManifestFromBlob(): Promise<LegalDocumentsState | null> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.warn("[legal-documents] BLOB_READ_WRITE_TOKEN is missing; manifest read disabled.");
+    return null;
+  }
 
   try {
     const result = await get(LEGAL_MANIFEST_PATH, { access: "public" });
@@ -141,13 +144,17 @@ async function loadManifestFromBlob(): Promise<LegalDocumentsState | null> {
     const text = await new Response(result.stream).text();
     if (!text.trim()) return null;
     return normalizeLegalDocuments(JSON.parse(text) as unknown);
-  } catch {
+  } catch (error) {
+    console.error("[legal-documents] Failed to load manifest from Blob.", error);
     return null;
   }
 }
 
 async function saveManifestToBlob(state: LegalDocumentsState): Promise<void> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return;
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.warn("[legal-documents] BLOB_READ_WRITE_TOKEN is missing; manifest write skipped.");
+    return;
+  }
 
   await put(LEGAL_MANIFEST_PATH, JSON.stringify(toManifest(state), null, 2), {
     access: "public",

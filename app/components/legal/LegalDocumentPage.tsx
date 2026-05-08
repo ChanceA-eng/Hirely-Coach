@@ -15,7 +15,7 @@ export default async function LegalDocumentPage({ documentKey }: { documentKey: 
   const uploadedUrl = documents[documentKey].url;
 
   if (uploadedUrl) {
-    redirect(uploadedUrl);
+    redirect(`/api/legal-documents/${documentKey}`);
   }
 
   return (
