@@ -296,13 +296,24 @@ export default function Header() {
         <div className="global-header-left">
           <SmartBrand className="global-header-brand" />
           {isFoundation && (
-            <Link
-              href="/foundation/home"
-              className="glass-nav-item"
-              style={{ fontSize: "0.82rem", padding: "6px 14px" }}
-            >
-              My Path
-            </Link>
+            <>
+              <Link
+                href="/foundation/home"
+                className="glass-nav-item"
+                style={{ fontSize: "0.82rem", padding: "6px 14px" }}
+              >
+                My Path
+              </Link>
+              {mode === "coach" && (
+                <Link
+                  href="/growthhub"
+                  className="glass-nav-item"
+                  style={{ fontSize: "0.82rem", padding: "6px 14px" }}
+                >
+                  Return to GrowthHub
+                </Link>
+              )}
+            </>
           )}
           {showLandingContent && (
             <nav className="global-header-links" aria-label="Section links">

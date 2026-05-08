@@ -218,7 +218,7 @@ function FoundationHomeContent() {
         <section className="fp-section">
           <h2 className="fp-section-title">Learning Path</h2>
           <div className="fp-path">
-            {MODULES.map((mod, idx) => {
+            {MODULES.map((mod) => {
               const complete = completedModulesArr.includes(mod.num);
               const unlocked =
                 mod.num === 1 ||
@@ -230,19 +230,16 @@ function FoundationHomeContent() {
               const hasVideo    = !!videoLocks[mod.num]?.videoUrl;
 
               return (
-                <div key={mod.num} className="fp-mod-row">
-                  {idx > 0 && (
-                    <div className={`fp-connector ${complete ? "fp-connector--done" : ""}`} aria-hidden />
-                  )}
-                  <div
-                    className={[
-                      "fp-mod",
-                      complete  ? "fp-mod--complete" : "",
-                      !unlocked ? "fp-mod--locked"   : "",
-                    ].join(" ")}
-                    style={{ "--mod-color": mod.color } as React.CSSProperties}
-                  >
-                    {/* Icon + number */}
+                <div
+                  key={mod.num}
+                  className={[
+                    "fp-mod",
+                    complete ? "fp-mod--complete" : "",
+                    !unlocked ? "fp-mod--locked" : "",
+                  ].join(" ")}
+                  style={{ "--mod-color": mod.color } as React.CSSProperties}
+                >
+                  <div className="fp-mod-head">
                     <div className="fp-mod-icon-col">
                       <div className="fp-mod-icon">
                         {complete ? "✅" : !unlocked ? "🔒" : mod.icon}
@@ -250,69 +247,68 @@ function FoundationHomeContent() {
                       <div className="fp-mod-num">Module {mod.num}</div>
                     </div>
 
-                    {/* Info */}
                     <div className="fp-mod-info">
                       <h3 className="fp-mod-title">{mod.title}</h3>
                       <p className="fp-mod-title-sw">{mod.title_sw}</p>
-                      <p className="fp-mod-desc">{mod.description}</p>
-
-                      {unlocked && !complete && (
-                        <div className="fp-mod-progress">
-                          <div className="fp-mod-bar">
-                            <div
-                              className="fp-mod-fill"
-                              style={{ width: `${lessonPct}%`, background: mod.color }}
-                            />
-                          </div>
-                          <span className="fp-mod-pct">{doneLessons}/{mod.totalLessons} lessons</span>
-                        </div>
-                      )}
-
-                      {complete && doneLessons > 0 && (
-                        <div className="fp-mod-progress">
-                          <div className="fp-mod-bar">
-                            <div className="fp-mod-fill" style={{ width: "100%", background: mod.color }} />
-                          </div>
-                          <span className="fp-mod-pct" style={{ color: mod.color }}>
-                            {mod.totalLessons}/{mod.totalLessons} lessons ✓{score !== null ? ` · ${score}%` : ""}
-                          </span>
-                        </div>
-                      )}
                     </div>
+                  </div>
 
-                    {/* Action */}
-                    <div className="fp-mod-action">
-                      {unlocked ? (
-                        <div className="fp-action-stack">
-                          <Link
-                            href={`/foundation/lesson/${mod.num}/${mod.firstLesson}`}
-                            className={`fp-btn ${complete ? "fp-btn--review" : "fp-btn--start"}`}
-                            style={
-                              complete
-                                ? undefined
-                                : {
-                                    background: `color-mix(in srgb, ${mod.color} 14%, transparent)`,
-                                    borderColor: `color-mix(in srgb, ${mod.color} 40%, transparent)`,
-                                    color: mod.color,
-                                  }
-                            }
+                  <p className="fp-mod-desc">{mod.description}</p>
+
+                  {unlocked && !complete && (
+                    <div className="fp-mod-progress">
+                      <div className="fp-mod-bar">
+                        <div
+                          className="fp-mod-fill"
+                          style={{ width: `${lessonPct}%`, background: mod.color }}
+                        />
+                      </div>
+                      <span className="fp-mod-pct">{doneLessons}/{mod.totalLessons} lessons</span>
+                    </div>
+                  )}
+
+                  {complete && doneLessons > 0 && (
+                    <div className="fp-mod-progress">
+                      <div className="fp-mod-bar">
+                        <div className="fp-mod-fill" style={{ width: "100%", background: mod.color }} />
+                      </div>
+                      <span className="fp-mod-pct" style={{ color: mod.color }}>
+                        {mod.totalLessons}/{mod.totalLessons} lessons ✓{score !== null ? ` · ${score}%` : ""}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="fp-mod-action">
+                    {unlocked ? (
+                      <div className="fp-action-stack">
+                        <Link
+                          href={`/foundation/lesson/${mod.num}/${mod.firstLesson}`}
+                          className={`fp-btn ${complete ? "fp-btn--review" : "fp-btn--start"}`}
+                          style={
+                            complete
+                              ? undefined
+                              : {
+                                  background: `color-mix(in srgb, ${mod.color} 14%, transparent)`,
+                                  borderColor: `color-mix(in srgb, ${mod.color} 40%, transparent)`,
+                                  color: mod.color,
+                                }
+                          }
+                        >
+                          {complete ? "Review" : doneLessons > 0 ? "Continue →" : "Start →"}
+                        </Link>
+                        {hasVideo && (
+                          <button
+                            type="button"
+                            className="fp-btn fp-btn--video"
+                            onClick={() => router.push(`${pathname}?video=${mod.num}`)}
                           >
-                            {complete ? "Review" : doneLessons > 0 ? "Continue →" : "Start →"}
-                          </Link>
-                          {hasVideo && (
-                            <button
-                              type="button"
-                              className="fp-btn fp-btn--video"
-                              onClick={() => router.push(`${pathname}?video=${mod.num}`)}
-                            >
-                              Watch Video
-                            </button>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="fp-locked-msg">Complete Module {mod.num - 1} first</span>
-                      )}
-                    </div>
+                            Watch Video
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="fp-locked-msg">Complete Module {mod.num - 1} first</span>
+                    )}
                   </div>
                 </div>
               );

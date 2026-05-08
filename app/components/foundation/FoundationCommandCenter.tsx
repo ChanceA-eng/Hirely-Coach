@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
+import LegalLinks from "@/app/components/legal/LegalLinks";
 import {
   FOUNDATION_INBOX_EVENT,
   FOUNDATION_PROFILE_EVENT,
@@ -38,7 +39,6 @@ const UI_TEXT = {
     drawerTitle: "Updates",
     markAll: "Mark All as Read",
     empty: "No new items right now.",
-    legal: "v1.0.0 · Terms · Privacy",
     learner: "Learner",
     closeInboxAria: "Close inbox",
     justNow: "just now",
@@ -50,7 +50,6 @@ const UI_TEXT = {
     drawerTitle: "Taarifa",
     markAll: "Weka Zote Zimesomwa",
     empty: "Hakuna taarifa mpya kwa sasa.",
-    legal: "v1.0.0 · Masharti · Faragha",
     learner: "Mwanafunzi",
     closeInboxAria: "Funga kikasha",
     justNow: "sasa hivi",
@@ -92,6 +91,10 @@ function formatTimeAgo(
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `${hours} ${copy.hourAgo}`;
   return `${Math.floor(hours / 24)} ${copy.dayAgo}`;
+}
+
+function isExternalHref(href: string) {
+  return /^https?:\/\//i.test(href);
 }
 
 export default function FoundationCommandCenter() {
@@ -240,6 +243,10 @@ export default function FoundationCommandCenter() {
     }
     setOpen(false);
     void loadState();
+    if (isExternalHref(item.href)) {
+      window.open(item.href, "_blank", "noopener,noreferrer");
+      return;
+    }
     router.push(item.href);
   }
 
@@ -330,7 +337,12 @@ export default function FoundationCommandCenter() {
               </div>
 
               <div style={styles.drawerFooter}>
-                <p style={styles.legalText}>{copy.legal}</p>
+                <LegalLinks
+                  language={language}
+                  includeVersion
+                  style={styles.legalText}
+                  linkStyle={styles.legalLink}
+                />
               </div>
             </motion.aside>
           </>
@@ -527,5 +539,12 @@ const styles: Record<string, CSSProperties> = {
     margin: 0,
     fontSize: "0.66rem",
     color: "#707070",
+    display: "inline-flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+  legalLink: {
+    color: "#cbd5e1",
+    textDecoration: "none",
   },
 };
