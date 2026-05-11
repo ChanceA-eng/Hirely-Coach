@@ -1,7 +1,5 @@
 import OpenAI from "openai";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 // Only allow http/https URLs to prevent SSRF to internal resources
 function isSafeUrl(raw: string): boolean {
   try {
@@ -14,6 +12,11 @@ function isSafeUrl(raw: string): boolean {
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return Response.json({ error: "OPENAI_API_KEY is not configured." }, { status: 500 });
+    }
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
     const { url } = (await req.json()) as { url?: string };
     if (!url || typeof url !== "string" || !isSafeUrl(url)) {
       return Response.json({ error: "A valid http/https URL is required." }, { status: 400 });

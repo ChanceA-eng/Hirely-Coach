@@ -5,12 +5,16 @@ import {
 } from "@/app/lib/hirelySupremacy";
 import { loadHcAdminConfig } from "@/app/lib/hcAdminConfig";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function POST(req) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return Response.json(
+        { error: "OPENAI_API_KEY is not configured." },
+        { status: 500 }
+      );
+    }
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
     const { resume, job, jobLink, tier } = await req.json();
     const adminConfig = await loadHcAdminConfig();
 

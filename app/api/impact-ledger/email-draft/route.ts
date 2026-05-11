@@ -15,8 +15,6 @@ type RequestBody = {
   certificationsCompleted?: number;
 };
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 const RESPONSE_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -84,6 +82,7 @@ export async function POST(request: Request) {
         : "Do not invent certifications.";
 
     const config = await loadHcAdminConfig();
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const completion = await client.chat.completions.create({
       model: config.model,

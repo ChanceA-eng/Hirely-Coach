@@ -5,10 +5,6 @@ import type { ImpactEntry } from "@/app/lib/impactLog";
 import { appendAdminAuditLog } from "@/app/lib/adminAuditLogStore";
 import { loadHcAdminConfig } from "@/app/lib/hcAdminConfig";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 const MAX_MODEL_CHARS = 32000; // ~8000 tokens at ~4 chars/token
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const PHASE_CACHE = new Map<string, { at: number; value: unknown }>();
@@ -303,6 +299,7 @@ export async function POST(req: Request) {
     if (!process.env.OPENAI_API_KEY) {
       return Response.json({ error: "OPENAI_API_KEY is not configured." }, { status: 500 });
     }
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const startedAt = Date.now();
     const url = new URL(req.url);

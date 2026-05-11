@@ -8,10 +8,6 @@ import {
   formatBattleStatsForReport,
 } from "@/app/lib/hirelySupremacy";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 const NON_SUBSTANTIVE_PATTERNS = [
   /^\s*$/, /^(mm+|mmm+|uh+|um+|hmm+|ah+|eh+)\b/i,
   /^(ok(ay)?|yeah|yep|nope|nah|sure|right)\s*$/i,
@@ -31,6 +27,14 @@ function sanitizeAnswer(rawAnswer) {
 
 export async function POST(req) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return Response.json(
+        { error: "OPENAI_API_KEY is not configured." },
+        { status: 500 }
+      );
+    }
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
     const { resume, job, questions, answers, tier } = await req.json();
 
     if (!resume || !job || !Array.isArray(questions) || !Array.isArray(answers)) {
