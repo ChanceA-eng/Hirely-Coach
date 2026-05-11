@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth, useClerk, useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import SmartBrand from "./SmartBrand";
+import MobileDrawer from "./MobileDrawer";
 import NotificationItem from "./NotificationItem";
 import type { NotificationRecord } from "@/app/lib/notifications";
 import {
@@ -264,11 +265,21 @@ export default function Header() {
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false);
   const [mode, setModeState] = useState<"foundation" | "coach" | null>(null);
   const [progress, setProgress] = useState(0);
   const [coachNotifications, setCoachNotifications] = useState<NotificationRecord[]>([]);
   const [coachUnreadCount, setCoachUnreadCount] = useState(0);
   const [coachFeedOpen, setCoachFeedOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   const isFoundation = pathname?.startsWith("/foundation") ?? false;
   const isGrowthHubRoute = pathname?.startsWith("/growthhub") ?? false;
@@ -387,6 +398,12 @@ export default function Header() {
     router.push(href);
   }
 
+  useEffect(() => {
+    if (!isSignedIn || isFoundation) {
+      setDrawerOpen(false);
+    }
+  }, [isSignedIn, isFoundation]);
+
   return (
     <>
       <header className="global-header">
@@ -395,11 +412,11 @@ export default function Header() {
         {/* LEFT: Brand + optional landing nav */}
         <div className="global-header-left">
           <SmartBrand className="global-header-brand" />
-          {isFoundation && (
+          {isFoundation && !isMobile && (
             <>
               <Link
                 href="/foundation/home"
-                className="glass-nav-item"
+                className="glass-nav-item foundation-desktop-only"
                 style={{ fontSize: "0.82rem", padding: "6px 14px" }}
               >
                 My Path
@@ -407,10 +424,10 @@ export default function Header() {
               {mode === "coach" && (
                 <Link
                   href="/growthhub"
-                  className="glass-nav-item"
+                  className="glass-nav-item foundation-desktop-only"
                   style={{ fontSize: "0.82rem", padding: "6px 14px" }}
                 >
-                  Return to GrowthHub
+                  GrowthHub
                 </Link>
               )}
             </>
@@ -432,7 +449,7 @@ export default function Header() {
           <SignedIn>
             {isFoundation ? (
               /* ── FOUNDATION MODE ─────────────────────────────── */
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div className="hidden md:flex" style={{ alignItems: "center", gap: 14 }}>
 
                 {/* Progress bar + percentage */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -488,7 +505,7 @@ export default function Header() {
             ) : (
               /* ── STANDARD COACH MODE ─────────────────────────── */
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <nav className="global-header-nav" aria-label="Primary">
+                <nav className="global-header-nav hidden md:flex" aria-label="Primary">
                   {NAV.map(({ href, label }) => {
                     const base = href.split("?")[0];
                     const active = pathname === base || pathname.startsWith(base + "/");
@@ -504,7 +521,7 @@ export default function Header() {
                   })}
                 </nav>
                 {isGrowthHubRoute && (
-                  <div className="gh-notif-wrap">
+                  <div className="gh-notif-wrap hidden md:block">
                     <button
                       type="button"
                       aria-label="Open activity feed"
@@ -520,16 +537,29 @@ export default function Header() {
                     </button>
                   </div>
                 )}
+
+                <button
+                  type="button"
+                  aria-label="Open menu"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-200 md:hidden"
+                  onClick={() => setDrawerOpen(true)}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M4 7h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 17h16" />
+                  </svg>
+                </button>
               </div>
             )}
 
             {/* Switch to Foundation — only shown in Coach mode outside Foundation routes */}
             {!isFoundation && mode === "coach" && (
-              <Link href="/foundation/home" className="global-header-muted-link">
+              <Link href="/foundation/home" className="global-header-muted-link hidden md:inline-flex">
                 Foundation
               </Link>
             )}
-            {!isFoundation && mode === "coach" && <HelpNavButton active={Boolean(isHelpRoute)} />}
+            {!isFoundation && mode === "coach" && <div className="hidden md:block"><HelpNavButton active={Boolean(isHelpRoute)} /></div>}
           </SignedIn>
 
           <SignedOut>
@@ -546,12 +576,20 @@ export default function Header() {
           </SignedOut>
 
           <SignedIn>
-            <IdentityNudge isFoundation={isFoundation} />
+            {isFoundation ? (
+              <IdentityNudge isFoundation={isFoundation} />
+            ) : (
+              <div className="hidden md:block">
+                <IdentityNudge isFoundation={isFoundation} />
+              </div>
+            )}
           </SignedIn>
 
         </div>
       </div>
       </header>
+
+      <MobileDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} unreadCount={coachUnreadCount} />
 
       <AnimatePresence>
         {coachFeedOpen && isGrowthHubRoute && !isFoundation && (

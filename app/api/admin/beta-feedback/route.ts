@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
   const starredParam = req.nextUrl.searchParams.get("starred");
   const format = req.nextUrl.searchParams.get("format");
 
-  const rows = listBetaFeedback({
+  const rows = await listBetaFeedback({
     query,
     module:
       moduleParam && moduleParam !== "all" ? Math.max(1, Math.min(12, Math.floor(Number(moduleParam)))) : undefined,
@@ -118,7 +118,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "id is required" }, { status: 400 });
   }
 
-  const updated = updateBetaFeedback(body.id, {
+  const updated = await updateBetaFeedback(body.id, {
     resolved: typeof body.resolved === "boolean" ? body.resolved : undefined,
     starred: typeof body.starred === "boolean" ? body.starred : undefined,
     actorUserId: userId,

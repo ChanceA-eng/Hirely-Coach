@@ -3533,6 +3533,16 @@ textarea::placeholder {
   transition: all 0.2s ease-in-out;
 }
 
+.foundation-desktop-only {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .foundation-desktop-only {
+    display: inline-flex !important;
+  }
+}
+
 .glass-nav-item:hover {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(16, 185, 129, 0.3);

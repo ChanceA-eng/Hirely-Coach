@@ -5,37 +5,6 @@ import Link from "next/link";
 import { SignedOut, SignUpButton, useAuth } from "@clerk/nextjs";
 import "./growthhub/page.css";
 
-const POWER_PILLARS = [
-  {
-    variant: "alignment",
-    title: "The Alignment Engine",
-    subtitle: "AI Resume Optimizer",
-    description: "Most resumes are ignored because they don't match the job. Paste a link to any job and our AI helps you rewrite your resume to match exactly what the company is looking for. Stop guessing. Be the perfect match every time.",
-    href: "/canvas",
-  },
-  {
-    variant: "simulation",
-    title: "Interview Practice",
-    subtitle: "Practice Interviews",
-    description: "Interviews are scary and high-pressure. Practice with an AI that talks like a real boss. Choose your level — Casual for basic practice, Professional for real job tests, or Surgical for the hardest questions.",
-    href: "/voice/interview",
-  },
-  {
-    variant: "impact",
-    title: "The Impact Log",
-    subtitle: "Career Progress Tracker",
-    description: "People forget their hard work when it's time for a promotion. Write down your Weekly Wins in our easy log. Earn Impact Points (IP) to level up your profile from Candidate to Professional.",
-    href: "/growthhub",
-  },
-  {
-    variant: "asset",
-    title: "The Asset Generator",
-    subtitle: "Professional Portfolio Builder",
-    description: "Writing professional emails and portfolios takes too much time. Our AI uses your interview practice and your Wins to write perfect follow-up emails and a professional website for you.",
-    href: "/feedback",
-  },
-];
-
 const METRICS = [
   {
     category: "Knowledge and Accuracy",
@@ -125,63 +94,47 @@ const SOLUTIONS = [
 
 const CAPABILITIES = [
   {
-    title: "The Alignment Engine",
-    subtitle: "Resume Optimization",
-    description: "Paste any job link. Our AI reads what the company wants and rewrites your resume to match. Look like the right person before the interview even starts.",
+    title: "Find your voice",
+    subtitle: "Modules 1-3",
+    description:
+      "Phonics, Grammar, Vocabulary — Build your foundation with pronunciation, sentence structure, and professional words.",
   },
   {
-    title: "Interview Practice.",
-    subtitle: "AI Mock Interviews",
-    description: "Practice with an AI that acts like a real interviewer. Pick Casual for easy practice, Professional for job-ready pressure, or Surgical for the hardest questions. Get a Score Card after every session.",
+    title: "Learn Conversation Skills",
+    subtitle: "Modules 4-9",
+    description:
+      "Pronouns, Verbs, Dialogue — Practice real workplace conversations and daily scenarios.",
   },
   {
-    title: "Impact Log & IP System.",
-    subtitle: "Achievement Tracking",
-    description: "Write down your Weekly Wins and earn Impact Points (IP). Follow your 8-level career growth plan and keep a record of your value — ready for your next promotion or salary talk.",
-  },
-  {
-    title: "AI Asset Generator.",
-    subtitle: "Professional Portfolio Builder",
-    description: "After each interview, Hirely writes your follow-up emails and builds your career portfolio using your practice sessions and Impact Log. Look like a pro without the hard work.",
+    title: "Ace Your Interview",
+    subtitle: "Modules 10-12",
+    description:
+      "Self-Introduction, Interview Prep, Exit Exam — Practice how to talk about yourself and handle real job interview questions.",
   },
 ];
 
 const CORE_FEATURES = [
   {
-    variant: "alignment",
+    variant: "simulation",
     title: "The Alignment Engine",
-    description: "Paste a link to any job. Our AI reads what the company wants and helps you rewrite your resume to match.",
-    simpleEnglish: "Stop guessing. Be the perfect match every time.",
+    description: "Paste a link to any job. Our AI reads what the company wants and helps you rewrite your resume to match. Stop guessing. Be the perfect match every time.",
     href: "/canvas",
   },
   {
-    variant: "simulation",
+    variant: "training",
     title: "Interview Practice",
-    description: "Practice with an AI that talks like a real boss. Pick your level: Casual, Professional, or Surgical.",
-    simpleEnglish: "Build your confidence before the real meeting.",
+    description: "Practice with an AI that talks like a real boss. Pick your level: Casual, Professional, or Surgical. Build your confidence before the real meeting.",
     href: "/voice/interview",
   },
   {
-    variant: "impact",
+    variant: "archive",
     title: "The Impact Log",
-    description: "Write down your Weekly Wins. Earn Impact Points (IP) and level up your career profile.",
-    simpleEnglish: "Keep a record of your value so you can ask for a higher salary.",
-    href: "/growthhub",
+    description: "Write down your Weekly Wins. Earn Impact Points (IP) and level up your career profile. Keep a record of your value so you can ask for a higher salary.",
+    href: "/history",
   },
 ];
 
-function FeatureIcon({ variant }: { variant: "alignment" | "simulation" | "impact" | "asset" }) {
-  if (variant === "alignment") {
-    return (
-      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-        <path d="M8 12H40L36 36H12L8 12Z" />
-        <path d="M24 16V32" />
-        <path d="M16 24H32" />
-        <circle cx="24" cy="24" r="2" fill="currentColor" />
-        <path d="M12 12L36 36" />
-      </svg>
-    );
-  }
+function FeatureIcon({ variant }: { variant: "simulation" | "training" | "archive" }) {
   if (variant === "simulation") {
     return (
       <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
@@ -194,16 +147,18 @@ function FeatureIcon({ variant }: { variant: "alignment" | "simulation" | "impac
       </svg>
     );
   }
-  if (variant === "impact") {
+  if (variant === "training") {
     return (
       <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-        <path d="M8 20H14V32H8Z" />
-        <path d="M18 12H24V32H18Z" />
-        <path d="M28 16H34V32H28Z" />
-        <path d="M6 34H40" stroke="currentColor" strokeWidth="2" />
-        <circle cx="14" cy="28" r="2" fill="currentColor" />
-        <circle cx="24" cy="20" r="2" fill="currentColor" />
-        <circle cx="34" cy="24" r="2" fill="currentColor" />
+        <circle cx="24" cy="10" r="3" />
+        <circle cx="12" cy="18" r="3" />
+        <circle cx="16" cy="33" r="3" />
+        <circle cx="32" cy="33" r="3" />
+        <circle cx="36" cy="18" r="3" />
+        <path d="M24 13L12 18L16 33L32 33L36 18L24 13Z" />
+        <path d="M12 18L32 33" />
+        <path d="M36 18L16 33" />
+        <path d="M24 10V24" />
       </svg>
     );
   }
@@ -228,68 +183,15 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const faqs = [
-    { q: "How does Hirely Coach help me get more job interviews?", a: "Hirely Coach helps you match your resume to each job, practice interviews, and track your wins so recruiters can see your value." },
-    { q: "How does the Alignment Engine work?", a: "Paste a job link. Hirely reads the role and helps you rewrite your resume to match it." },
-    { q: "What is the difference between Casual, Professional, and Surgical interview levels?", a: "Casual is easy practice. Professional feels like a real interview. Surgical is the hardest level with fast follow-up questions." },
-    { q: "What is the Impact Log?", a: "The Impact Log is where you save your Weekly Wins. You earn Impact Points and build proof for interviews, raises, and promotions." },
-    { q: "How quickly can I start?", a: "Most users start in under two minutes. Upload your resume and job description, then begin." },
+    { q: "How does Hirely Coach help me get more job interviews?", a: "Hirely Coach helps you improve your resume, practice interviews, and show your work clearly so you look stronger to recruiters and hiring managers." },
+    { q: "How does the Alignment Engine work?", a: "Paste any job link and Hirely reads what the company wants, then helps rewrite your resume so it matches the role better." },
+    { q: "What is the difference between Casual, Professional, and Surgical interview levels?", a: "Casual is lighter practice, Professional adds realistic pressure, and Surgical is the toughest mode with sharper follow-ups." },
+    { q: "What is the Impact Log?", a: "The Impact Log helps you record your weekly wins, earn Impact Points, and keep proof of your value for future promotions or job changes." },
+    { q: "How quickly can I start?", a: "Most users upload context and launch their first simulation in under a minute." },
   ];
 
   return (
     <div className="lp-root lp-accelerator-theme">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            "name": "Hirely Coach",
-            "description": "AI-powered career tools for resume optimization, interview practice, and achievement tracking. Improve your resume, practice real interviews, and get better jobs.",
-            "url": "https://hirelycoach.com",
-            "applicationCategory": "CareerDevelopment",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD"
-            },
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": "4.8",
-              "ratingCount": "150"
-            }
-          })
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Hirely Coach",
-            "url": "https://hirelycoach.com",
-            "description": "We help job seekers improve their resume, practice real interviews, and track their achievements with simple, AI-powered tools.",
-            "sameAs": ["https://hirelycoach.com"]
-          })
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": faqs.map(faq => ({
-              "@type": "Question",
-              "name": faq.q,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": faq.a
-              }
-            }))
-          })
-        }}
-      />
       <main className="gh-main">
         <section className="gh-first-time">
           <div className="gh-first-layout">
@@ -305,11 +207,11 @@ export default function Home() {
                 <Link href={isSignedIn ? "/voice/interview" : "/voice"} className="global-auth-btn global-auth-btn--strong lp-hero-cta-btn">
                   Try our interview practice
                 </Link>
-                {!isSignedIn ? (
-                  <Link href="/sign-up" className="global-auth-btn lp-hero-cta-btn">
-                    Create your account
-                  </Link>
-                ) : null}
+                <SignedOut>
+                  <SignUpButton mode="modal">
+                    <button className="global-auth-btn lp-hero-cta-btn" type="button">Create your account</button>
+                  </SignUpButton>
+                </SignedOut>
               </div>
               <div className="gh-first-badges">
                 <span>AI Resume Optimization</span>
@@ -339,7 +241,7 @@ export default function Home() {
             <p className="gh-eyebrow">The Power Pillars</p>
             <h2 className="gh-h1 gh-preview-title">Four career tools that work together as one system</h2>
             <p className="gh-first-sub" style={{ maxWidth: 760, marginBottom: 24 }}>
-              <strong>Improve your resume</strong>, practice interviews, track your wins, and build your career portfolio in one place.
+              Improve your resume, practice interviews, track your wins, and build your career portfolio in one place.
             </p>
             <div className="gh-action-grid">
               {CORE_FEATURES.map((feature, idx) => (
@@ -351,12 +253,11 @@ export default function Home() {
                   <div className="gh-action-link gh-action-link--preview" aria-label={`${feature.title} preview`}>
                     <div className="gh-card-header">
                       <div className="gh-professional-icon">
-                        <FeatureIcon variant={feature.variant as "alignment" | "simulation" | "impact" | "asset"} />
+                        <FeatureIcon variant={feature.variant as "simulation" | "training" | "archive"} />
                       </div>
                     </div>
                     <h3 className="gh-card-title">{feature.title}</h3>
                     <p className="gh-card-desc">{feature.description}</p>
-                    <p className="gh-card-simple">{feature.simpleEnglish}</p>
                   </div>
                 </article>
               ))}
@@ -376,63 +277,6 @@ export default function Home() {
               </div>
             </section>
           </aside>
-        </section>
-
-        {/* ── HIRELY FOUNDATION ── */}
-        <section className="lp-section" id="foundation">
-          <p className="gh-eyebrow">A New Path for English Learners</p>
-          <h2 className="gh-h1">Hirely Foundation: 12 Modules, One Goal — Professional English</h2>
-          <p className="lp-section-sub">
-            Want to build a strong English foundation first? <strong>Foundation</strong> is a structured 12-modules learning program that teaches you the English skills you need for professional success.
-          </p>
-          <div className="lp-steps" style={{ marginTop: 32, marginBottom: 32 }}>
-            <div className="lp-step glass-card">
-              <div className="lp-step-top"><span className="lp-step-badge">Modules 1-3</span></div>
-              <h3 className="lp-step-title">Find your voice</h3>
-              <p className="lp-step-body"><strong>Phonics, Grammar, Vocabulary</strong> — Build your foundation with pronunciation, sentence structure, and professional words.</p>
-            </div>
-            <div className="lp-step glass-card">
-              <div className="lp-step-top"><span className="lp-step-badge">Modules 4-9</span></div>
-              <h3 className="lp-step-title">Learn Conversation Skills</h3>
-              <p className="lp-step-body"><strong>Pronouns, Verbs, Dialogue</strong> — Practice real workplace conversations and daily scenarios.</p>
-            </div>
-            <div className="lp-step glass-card">
-              <div className="lp-step-top"><span className="lp-step-badge">Modules 10-12</span></div>
-              <h3 className="lp-step-title">Ace Your Interview</h3>
-              <p className="lp-step-body"><strong>Self-Introduction, Interview Prep, Exit Exam</strong> — Practice how to talk about yourself and handle real job interview questions.</p>
-            </div>
-          </div>
-          <div style={{ textAlign: "center", marginTop: 40 }}>
-            <Link href={isSignedIn ? "/foundation/home" : "/sign-up"} className="global-auth-btn global-auth-btn--strong" style={{ display: "inline-block" }}>
-              Start Foundation Now
-            </Link>
-          </div>
-        </section>
-
-        {/* ── STARR + MOCK INTERVIEW HIGHLIGHT ── */}
-        <section className="lp-section" id="interview-practice">
-          <p className="gh-eyebrow">STARR Lab &amp; AI Mock Interviews</p>
-          <h2 className="gh-h1">AI Interview Coach that actually challenges you.</h2>
-          <p className="lp-section-sub">
-            Learn to answer with the STARR method. Then practice with your AI interview coach. Pick Casual, Professional, or Surgical based on your goal.
-          </p>
-          <div className="lp-steps" style={{ marginTop: 32 }}>
-            <div className="lp-step glass-card">
-              <div className="lp-step-top"><span className="lp-step-badge">STARR Lab</span></div>
-              <h3 className="lp-step-title">Structure your stories until they&apos;re automatic.</h3>
-              <p className="lp-step-body">Short drills help you build strong stories. You stay clear even when you feel nervous.</p>
-            </div>
-            <div className="lp-step glass-card">
-              <div className="lp-step-top"><span className="lp-step-badge">Mock Interview</span></div>
-              <h3 className="lp-step-title">Simulate the real interview before it&apos;s real.</h3>
-              <p className="lp-step-body">Practice with live follow-up questions. Start easy, then move up to harder levels.</p>
-            </div>
-            <div className="lp-step glass-card">
-              <div className="lp-step-top"><span className="lp-step-badge">10-Point Scorecard</span></div>
-              <h3 className="lp-step-title">Know exactly what&apos;s costing you the offer.</h3>
-              <p className="lp-step-body">See clear scores after each session. You know what to fix next.</p>
-            </div>
-          </div>
         </section>
 
         {/* ── PROBLEM / SOLUTION ── */}
@@ -467,10 +311,10 @@ export default function Home() {
 
         {/* ── CAPABILITIES ── */}
         <section className="lp-section" id="capabilities">
-          <p className="gh-eyebrow">The System</p>
-          <h2 className="gh-h1">Four integrated career tools in one platform</h2>
+          <p className="gh-eyebrow">A New Path for English Learners</p>
+          <h2 className="gh-h1">Hirely Foundation: 12 Modules, One Goal — Professional English</h2>
           <p className="lp-section-sub">
-            <strong>Hirely Coach</strong> helps you improve your resume, practice interviews, log wins, and generate career proof in one dashboard.
+            Want to build a strong English foundation first? Foundation is a structured 12-modules learning program that teaches you the English skills you need for professional success.
           </p>
 
           <div className="lp-metrics-grid">
@@ -494,8 +338,7 @@ export default function Home() {
           <p className="gh-eyebrow">Your Score Card</p>
           <h2 className="gh-h1">Know exactly what to improve after every session</h2>
           <p className="lp-section-sub">
-            Every practice session gives you a clear <strong>Score Card</strong> with simple results:<br />
-            No guessing. No vague feedback.
+            Every practice session gives you a clear Score Card with simple results: No guessing. No vague feedback.
           </p>
 
           <div className="lp-metrics-grid">
@@ -521,7 +364,7 @@ export default function Home() {
           <p className="gh-eyebrow">The Path to Ascension</p>
           <h2 className="gh-h1">From profile to promotion in 3 simple steps</h2>
           <p className="lp-section-sub">
-            <strong>Upload your resume. Practice interviews. Track your wins.</strong> It takes less than 2 minutes to get started.
+            Upload your resume. Practice interviews. Track your wins. It takes less than 2 minutes to get started.
           </p>
 
           <div className="lp-steps">
@@ -536,47 +379,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* ── SOCIAL PROOF ── */}
-        <section className="lp-section">
-          <p className="gh-eyebrow">Trust Metrics</p>
-          <h2 className="gh-h1">See the gap we close in real time</h2>
-          
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginTop: 40, marginBottom: 40 }}>
-            <div className="glass-card" style={{ padding: 24 }}>
-              <p style={{ fontSize: "2.5rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>40%</p>
-              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>Many users improve Clarity scores by 40% in their first 3 sessions.</p>
-            </div>
-            <div className="glass-card" style={{ padding: 24 }}>
-              <p style={{ fontSize: "2.5rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>8 Levels</p>
-              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>Track your growth from Candidate to Executive.</p>
-            </div>
-            <div className="glass-card" style={{ padding: 24 }}>
-              <p style={{ fontSize: "2.5rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>100%</p>
-              <p style={{ fontSize: "0.9rem", margin: 0, color: "#ccc" }}>See how well your profile matches your target role.</p>
-            </div>
-          </div>
-
-          <p style={{ textAlign: "center", fontSize: "0.95rem", color: "#888", marginBottom: 40 }}>
-            <strong>Recent Ascensions:</strong> User_402 → Level 4 (Professional) | User_589 → Level 5 (Senior) | User_721 → Level 4 (Professional)
-          </p>
-        </section>
-
-        {/* ── WHY WE EXIST ── */}
-        <section className="lp-section" id="about" style={{ textAlign: "center" }}>
-          <p className="gh-eyebrow">Our Mission</p>
-          <h2 className="gh-h1">Why Hirely Coach Exists</h2>
-          <p className="lp-section-sub" style={{ maxWidth: 640, margin: "0 auto 24px" }}>
-            We help job seekers <strong>speak clearly</strong>, <strong>show their value</strong>, and <strong>get better jobs</strong> using simple, AI-powered tools. No jargon. No guesswork.
-          </p>
-          <p className="lp-section-sub" style={{ maxWidth: 640, margin: "0 auto 32px", fontSize: "0.92rem", color: "#64748b" }}>
-            After improving your resume, try our{" "}
-            <a href="#interview-practice" style={{ color: "#10b981", textDecoration: "underline" }}>AI interview practice</a>{" "}
-            to prepare for real questions. After each session, use the{" "}
-            <a href="/growthhub" style={{ color: "#10b981", textDecoration: "underline" }}>Impact Log</a>{" "}
-            to track your wins and build your career story.
-          </p>
         </section>
 
         {/* ── FAQ ── */}
@@ -606,18 +408,14 @@ export default function Home() {
           <span className="gh-eyebrow">Don&apos;t just work. Grow.</span>
           <h2 className="gh-h1">Are you ready to move to the next level?</h2>
           <p className="lp-cta-sub">
-            <strong>Hirely Coach</strong> gives you the tools to plan your future. Fix your resume, practice your talking skills, and save your best work results.
+            Hirely Coach gives you the tools to plan your future. Fix your resume, practice your talking skills, and save your best work results.
           </p>
           <div className="lp-cta-actions">
-            <SignedOut>
-              <SignUpButton mode="modal">
-                <button className="global-auth-btn global-auth-btn--strong lp-cta-preview-btn" type="button">Launch your interview now</button>
-              </SignUpButton>
-            </SignedOut>
-            <Link href={isSignedIn ? "/voice/interview" : "/voice"} className="global-auth-btn global-auth-btn--strong lp-cta-preview-btn" style={{ display: isSignedIn ? undefined : "none" }}>
+            <div className="global-auth-btn global-auth-btn--strong lp-cta-preview-btn">
               Launch your interview now
-            </Link>
+            </div>
           </div>
+          <p className="lp-cta-note">Your Career OS. Precision. Command. Ascension.</p>
         </section>
       </main>
 
@@ -630,9 +428,9 @@ export default function Home() {
           </div>
           <div className="lp-footer-cols">
             <div className="lp-footer-col lp-footer-col--product">
-                <p className="lp-footer-col-label">Career Tools</p>
-                <Link href="/canvas">Resume Optimizer</Link>
-                <Link href="/voice/interview">Interview Practice</Link>
+              <p className="lp-footer-col-label">Career Tools</p>
+              <Link href="/canvas">Resume Optimizer</Link>
+              <Link href="/voice/interview">Interview Practice</Link>
               <Link href="/growthhub">Impact Log</Link>
               <Link href="/foundation/home">Foundation</Link>
             </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useClerk, useUser } from "@clerk/nextjs";
 import "./page.css";
 import "../../growthhub/page.css";
 
@@ -36,8 +36,12 @@ const EMPTY: ProfileForm = {
 export default function CreateProfilePage() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
 
   const [form, setForm] = useState<ProfileForm>(EMPTY);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [duplicateError, setDuplicateError] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -70,6 +74,9 @@ export default function CreateProfilePage() {
         ? existing.relocationPreferences
         : prev.relocationPreferences,
     }));
+
+    setFirstName(user?.firstName ?? "");
+    setLastName(user?.lastName ?? "");
   }, [isLoaded]);
 
   function set(field: keyof ProfileForm, value: string) {
@@ -77,6 +84,8 @@ export default function CreateProfilePage() {
   }
 
   function validate(): string {
+    if (!firstName.trim()) return "First name is required.";
+    if (!lastName.trim()) return "Last name is required.";
     if (!form.city.trim()) return "City is required.";
     if (!form.zip.trim()) return "ZIP code is required.";
     if (!form.state.trim()) return "State is required.";
@@ -92,15 +101,49 @@ export default function CreateProfilePage() {
     });
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    setDuplicateError("");
+
     const err = validate();
-    if (err) { setError(err); return; }
+    if (err) {
+      setError(err);
+      return;
+    }
 
     setSaving(true);
     try {
+      const recognition = await fetch("/api/user/account-recognition", { cache: "no-store" });
+      if (recognition.ok) {
+        const recognitionData = (await recognition.json()) as { duplicate?: boolean };
+        if (recognitionData.duplicate) {
+          setDuplicateError("This email is already tied to an older account. Please sign in with your existing account.");
+          setSaving(false);
+          return;
+        }
+      }
+
+      const identityRes = await fetch("/api/user/profile-identity", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+        }),
+      });
+
+      if (!identityRes.ok) {
+        const data = (await identityRes.json().catch(() => ({}))) as { error?: string };
+        setError(data.error || "Could not save your identity details.");
+        setSaving(false);
+        return;
+      }
+
       const profile = {
-        name: user?.fullName ?? "",
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        name: `${firstName.trim()} ${lastName.trim()}`.trim(),
         email: user?.primaryEmailAddress?.emailAddress ?? "",
         city: form.city.trim(),
         zip: form.zip.trim(),
@@ -113,15 +156,15 @@ export default function CreateProfilePage() {
       };
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
       localStorage.setItem(PROFILE_DONE_KEY, "1");
+
+      const next =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("next") ?? "/growthhub"
+          : "/growthhub";
+      router.push(next);
     } finally {
       setSaving(false);
     }
-
-    const next =
-      typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search).get("next") ?? "/growthhub"
-        : "/growthhub";
-    router.push(next);
   }
 
   if (!isLoaded) return null;
@@ -158,6 +201,33 @@ export default function CreateProfilePage() {
           </div>
 
           <form onSubmit={handleSubmit} className="ob-form" noValidate>
+
+            {/* Identity */}
+            <fieldset className="ob-fieldset">
+              <legend className="ob-legend">Legal Identity</legend>
+              <div className="ob-row-3">
+                <label className="ob-label">
+                  First name
+                  <input
+                    className="ob-input"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="First name"
+                    autoComplete="given-name"
+                  />
+                </label>
+                <label className="ob-label">
+                  Last name
+                  <input
+                    className="ob-input"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Last name"
+                    autoComplete="family-name"
+                  />
+                </label>
+              </div>
+            </fieldset>
 
             {/* Location */}
             <fieldset className="ob-fieldset">
@@ -264,6 +334,18 @@ export default function CreateProfilePage() {
             </fieldset>
 
             {error && <p className="ob-error" role="alert">{error}</p>}
+            {duplicateError && (
+              <p className="ob-error" role="alert">
+                {duplicateError}{" "}
+                <button
+                  type="button"
+                  className="ob-link-btn"
+                  onClick={() => signOut({ redirectUrl: "/sign-in" })}
+                >
+                  Use existing account
+                </button>
+              </p>
+            )}
 
             <button type="submit" className="ob-submit" disabled={saving}>
               {saving ? "Saving…" : "Confirm Identity & Enter GrowthHub →"}

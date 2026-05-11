@@ -9,11 +9,14 @@ export default function SignInPage() {
         <SmartBrand className="auth-brand" />
         <p className="gh-eyebrow">Account Access</p>
         <h1 className="gh-h1">Sign in to Hirely Coach</h1>
+        <p style={{ marginTop: 10, color: "#cbd5e1", fontSize: "0.88rem", lineHeight: 1.6 }}>
+          Use your saved device method whenever available, including phone passcode, Face ID, or passkeys.
+        </p>
       </div>
       <SignIn
         path="/sign-in"
-        forceRedirectUrl="/onboarding"
-        fallbackRedirectUrl="/onboarding"
+        forceRedirectUrl="/growthhub"
+        fallbackRedirectUrl="/growthhub"
         appearance={{
           variables: {
             colorPrimary: "#10b981",

@@ -206,6 +206,16 @@
   border-radius: 8px;
 }
 
+.ob-link-btn {
+  border: 0;
+  background: transparent;
+  color: #fde68a;
+  text-decoration: underline;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 /* ── Submit ───────────────────────────────────────────────────────── */
 .ob-submit {
   width: 100%;

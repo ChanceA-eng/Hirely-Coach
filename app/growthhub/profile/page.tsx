@@ -149,6 +149,8 @@ export default function ProfileHubPage() {
   const [rating, setRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackSent, setFeedbackSent] = useState(false);
+  const [feedbackSending, setFeedbackSending] = useState(false);
+  const [feedbackError, setFeedbackError] = useState("");
   const [xp, setXp] = useState(0);
 
   // Account
@@ -347,16 +349,50 @@ export default function ProfileHubPage() {
   }
 
   // ── Submit feedback ──────────────────────────────────────────────────────
-  function submitFeedback() {
-    if (!feedbackText.trim()) return;
-    const earned = 25 + rating * 5;
-    const newXp = xp + earned;
-    saveXP(newXp);
-    setXp(newXp);
-    setFeedbackSent(true);
-    setFeedbackText("");
-    setRating(0);
-    setTimeout(() => setFeedbackSent(false), 4000);
+  async function submitFeedback() {
+    const trimmed = feedbackText.trim();
+    if (!trimmed) return;
+
+    setFeedbackSending(true);
+    setFeedbackError("");
+    try {
+      const response = await fetch("/api/beta-feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "pulse",
+          category: "idea",
+          sentimentScore: rating || 3,
+          userComment: trimmed,
+          moduleNumber: null,
+          url: window.location.pathname,
+          userAgent: navigator.userAgent,
+          viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          deviceType: /mobile|android|iphone|ipad/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
+          userId: user?.id ?? null,
+          userEmail: user?.primaryEmailAddress?.emailAddress ?? null,
+        }),
+      });
+
+      if (!response.ok) {
+        setFeedbackError("Feedback could not be sent. Please try again.");
+        return;
+      }
+
+      const earned = 25 + rating * 5;
+      const newXp = xp + earned;
+      saveXP(newXp);
+      setXp(newXp);
+      setFeedbackSent(true);
+      setFeedbackText("");
+      setRating(0);
+      setTimeout(() => setFeedbackSent(false), 4000);
+    } catch {
+      setFeedbackError("Feedback could not be sent. Please try again.");
+    } finally {
+      setFeedbackSending(false);
+    }
   }
 
   // ── Save notifications ───────────────────────────────────────────────────
@@ -807,9 +843,9 @@ export default function ProfileHubPage() {
                   type="button"
                   className="ph-btn-primary"
                   onClick={submitFeedback}
-                  disabled={!feedbackText.trim()}
+                  disabled={!feedbackText.trim() || feedbackSending}
                 >
-                  Submit Feedback (+{25 + rating * 5} XP)
+                  {feedbackSending ? "Submitting..." : `Submit Feedback (+${25 + rating * 5} XP)`}
                 </button>
                 <AnimatePresence>
                   {feedbackSent && (
@@ -824,6 +860,9 @@ export default function ProfileHubPage() {
                   )}
                 </AnimatePresence>
               </div>
+              {feedbackError ? (
+                <p style={{ marginTop: 10, color: "#dc2626", fontSize: "0.82rem" }}>{feedbackError}</p>
+              ) : null}
             </motion.div>
           )}
 

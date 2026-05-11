@@ -248,6 +248,8 @@ function GrowthChart({ data }: { data: { date: string; count: number }[] }) {
 
 export default function DashboardClient() {
   const [tab, setTab] = useState<Tab>("overview");
+  const [sectionMenuOpen, setSectionMenuOpen] = useState(false);
+  const [isMobileSections, setIsMobileSections] = useState(false);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [dbStats, setDbStats] = useState<DbStats>(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -645,6 +647,100 @@ export default function DashboardClient() {
   const growthData = buildGrowthData(users);
   const signupsThisMonth = growthData.reduce((s, d) => s + d.count, 0);
 
+  const tabItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    {
+      id: "overview",
+      label: "Overview",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <rect x="2" y="2" width="9" height="9" rx="1" /><rect x="13" y="2" width="9" height="9" rx="1" /><rect x="2" y="13" width="9" height="9" rx="1" /><rect x="13" y="13" width="9" height="9" rx="1" />
+        </svg>
+      ),
+    },
+    {
+      id: "users",
+      label: "Users",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" /><path d="M19 8v6M22 11h-6" />
+        </svg>
+      ),
+    },
+    {
+      id: "refinery",
+      label: "Job Refinery",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="12" y1="18" x2="12" y2="12" /><polyline points="9 15 12 12 15 15" />
+        </svg>
+      ),
+    },
+    {
+      id: "advanced",
+      label: "Advanced Controls",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <circle cx="12" cy="12" r="3" /><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12H4M20 12h2" />
+        </svg>
+      ),
+    },
+    {
+      id: "documents",
+      label: "Documents",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><path d="M9 15h6" /><path d="M9 11h6" />
+        </svg>
+      ),
+    },
+    {
+      id: "foundation",
+      label: "Foundation Mode",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+        </svg>
+      ),
+    },
+    {
+      id: "userVoice",
+      label: "User Voice",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
+        </svg>
+      ),
+    },
+  ];
+
+  function activateTab(nextTab: Tab) {
+    setTab(nextTab);
+    if (nextTab === "advanced") {
+      void loadHcConfig();
+      void loadLeaderboard();
+      void loadRawLogs();
+    }
+  }
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 860px)");
+    const update = () => setIsMobileSections(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileSections) {
+      setSectionMenuOpen(false);
+      return;
+    }
+    document.body.style.overflow = sectionMenuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [sectionMenuOpen, isMobileSections]);
+
   return (
     <div style={S.page}>
       {/* ── Top Header ── */}
@@ -670,97 +766,88 @@ export default function DashboardClient() {
       </div>
 
       {/* ── Tab bar ── */}
-      <div style={S.tabBar}>
-        {(
-          [
-            {
-              id: "overview",
-              label: "Overview",
-              icon: (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <rect x="2" y="2" width="9" height="9" rx="1" /><rect x="13" y="2" width="9" height="9" rx="1" /><rect x="2" y="13" width="9" height="9" rx="1" /><rect x="13" y="13" width="9" height="9" rx="1" />
-                </svg>
-              ),
-            },
-            {
-              id: "users",
-              label: "Users",
-              icon: (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" /><path d="M19 8v6M22 11h-6" />
-                </svg>
-              ),
-            },
-            {
-              id: "refinery",
-              label: "Job Refinery",
-              icon: (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="12" y1="18" x2="12" y2="12" /><polyline points="9 15 12 12 15 15" />
-                </svg>
-              ),
-            },
-            {
-              id: "advanced",
-              label: "Advanced Controls",
-              icon: (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <circle cx="12" cy="12" r="3" /><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12H4M20 12h2" />
-                </svg>
-              ),
-            },
-            {
-              id: "documents",
-              label: "Documents",
-              icon: (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><path d="M9 15h6" /><path d="M9 11h6" />
-                </svg>
-              ),
-            },
-            {
-              id: "foundation",
-              label: "Foundation Mode",
-              icon: (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
-                </svg>
-              ),
-            },
-            {
-              id: "userVoice",
-              label: "User Voice",
-              icon: (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
-                </svg>
-              ),
-            },
-          ] as { id: Tab; label: string; icon: React.ReactNode }[]
-        ).map((t) => (
+      {isMobileSections ? (
+        <div style={S.mobileTabBar}>
           <button
-            key={t.id}
-            onClick={() => {
-              setTab(t.id);
-              if (t.id === "advanced") {
-                void loadHcConfig();
-                void loadLeaderboard();
-                void loadRawLogs();
-              }
-            }}
-            style={{
-              ...S.tabBtn,
-              ...(tab === t.id ? S.tabActive : {}),
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-            }}
+            type="button"
+            onClick={() => setSectionMenuOpen(true)}
+            style={S.mobileTabButton}
           >
-            {t.icon}
-            {t.label}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+              <path d="M4 7h16" />
+              <path d="M4 12h16" />
+              <path d="M4 17h16" />
+            </svg>
+            {tabItems.find((item) => item.id === tab)?.label ?? "Sections"}
           </button>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div style={S.tabBar}>
+          {tabItems.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => activateTab(t.id)}
+              style={{
+                ...S.tabBtn,
+                ...(tab === t.id ? S.tabActive : {}),
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              {t.icon}
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <AnimatePresence>
+        {isMobileSections && sectionMenuOpen && (
+          <>
+            <motion.button
+              type="button"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={S.tabDrawerScrim}
+              onClick={() => setSectionMenuOpen(false)}
+              aria-label="Close sections menu"
+            />
+            <motion.aside
+              initial={{ x: -300 }}
+              animate={{ x: 0 }}
+              exit={{ x: -300 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              style={S.tabDrawer}
+            >
+              <div style={S.tabDrawerHead}>
+                <p style={{ margin: 0, fontSize: "0.82rem", fontWeight: 700, color: "#e2e8f0", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sections</p>
+                <button type="button" onClick={() => setSectionMenuOpen(false)} style={S.tabDrawerClose} aria-label="Close sections menu">✕</button>
+              </div>
+              <div style={{ display: "grid", gap: 6, padding: "10px 10px 16px" }}>
+                {tabItems.map((t) => (
+                  <button
+                    key={`mobile-tab-${t.id}`}
+                    type="button"
+                    onClick={() => {
+                      activateTab(t.id);
+                      setSectionMenuOpen(false);
+                    }}
+                    style={{
+                      ...S.tabDrawerItem,
+                      ...(tab === t.id ? S.tabDrawerItemActive : {}),
+                    }}
+                  >
+                    {t.icon}
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* ── Content ── */}
       <div style={S.content}>
@@ -1929,7 +2016,7 @@ export default function DashboardClient() {
                         <span style={{ fontSize: "0.78rem", color: "#94a3b8", fontWeight: 600 }}>
                           Foundation module override (testing)
                         </span>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, minmax(0, 1fr))", gap: 6 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(44px, 1fr))", gap: 6 }}>
                           {Array.from({ length: 12 }, (_, index) => index + 1).map((moduleNum) => {
                             const selected = foundationUnlockedModules.includes(moduleNum);
                             return (
@@ -2034,6 +2121,7 @@ export default function DashboardClient() {
 const S: Record<string, React.CSSProperties> = {
   page: {
     minHeight: "100vh",
+    overflowX: "hidden",
     background:
       "radial-gradient(1200px 600px at 12% 0%, rgba(16,185,129,0.16), transparent 60%), radial-gradient(900px 500px at 100% 20%, rgba(14,165,233,0.12), transparent 55%), #020617",
     fontFamily:
@@ -2122,12 +2210,93 @@ const S: Record<string, React.CSSProperties> = {
     borderBottom: "2.5px solid #10b981",
     fontWeight: 700,
   },
+  mobileTabBar: {
+    background: "rgba(15, 23, 42, 0.68)",
+    borderBottom: "1px solid rgba(148,163,184,0.22)",
+    padding: "10px 14px",
+  },
+  mobileTabButton: {
+    width: "100%",
+    background: "rgba(2, 6, 23, 0.58)",
+    border: "1px solid rgba(148,163,184,0.24)",
+    borderRadius: 10,
+    color: "#e2e8f0",
+    padding: "10px 12px",
+    fontSize: "0.86rem",
+    fontWeight: 700,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 8,
+    cursor: "pointer",
+    fontFamily: "inherit",
+  },
+  tabDrawerScrim: {
+    position: "fixed",
+    inset: 0,
+    border: "none",
+    background: "rgba(2,6,23,0.7)",
+    zIndex: 45,
+  },
+  tabDrawer: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: "min(86vw, 320px)",
+    background: "#020617",
+    borderRight: "1px solid rgba(148,163,184,0.22)",
+    boxShadow: "10px 0 26px rgba(0,0,0,0.35)",
+    zIndex: 50,
+    display: "flex",
+    flexDirection: "column",
+    paddingTop: "max(10px, env(safe-area-inset-top))",
+  },
+  tabDrawerHead: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "12px 12px 8px",
+    borderBottom: "1px solid rgba(148,163,184,0.16)",
+  },
+  tabDrawerClose: {
+    background: "transparent",
+    border: "none",
+    color: "#94a3b8",
+    fontSize: "1.1rem",
+    lineHeight: 1,
+    cursor: "pointer",
+    padding: 4,
+  },
+  tabDrawerItem: {
+    width: "100%",
+    border: "1px solid transparent",
+    background: "transparent",
+    color: "#cbd5e1",
+    borderRadius: 8,
+    padding: "10px 12px",
+    textAlign: "left",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    fontSize: "0.84rem",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit",
+  },
+  tabDrawerItemActive: {
+    color: "#e2e8f0",
+    background: "rgba(16,185,129,0.12)",
+    border: "1px solid rgba(16,185,129,0.3)",
+  },
 
   /* Content area */
   content: {
     maxWidth: 980,
     margin: "0 auto",
     padding: "32px 24px 80px",
+    minWidth: 0,
+    overflowX: "hidden",
   },
 
   /* Stats */
@@ -2217,11 +2386,15 @@ const S: Record<string, React.CSSProperties> = {
   tableWrap: {
     border: "1px solid rgba(148,163,184,0.24)",
     borderRadius: 14,
-    overflow: "hidden",
+    width: "100%",
+    maxWidth: "100%",
+    overflowX: "auto",
+    overflowY: "hidden",
     boxShadow: "0 1px 10px rgba(0,0,0,0.24)",
   },
   table: {
     width: "100%",
+    minWidth: 760,
     borderCollapse: "collapse",
     fontSize: "0.84rem",
   },
@@ -2287,7 +2460,8 @@ const S: Record<string, React.CSSProperties> = {
     top: 0,
     right: 0,
     bottom: 0,
-    width: 390,
+    width: "100vw",
+    maxWidth: 390,
     background: "#020617",
     boxShadow: "-6px 0 28px rgba(0,0,0,0.28)",
     zIndex: 50,

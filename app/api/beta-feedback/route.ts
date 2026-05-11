@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const row = insertBetaFeedback({
+  const row = await insertBetaFeedback({
     kind: normalizeKind(body.kind),
     category: normalizeCategory(body.category),
     sentimentScore,

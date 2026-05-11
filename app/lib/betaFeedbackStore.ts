@@ -1,3 +1,5 @@
+import { get, put } from "@vercel/blob";
+
 export type BetaFeedbackKind = "pulse" | "module_milestone";
 
 export type BetaFeedbackCategory =
@@ -65,18 +67,59 @@ export type ListBetaFeedbackOptions = {
 };
 
 const MAX_ROWS = 10000;
+const BETA_FEEDBACK_BLOB_PATH = "feedback/beta-feedback.json";
 
 const g = globalThis as typeof globalThis & {
   __betaFeedbackTable?: BetaFeedbackEntry[];
+  __betaFeedbackLoaded?: boolean;
 };
 
 if (!g.__betaFeedbackTable) g.__betaFeedbackTable = [];
+if (!g.__betaFeedbackLoaded) g.__betaFeedbackLoaded = false;
 
 function table(): BetaFeedbackEntry[] {
   return g.__betaFeedbackTable!;
 }
 
-export function insertBetaFeedback(input: CreateBetaFeedbackInput): BetaFeedbackEntry {
+async function loadFromBlob(): Promise<BetaFeedbackEntry[] | null> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
+  try {
+    const blob = await get(BETA_FEEDBACK_BLOB_PATH, { access: "public" });
+    if (!blob || blob.statusCode !== 200 || !blob.blob) return null;
+    const raw = await blob.blob.text();
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return null;
+    return parsed as BetaFeedbackEntry[];
+  } catch {
+    return null;
+  }
+}
+
+async function saveToBlob(rows: BetaFeedbackEntry[]): Promise<void> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return;
+  try {
+    await put(BETA_FEEDBACK_BLOB_PATH, JSON.stringify(rows), {
+      access: "public",
+      addRandomSuffix: false,
+      contentType: "application/json",
+    });
+  } catch {
+    // Non-fatal: keep in-memory copy if blob write fails transiently.
+  }
+}
+
+async function ensureLoaded() {
+  if (g.__betaFeedbackLoaded) return;
+  const fromBlob = await loadFromBlob();
+  if (fromBlob && fromBlob.length) {
+    g.__betaFeedbackTable = fromBlob.slice(0, MAX_ROWS);
+  }
+  g.__betaFeedbackLoaded = true;
+}
+
+export async function insertBetaFeedback(input: CreateBetaFeedbackInput): Promise<BetaFeedbackEntry> {
+  await ensureLoaded();
+
   const now = Date.now();
   const row: BetaFeedbackEntry = {
     id: `${now}-${Math.random().toString(36).slice(2, 10)}`,
@@ -115,11 +158,13 @@ export function insertBetaFeedback(input: CreateBetaFeedbackInput): BetaFeedback
   const rows = table();
   rows.unshift(row);
   if (rows.length > MAX_ROWS) rows.splice(MAX_ROWS);
+  await saveToBlob(rows);
 
   return row;
 }
 
-export function listBetaFeedback(opts: ListBetaFeedbackOptions = {}): BetaFeedbackEntry[] {
+export async function listBetaFeedback(opts: ListBetaFeedbackOptions = {}): Promise<BetaFeedbackEntry[]> {
+  await ensureLoaded();
   const query = String(opts.query ?? "").trim().toLowerCase();
   const rows = table().filter((row) => {
     if (typeof opts.module === "number" && row.moduleNumber !== opts.module) return false;
@@ -146,10 +191,11 @@ export function listBetaFeedback(opts: ListBetaFeedbackOptions = {}): BetaFeedba
   return rows.slice(0, Math.max(1, Math.min(opts.limit ?? 1500, 5000)));
 }
 
-export function updateBetaFeedback(
+export async function updateBetaFeedback(
   id: string,
   patch: { resolved?: boolean; starred?: boolean; actorUserId?: string | null }
-): BetaFeedbackEntry | null {
+): Promise<BetaFeedbackEntry | null> {
+  await ensureLoaded();
   const row = table().find((entry) => entry.id === id);
   if (!row) return null;
 
@@ -165,6 +211,7 @@ export function updateBetaFeedback(
   }
 
   row.updatedAt = now;
+  await saveToBlob(table());
   return row;
 }
 
