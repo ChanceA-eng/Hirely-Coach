@@ -1132,7 +1132,7 @@ export default function GrowthHubPage() {
                   )}
                 </div>
 
-                {/* Coach's nudge sidebar */}
+                {/* Coach's insight sidebar */}
                 <motion.aside
                   className="gh-sidebar"
                   initial={{ x: 20, opacity: 0 }}
@@ -1145,7 +1145,7 @@ export default function GrowthHubPage() {
                         <NudgeIcon />
                       </div>
                       <div>
-                        <p className="gh-nudge-title">Coach&apos;s Nudge</p>
+                        <p className="gh-nudge-title">Coach&apos;s Insight</p>
                         <p className="gh-nudge-subtitle">Current Focus</p>
                       </div>
                     </div>

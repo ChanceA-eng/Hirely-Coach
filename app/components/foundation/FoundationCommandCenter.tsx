@@ -38,6 +38,9 @@ const UI_TEXT = {
   en: {
     drawerTitle: "Updates",
     markAll: "Mark All as Read",
+    languageLabel: "Foundation Language",
+    english: "English",
+    swahili: "Swahili",
     empty: "No new items right now.",
     learner: "Learner",
     closeInboxAria: "Close inbox",
@@ -49,6 +52,9 @@ const UI_TEXT = {
   sw: {
     drawerTitle: "Taarifa",
     markAll: "Weka Zote Zimesomwa",
+    languageLabel: "Lugha ya Foundation",
+    english: "Kiingereza",
+    swahili: "Kiswahili",
     empty: "Hakuna taarifa mpya kwa sasa.",
     learner: "Mwanafunzi",
     closeInboxAria: "Funga kikasha",
@@ -257,6 +263,26 @@ export default function FoundationCommandCenter() {
 
   return (
     <div style={styles.shell}>
+      <div style={styles.globalLanguageDock}>
+        <p style={styles.globalLanguageLabel}>{copy.languageLabel}</p>
+        <div style={styles.globalLanguageActions}>
+          <button
+            type="button"
+            style={{ ...styles.globalLanguageBtn, ...(language === "en" ? styles.globalLanguageBtnActive : {}) }}
+            onClick={() => void toggleLanguage("en")}
+          >
+            {copy.english}
+          </button>
+          <button
+            type="button"
+            style={{ ...styles.globalLanguageBtn, ...(language === "sw" ? styles.globalLanguageBtnActive : {}) }}
+            onClick={() => void toggleLanguage("sw")}
+          >
+            {copy.swahili}
+          </button>
+        </div>
+      </div>
+
       {showIosA2hsPrompt && (
         <div style={styles.a2hsPrompt}>
           <p style={styles.a2hsText}>
@@ -295,14 +321,14 @@ export default function FoundationCommandCenter() {
                     style={{ ...styles.languageBtn, ...(language === "en" ? styles.languageBtnActive : {}) }}
                     onClick={() => void toggleLanguage("en")}
                   >
-                    EN
+                    {copy.english}
                   </button>
                   <button
                     type="button"
                     style={{ ...styles.languageBtn, ...(language === "sw" ? styles.languageBtnActive : {}) }}
                     onClick={() => void toggleLanguage("sw")}
                   >
-                    SW
+                    {copy.swahili}
                   </button>
                 </div>
               </div>
@@ -355,6 +381,49 @@ export default function FoundationCommandCenter() {
 const styles: Record<string, CSSProperties> = {
   shell: {
     display: "contents",
+  },
+  globalLanguageDock: {
+    position: "fixed",
+    top: "max(12px, env(safe-area-inset-top))",
+    right: 12,
+    zIndex: 42,
+    border: "1px solid rgba(148,163,184,0.28)",
+    borderRadius: 12,
+    background: "rgba(2, 6, 23, 0.86)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    boxShadow: "0 10px 26px rgba(0,0,0,0.3)",
+    padding: "0.45rem",
+    display: "grid",
+    gap: 6,
+  },
+  globalLanguageLabel: {
+    margin: 0,
+    color: "#cbd5e1",
+    fontSize: "0.66rem",
+    fontWeight: 700,
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+  },
+  globalLanguageActions: {
+    display: "inline-flex",
+    gap: 6,
+  },
+  globalLanguageBtn: {
+    border: "1px solid rgba(148,163,184,0.24)",
+    borderRadius: 8,
+    background: "rgba(15, 23, 42, 0.65)",
+    color: "#cbd5e1",
+    fontSize: "0.72rem",
+    fontWeight: 700,
+    lineHeight: 1,
+    padding: "0.42rem 0.58rem",
+    cursor: "pointer",
+  },
+  globalLanguageBtnActive: {
+    border: "1px solid rgba(16,185,129,0.45)",
+    background: "rgba(16,185,129,0.18)",
+    color: "#d1fae5",
   },
   scrim: {
     position: "fixed",
