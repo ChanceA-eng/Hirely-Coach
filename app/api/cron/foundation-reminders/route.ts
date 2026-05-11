@@ -12,6 +12,22 @@ type ReminderDispatchState = {
   lastRunAt?: number;
 };
 
+function isTruthyQuery(value: string | null): boolean {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === "1" || normalized === "true" || normalized === "yes";
+}
+
+function isFoundationUserMetadata(metadata: Record<string, unknown>): boolean {
+  const currentMode = String(metadata.current_mode ?? "").toLowerCase();
+  const onboardingPath = String(metadata.onboarding_path ?? "").toLowerCase();
+  if (currentMode === "foundation" || onboardingPath === "foundation") return true;
+
+  // Fallback: if a user already has foundation structures, treat as foundation user.
+  if (metadata.foundation_profile || metadata.foundation_progress) return true;
+  return false;
+}
+
 function nowInUtcPlus3(date = new Date()) {
   const utcMs = date.getTime() + date.getTimezoneOffset() * 60_000;
   const local = new Date(utcMs + 3 * 60 * 60 * 1000);
@@ -47,12 +63,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const forceDispatch = isTruthyQuery(req.nextUrl.searchParams.get("force"));
   const client = await clerkClient();
   const templates = getNotifications().filter((template) => template.enabled);
   const now = Date.now();
   const { dateKey, hour } = nowInUtcPlus3(new Date(now));
 
-  const scheduled = templates.filter((template) => template.scheduleHour === hour);
+  const scheduled = forceDispatch
+    ? templates.filter((template) => template.channel === "streak_alerts")
+    : templates.filter((template) => template.scheduleHour === hour);
 
   // Fallback daily morning nudge if nothing matches at 8am UTC+3.
   if (scheduled.length === 0 && hour === 8) {
@@ -88,7 +107,13 @@ export async function GET(req: NextRequest) {
   }
 
   if (scheduled.length === 0) {
-    return NextResponse.json({ ok: true, scannedUsers: 0, dispatched: 0, reason: "No templates scheduled this hour" });
+    return NextResponse.json({
+      ok: true,
+      scannedUsers: 0,
+      dispatched: 0,
+      forceDispatch,
+      reason: "No templates scheduled this hour",
+    });
   }
 
   const users = await client.users.getUserList({ limit: 500 });
@@ -98,8 +123,7 @@ export async function GET(req: NextRequest) {
 
   for (const user of users.data) {
     const metadata = (user.publicMetadata ?? {}) as Record<string, unknown>;
-    const mode = String(metadata.current_mode ?? "");
-    if (mode !== "foundation") continue;
+    if (!isFoundationUserMetadata(metadata)) continue;
 
     scannedUsers += 1;
 
@@ -188,6 +212,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     ok: true,
+    forceDispatch,
     scannedUsers,
     dispatched,
     templatesScheduled: scheduled.map((template) => template.id),
