@@ -85,8 +85,10 @@ async function loadFromBlob(): Promise<BetaFeedbackEntry[] | null> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
   try {
     const blob = await get(BETA_FEEDBACK_BLOB_PATH, { access: "public" });
-    if (!blob || blob.statusCode !== 200 || !blob.blob) return null;
-    const raw = await blob.blob.text();
+    if (!blob || blob.statusCode !== 200 || !blob.url) return null;
+    const response = await fetch(blob.url, { cache: "no-store" });
+    if (!response.ok) return null;
+    const raw = await response.text();
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return null;
     return parsed as BetaFeedbackEntry[];
