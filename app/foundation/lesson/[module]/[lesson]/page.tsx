@@ -7,6 +7,7 @@ import FoundationCommandCenter from "../../../../components/foundation/Foundatio
 import LessonRenderer from "../../../../components/foundation/LessonRenderer";
 import SofiaGuide from "../../../../components/foundation/SofiaGuide";
 import {
+  completeFoundationModule,
   FOUNDATION_PROFILE_EVENT,
   getFoundationLanguagePref,
   isAllModulesComplete,
@@ -95,6 +96,8 @@ const LESSON_UI = {
     moduleComplete: "Module Complete",
     moduleUnlocked: "Great work. You unlocked the next module.",
     moduleReadyNow: "is ready now.",
+    badgeEarned: "Badge earned",
+    nextLesson: "Next Lesson",
     startNow: "Start",
     now: "Now",
     close: "Close",
@@ -128,6 +131,8 @@ const LESSON_UI = {
     moduleComplete: "Kipengele Kimekamilika",
     moduleUnlocked: "Hongera. Umefungua kipengele kinachofuata.",
     moduleReadyNow: "kiko tayari sasa.",
+    badgeEarned: "Beji uliyopata",
+    nextLesson: "Somo Linalofuata",
     startNow: "Anza",
     now: "Sasa",
     close: "Funga",
@@ -207,17 +212,37 @@ export default function LessonPage() {
 
   const prevLesson = currentIdx > 0 ? lessons[currentIdx - 1] : null;
   const nextLesson = currentIdx < lessons.length - 1 ? lessons[currentIdx + 1] : null;
+  const completionBadge = languagePref === "sw"
+    ? `🏅 Bingwa wa Kipengele ${moduleNum}`
+    : `🏅 Module ${moduleNum} Champion`;
 
   function handleComplete() {
     if (nextLesson) {
       router.push(`/foundation/lesson/${moduleNum}/${nextLesson.id}`);
-    } else {
-      // End of module — go back to path map
-      router.push("/foundation");
+      return;
     }
+
+    // Assessment lessons use onModulePassed -> survey -> completion modal flow.
+    if (lesson.type === "multiple_choice" && !lesson.is_graduation_gate) {
+      return;
+    }
+
+    // End of module for any lesson type: mark module complete and unlock next module.
+    if (!lesson.is_graduation_gate) {
+      completeFoundationModule(moduleNum);
+      if (nextModule) {
+        setCompletionModalOpen(true);
+        return;
+      }
+      router.push("/foundation/home");
+      return;
+    }
+
+    router.push("/foundation/home");
   }
 
   function handleModulePassed(completedModuleNum: number) {
+    completeFoundationModule(completedModuleNum);
     setCompletedModuleForSurvey(completedModuleNum);
     setSurveyClarity(0);
     setSurveyPronunciationHelped("");
@@ -266,7 +291,7 @@ export default function LessonPage() {
       if (nextModule) {
         setCompletionModalOpen(true);
       } else {
-        router.push("/foundation");
+        router.push("/foundation/home");
       }
     } catch {
       setSurveyError(copy.surveyFailed);
@@ -440,9 +465,12 @@ export default function LessonPage() {
             <p className="lp-completion-copy">
               {copy.moduleLabel} {moduleNum + 1}, <strong>{nextModule.title}</strong>, {copy.moduleReadyNow}
             </p>
+            <p className="lp-completion-copy" style={{ color: "#86efac", fontWeight: 700 }}>
+              {copy.badgeEarned}: {completionBadge}
+            </p>
             <div className="lp-completion-actions">
               <Link href={`/foundation/lesson/${nextModule.num}/${nextModule.firstLesson}`} className="lp-nav-btn lp-nav-btn--grad">
-                {copy.startNow} {nextModule.title} {copy.now}
+                {copy.nextLesson} →
               </Link>
               <button type="button" className="lp-nav-btn lp-nav-btn--prev" onClick={() => setCompletionModalOpen(false)}>
                 {copy.close}

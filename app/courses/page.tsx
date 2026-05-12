@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { loadImpactEntries } from "../lib/impactLog";
 import { getProgressMeta, loadIP } from "../lib/progression";
 import type { ProgressTier } from "../lib/progression";
@@ -25,8 +25,20 @@ const LEVEL_SEQUENCE: ProgressTier["title"][] = [
   "Master",
 ];
 
+const LEVEL_RANK: Record<ProgressTier["title"], number> = {
+  Novice: 1,
+  Apprentice: 2,
+  Candidate: 3,
+  Professional: 4,
+  Expert: 5,
+  Executive: 6,
+  Advanced: 7,
+  Master: 8,
+};
+
 export default function AcademyPage() {
   const { userId } = useAuth();
+  const { user } = useUser();
   const [ip, setIp] = useState(0);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [keywordMatchScore, setKeywordMatchScore] = useState(0);
@@ -60,6 +72,13 @@ export default function AcademyPage() {
   const progressMeta = getProgressMeta(ip);
   const gateSignals = buildCourseGateSignals(completed, userId);
   const { access, candidateGateMet, levelGateDetails } = getCourseLevelAccess(ip, gateSignals);
+  const rawOverride = (user?.publicMetadata?.interviewAdminOverride ?? {}) as Record<string, unknown>;
+  const masterUnlock = Boolean(rawOverride.masterUnlock);
+  const forcedCourseLevel = typeof rawOverride.forcedCourseLevel === "number"
+    ? rawOverride.forcedCourseLevel
+    : null;
+  const forcedTier = typeof rawOverride.forcedTier === "number" ? rawOverride.forcedTier : null;
+  const adminUnlockRank = Math.max(forcedCourseLevel ?? 0, forcedTier ?? 0);
 
   return (
     <div className="lp-root">
@@ -112,11 +131,14 @@ export default function AcademyPage() {
         {LEVEL_SEQUENCE.map((level, groupIdx) => {
           const courses = COURSE_CATALOG.filter((course) => course.level === level);
           if (!courses.length) return null;
-          const isUnlocked = access.get(level) ?? false;
+          const baseUnlocked = access.get(level) ?? false;
+          const isUnlocked = masterUnlock || baseUnlocked || adminUnlockRank >= LEVEL_RANK[level];
           const completedInLevel = courses.filter((course) => completed.has(course.id)).length;
           const levelProgressPct = courses.length ? Math.round((completedInLevel / courses.length) * 100) : 0;
           const levelGateLabel = isUnlocked
-            ? "Unlocked"
+            ? masterUnlock
+              ? "Unlocked by admin override."
+              : "Unlocked"
             : levelGateDetails.get(level) || `Reach ${level} and required IP to unlock.`;
           return (
             <div key={level}>
@@ -148,7 +170,7 @@ export default function AcademyPage() {
                 <div className="ac-grid">
                   {courses.map((course) => {
                     const prerequisiteMet = !course.prerequisiteCourseId || completed.has(course.prerequisiteCourseId);
-                    const canOpen = isUnlocked && prerequisiteMet;
+                    const canOpen = isUnlocked && (masterUnlock || prerequisiteMet);
                     const isDone = hydrated && completed.has(course.id);
                     const isAtsCourse = course.id === "advanced-keyword-optimization";
                     const atsInProgress =
@@ -161,7 +183,7 @@ export default function AcademyPage() {
                       !isDone;
 
                     let lockLabel = levelGateDetails.get(course.level) || `Reach ${course.level} and required IP to unlock.`;
-                    if (isUnlocked && !prerequisiteMet && course.prerequisiteCourseId === "star-101") {
+                    if (isUnlocked && !masterUnlock && !prerequisiteMet && course.prerequisiteCourseId === "star-101") {
                       lockLabel = "Complete STAR Method 101 first";
                     }
 

@@ -120,13 +120,43 @@ function saveFoundationOverride(override: FoundationOverride) {
   emitFoundationEvent(FOUNDATION_PROGRESS_EVENT);
 }
 
+function mergeProgress(local: FoundationProgress, incoming: FoundationProgress): FoundationProgress {
+  const completedLessons = Array.from(new Set([...local.completedLessons, ...incoming.completedLessons]));
+  const completedModules = Array.from(new Set([...local.completedModules, ...incoming.completedModules]))
+    .map(Number)
+    .filter((moduleNum) => Number.isFinite(moduleNum) && moduleNum >= 1 && moduleNum <= TOTAL_MODULES)
+    .sort((left, right) => left - right);
+
+  const assessmentScores: Record<string, number> = { ...local.assessmentScores };
+  for (const [key, value] of Object.entries(incoming.assessmentScores ?? {})) {
+    const next = Math.floor(Number(value) || 0);
+    if (!Number.isFinite(next)) continue;
+    const current = Math.floor(Number(assessmentScores[key] ?? 0) || 0);
+    assessmentScores[key] = Math.max(current, next);
+  }
+
+  const graduatedAt = local.graduatedAt ?? incoming.graduatedAt;
+  return { completedLessons, completedModules, assessmentScores, graduatedAt };
+}
+
+function mergeOverride(local: FoundationOverride, incoming: FoundationOverride): FoundationOverride {
+  return {
+    unlockedModules: Array.from(new Set([...local.unlockedModules, ...incoming.unlockedModules]))
+      .map(Number)
+      .filter((moduleNum) => Number.isFinite(moduleNum) && moduleNum >= 1 && moduleNum <= TOTAL_MODULES)
+      .sort((left, right) => left - right),
+  };
+}
+
 function unlockFoundationModule(moduleNum: number) {
   if (moduleNum < 1 || moduleNum > TOTAL_MODULES) return;
   const override = getFoundationOverride();
   if (override.unlockedModules.includes(moduleNum)) return;
-  saveFoundationOverride({
+  const nextOverride = {
     unlockedModules: [...override.unlockedModules, moduleNum].sort((left, right) => left - right),
-  });
+  };
+  saveFoundationOverride(nextOverride);
+  syncFoundationOverrideToCloud(nextOverride).catch(() => {});
 }
 
 export function hydrateFoundationState(payload: {
@@ -142,7 +172,8 @@ export function hydrateFoundationState(payload: {
   }
 
   if (payload.progress) {
-    saveProgress(payload.progress);
+    const merged = mergeProgress(getFoundationProgress(), payload.progress);
+    saveProgress(merged);
   }
 
   if (payload.profile) {
@@ -166,7 +197,8 @@ export function hydrateFoundationState(payload: {
                 .filter((moduleNum) => Number.isFinite(moduleNum) && moduleNum >= 1 && moduleNum <= 12)
             : [],
         };
-    saveFoundationOverride(override);
+    const merged = mergeOverride(getFoundationOverride(), override);
+    saveFoundationOverride(merged);
   }
 }
 
@@ -252,6 +284,39 @@ export function saveAssessmentScore(moduleNum: number, score: number) {
   }
 }
 
+export function completeFoundationModule(moduleNum: number): boolean {
+  if (moduleNum < 1 || moduleNum > TOTAL_MODULES) return false;
+
+  const progress = getFoundationProgress();
+  const wasComplete = progress.completedModules.includes(moduleNum);
+  if (!wasComplete) {
+    progress.completedModules.push(moduleNum);
+    progress.completedModules = Array.from(new Set(progress.completedModules))
+      .map(Number)
+      .filter((value) => Number.isFinite(value) && value >= 1 && value <= TOTAL_MODULES)
+      .sort((left, right) => left - right);
+    saveProgress(progress);
+    syncProgressToCloud(progress).catch(() => {});
+  }
+
+  const nextModule = moduleNum + 1;
+  if (nextModule <= TOTAL_MODULES) {
+    const hadUnlockAlready = getFoundationOverride().unlockedModules.includes(nextModule);
+    unlockFoundationModule(nextModule);
+    if (!hadUnlockAlready) {
+      fetch("/api/user/foundation-inbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "module-unlock", moduleNum: nextModule }),
+      })
+        .then(() => notifyFoundationInboxChanged())
+        .catch(() => {});
+    }
+  }
+
+  return !wasComplete;
+}
+
 export function isModuleUnlocked(moduleNum: number): boolean {
   const override = getFoundationOverride();
   if (override.unlockedModules.includes(moduleNum)) return true;
@@ -302,6 +367,19 @@ export async function syncFoundationProfileToCloud(profile?: FoundationProfile) 
         onboarding_complete: p.onboardingComplete,
         total_xp: p.totalXp,
         language_pref: p.languagePref,
+      },
+    }),
+  });
+}
+
+export async function syncFoundationOverrideToCloud(override?: FoundationOverride) {
+  const o = override ?? getFoundationOverride();
+  await fetch("/api/user/mode", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      foundation_override: {
+        unlocked_modules: o.unlockedModules,
       },
     }),
   });

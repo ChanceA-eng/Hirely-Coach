@@ -3,7 +3,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { loadImpactEntries } from "../../lib/impactLog";
 import { loadIP, getProgressMeta, addIP } from "../../lib/progression";
 import {
@@ -136,7 +136,28 @@ export default function LessonPage() {
   const params = useParams();
   const router = useRouter();
   const { userId } = useAuth();
+  const { user } = useUser();
   const courseId = typeof params["course-id"] === "string" ? params["course-id"] : "";
+  const rawOverride = (user?.publicMetadata?.interviewAdminOverride ?? {}) as Record<string, unknown>;
+  const masterUnlock = Boolean(rawOverride.masterUnlock);
+  const forcedCourseLevel = typeof rawOverride.forcedCourseLevel === "number"
+    ? rawOverride.forcedCourseLevel
+    : null;
+  const forcedTier = typeof rawOverride.forcedTier === "number" ? rawOverride.forcedTier : null;
+  const adminUnlockRank = Math.max(forcedCourseLevel ?? 0, forcedTier ?? 0);
+  const levelRank = (level: CourseEntry["level"]) => {
+    const rankByLevel: Record<CourseEntry["level"], number> = {
+      Novice: 1,
+      Apprentice: 2,
+      Candidate: 3,
+      Professional: 4,
+      Expert: 5,
+      Executive: 6,
+      Advanced: 7,
+      Master: 8,
+    };
+    return rankByLevel[level];
+  };
 
   const [course, setCourse] = useState<CourseEntry | null>(null);
   const [ip, setIp] = useState(0);
@@ -175,9 +196,11 @@ export default function LessonPage() {
       const { access, levelGateDetails } = getCourseLevelAccess(currentIp, gateSignals);
       const levelUnlocked = access.get(found.level) ?? false;
 
-      if (!levelUnlocked) {
+      const adminUnlockedForCourse = masterUnlock || adminUnlockRank >= levelRank(found.level);
+
+      if (!levelUnlocked && !adminUnlockedForCourse) {
         setLockedReason(levelGateDetails.get(found.level) || `Reach ${found.level} and required IP to unlock.`);
-      } else if (found.prerequisiteCourseId && !done.has(found.prerequisiteCourseId)) {
+      } else if (!masterUnlock && found.prerequisiteCourseId && !done.has(found.prerequisiteCourseId)) {
         setLockedReason("Complete STAR Method 101 before opening this course.");
       } else {
         setLockedReason("");
@@ -185,7 +208,7 @@ export default function LessonPage() {
 
       setAlreadyCompleted(done.has(courseId));
       if (courseId === "star-101") {
-        setStarGateBlocked(!hasLoggedWinWithNumber(userId));
+        setStarGateBlocked(masterUnlock ? false : !hasLoggedWinWithNumber(userId));
       }
 
       if (found.completionGate?.type === "resume-scan-min-score") {
@@ -193,8 +216,10 @@ export default function LessonPage() {
         const hasScan = optimizerSignals.hasRunScan;
         const score = optimizerSignals.keywordMatchScore;
         const blocked = !hasScan || score < minScore;
-        setResumeGateBlocked(blocked);
-        if (!hasScan) {
+        setResumeGateBlocked(masterUnlock ? false : blocked);
+        if (masterUnlock) {
+          setResumeGateMessage("");
+        } else if (!hasScan) {
           setResumeGateMessage(
             `To certify this course, run a Resume Optimizer scan first. Required ${found.completionGate.scoreLabel}: ${minScore}%+.`
           );
@@ -212,12 +237,14 @@ export default function LessonPage() {
 
       if (found.completionGate?.type === "creative-impact-win") {
         const met = hasCreativeKpiUpgradedWin(userId);
-        setCreativeGateBlocked(!met);
-        setCreativeGateMessage(
+        setCreativeGateBlocked(masterUnlock ? false : !met);
+        setCreativeGateMessage(masterUnlock
+          ? ""
+          : (
           met
             ? ""
             : "To certify this course, log one Creative Solution win in the Impact Ledger and include an HC (Hirely Coach) upgraded KPI (Key Performance Indicator)."
-        );
+          ));
       } else {
         setCreativeGateBlocked(false);
         setCreativeGateMessage("");
@@ -228,8 +255,10 @@ export default function LessonPage() {
         const negotiationSignals = loadNegotiationSimSignals();
         const score = negotiationSignals.bestValueCaptured;
         const blocked = score < minScore || !negotiationSignals.hasNegotiatorBadge;
-        setNegotiationGateBlocked(blocked);
-        if (blocked) {
+        setNegotiationGateBlocked(masterUnlock ? false : blocked);
+        if (masterUnlock) {
+          setNegotiationGateMessage("");
+        } else if (blocked) {
           setNegotiationGateMessage(
             `To certify this course, enter the STARR Lab Negotiation Simulator and achieve ${found.completionGate.scoreLabel || "Value Captured"} ${minScore}%+ to earn the Negotiator badge (current: ${score}%).`
           );
@@ -243,7 +272,7 @@ export default function LessonPage() {
 
       setHydrated(true);
     });
-  }, [courseId, userId]);
+  }, [courseId, masterUnlock, adminUnlockRank, userId]);
 
   const progressMeta = getProgressMeta(ip);
 
@@ -254,10 +283,12 @@ export default function LessonPage() {
 
   const canComplete =
     allQuizPassed &&
-    !starGateBlocked &&
-    !resumeGateBlocked &&
-    !creativeGateBlocked &&
-    !negotiationGateBlocked;
+    (masterUnlock || (
+      !starGateBlocked &&
+      !resumeGateBlocked &&
+      !creativeGateBlocked &&
+      !negotiationGateBlocked
+    ));
 
   function selectOption(qIdx: number, oIdx: number) {
     if (quizStates[qIdx].submitted) return;

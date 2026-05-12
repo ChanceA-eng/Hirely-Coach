@@ -1971,7 +1971,7 @@ export default function DashboardClient() {
                           checked={masterUnlock}
                           onChange={(e) => setMasterUnlock(e.target.checked)}
                         />
-                        Master unlock all interview tiers
+                        Master unlock all interview + academy requirements
                       </label>
                       <label style={{ display: "flex", alignItems: "center", gap: 10, color: "#e2e8f0", fontSize: "0.84rem" }}>
                         <input
@@ -2016,6 +2016,22 @@ export default function DashboardClient() {
                         <span style={{ fontSize: "0.78rem", color: "#94a3b8", fontWeight: 600 }}>
                           Foundation module override (testing)
                         </span>
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          <button
+                            type="button"
+                            style={S.secondaryBtn}
+                            onClick={() => setFoundationUnlockedModules(Array.from({ length: 12 }, (_, index) => index + 1))}
+                          >
+                            Unlock All Foundation Modules
+                          </button>
+                          <button
+                            type="button"
+                            style={S.ghostDangerBtn}
+                            onClick={() => setFoundationUnlockedModules([])}
+                          >
+                            Clear Foundation Override
+                          </button>
+                        </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(44px, 1fr))", gap: 6 }}>
                           {Array.from({ length: 12 }, (_, index) => index + 1).map((moduleNum) => {
                             const selected = foundationUnlockedModules.includes(moduleNum);
