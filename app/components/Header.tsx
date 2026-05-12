@@ -86,11 +86,10 @@ function IdentityNudge({ isFoundation }: { isFoundation: boolean }) {
       >
         <span
           style={{
-            width: 22,
             height: 22,
             background: accentBg,
             border: `1px solid ${accentBorder}`,
-            borderRadius: "50%",
+            borderRadius: 999,
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
@@ -98,11 +97,12 @@ function IdentityNudge({ isFoundation }: { isFoundation: boolean }) {
             fontWeight: 700,
             color: accentText,
             flexShrink: 0,
+            padding: "0 8px",
+            whiteSpace: "nowrap",
           }}
         >
-          {firstName[0]?.toUpperCase()}
+          {firstName}
         </span>
-        {firstName}
         <svg
           width="12"
           height="12"
@@ -468,76 +468,6 @@ export default function Header() {
               /* ── FOUNDATION MODE ─────────────────────────────── */
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
 
-                {/* Language switch in header (desktop + mobile) */}
-                <div style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                  padding: "0.2rem",
-                  border: "1px solid rgba(148,163,184,0.25)",
-                  borderRadius: 999,
-                  background: "rgba(255,255,255,0.04)",
-                }}>
-                  <button
-                    type="button"
-                    onClick={() => handleFoundationLanguage("en")}
-                    style={{
-                      border: foundationLanguage === "en" ? "1px solid rgba(16,185,129,0.5)" : "1px solid rgba(148,163,184,0.22)",
-                      background: foundationLanguage === "en" ? "rgba(16,185,129,0.16)" : "rgba(15,23,42,0.65)",
-                      color: foundationLanguage === "en" ? "#d1fae5" : "#cbd5e1",
-                      borderRadius: 999,
-                      fontSize: "0.62rem",
-                      fontWeight: 800,
-                      letterSpacing: "0.06em",
-                      padding: "0.3rem 0.42rem",
-                      minWidth: 40,
-                      lineHeight: 1,
-                      cursor: "pointer",
-                    }}
-                    aria-label="Switch Foundation language to English"
-                  >
-                    ENG
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleFoundationLanguage("sw")}
-                    style={{
-                      border: foundationLanguage === "sw" ? "1px solid rgba(16,185,129,0.5)" : "1px solid rgba(148,163,184,0.22)",
-                      background: foundationLanguage === "sw" ? "rgba(16,185,129,0.16)" : "rgba(15,23,42,0.65)",
-                      color: foundationLanguage === "sw" ? "#d1fae5" : "#cbd5e1",
-                      borderRadius: 999,
-                      fontSize: "0.62rem",
-                      fontWeight: 800,
-                      letterSpacing: "0.06em",
-                      padding: "0.3rem 0.42rem",
-                      minWidth: 40,
-                      lineHeight: 1,
-                      cursor: "pointer",
-                    }}
-                    aria-label="Switch Foundation language to Swahili"
-                  >
-                    SWA
-                  </button>
-                </div>
-
-                {/* Progress bar (desktop + mobile) */}
-                <div style={{ alignItems: "center", display: "flex" }}>
-                  <div style={{
-                    width: isMobile ? 92 : 132,
-                    height: 6,
-                    background: "rgba(255,255,255,0.08)",
-                    borderRadius: 99,
-                    overflow: "hidden",
-                  }}>
-                    <div style={{
-                      width: `${progress}%`,
-                      height: "100%",
-                      background: "linear-gradient(90deg,#34d399,#22c55e)",
-                      transition: "width 0.35s ease",
-                    }} />
-                  </div>
-                </div>
-
                 {/* Notification bell (opens FoundationCommandCenter drawer) */}
                 <button
                   type="button"
@@ -638,7 +568,58 @@ export default function Header() {
 
           <SignedIn>
             {isFoundation ? (
-              <IdentityNudge isFoundation={isFoundation} />
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {/* Language switch — compact, right of bell, beside identity nudge */}
+                <div style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 2,
+                  padding: "0.15rem",
+                  border: "1px solid rgba(148,163,184,0.22)",
+                  borderRadius: 999,
+                  background: "rgba(255,255,255,0.04)",
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => handleFoundationLanguage("en")}
+                    style={{
+                      border: foundationLanguage === "en" ? "1px solid rgba(16,185,129,0.45)" : "1px solid transparent",
+                      background: foundationLanguage === "en" ? "rgba(16,185,129,0.14)" : "transparent",
+                      color: foundationLanguage === "en" ? "#d1fae5" : "#94a3b8",
+                      borderRadius: 999,
+                      fontSize: "0.55rem",
+                      fontWeight: 800,
+                      letterSpacing: "0.05em",
+                      padding: "0.22rem 0.38rem",
+                      lineHeight: 1,
+                      cursor: "pointer",
+                    }}
+                    aria-label="Switch Foundation language to English"
+                  >
+                    ENG
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleFoundationLanguage("sw")}
+                    style={{
+                      border: foundationLanguage === "sw" ? "1px solid rgba(16,185,129,0.45)" : "1px solid transparent",
+                      background: foundationLanguage === "sw" ? "rgba(16,185,129,0.14)" : "transparent",
+                      color: foundationLanguage === "sw" ? "#d1fae5" : "#94a3b8",
+                      borderRadius: 999,
+                      fontSize: "0.55rem",
+                      fontWeight: 800,
+                      letterSpacing: "0.05em",
+                      padding: "0.22rem 0.38rem",
+                      lineHeight: 1,
+                      cursor: "pointer",
+                    }}
+                    aria-label="Switch Foundation language to Swahili"
+                  >
+                    SWA
+                  </button>
+                </div>
+                <IdentityNudge isFoundation={isFoundation} />
+              </div>
             ) : (
               <div className="hidden md:block">
                 <IdentityNudge isFoundation={isFoundation} />

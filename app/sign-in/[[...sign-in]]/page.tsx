@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SignIn } from "@clerk/nextjs";
 import SmartBrand from "../../components/SmartBrand";
 import "../../growthhub/page.css";
@@ -36,6 +37,20 @@ export default function SignInPage() {
           },
         }}
       />
+      <div style={{ textAlign: "center", marginTop: 12, fontSize: "0.8rem", color: "#94a3b8", display: "flex", flexDirection: "column", gap: 6 }}>
+        <p style={{ margin: 0 }}>
+          Foundation user?{" "}
+          <Link href="/foundation-login" style={{ color: "#10b981", fontWeight: 600, textDecoration: "none" }}>
+            Use the Foundation entry →
+          </Link>
+        </p>
+        <p style={{ margin: 0 }}>
+          Hirely Coach user?{" "}
+          <Link href="/coach-login" style={{ color: "#60a5fa", fontWeight: 600, textDecoration: "none" }}>
+            Use the Coach entry →
+          </Link>
+        </p>
+      </div>
     </main>
   );
 }
