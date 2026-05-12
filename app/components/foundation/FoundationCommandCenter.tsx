@@ -12,7 +12,6 @@ import {
   getFoundationLanguagePref,
   getFoundationProfile,
   hydrateFoundationState,
-  setFoundationLanguagePref,
 } from "@/app/lib/foundationProgress";
 import type { FoundationInboxItem } from "@/app/lib/foundationInbox";
 
@@ -48,6 +47,7 @@ const UI_TEXT = {
     minAgo: "m ago",
     hourAgo: "h ago",
     dayAgo: "d ago",
+    unread: "unread",
   },
   sw: {
     drawerTitle: "Taarifa",
@@ -57,11 +57,12 @@ const UI_TEXT = {
     swahili: "Kiswahili",
     empty: "Hakuna taarifa mpya kwa sasa.",
     learner: "Mwanafunzi",
-    closeInboxAria: "Funga kikasha",
+    closeInboxAria: "Funga ujumbe",
     justNow: "sasa hivi",
     minAgo: "dk zilizopita",
     hourAgo: "saa zilizopita",
     dayAgo: "siku zilizopita",
+    unread: "hazijasomwa",
   },
 } as const;
 
@@ -107,7 +108,7 @@ export default function FoundationCommandCenter() {
   const router = useRouter();
   const { user } = useUser();
   const [open, setOpen] = useState(false);
-  const [language, setLanguage] = useState<"en" | "sw">(getFoundationLanguagePref());
+  const [language, setLanguage] = useState<"en" | "sw">("en");
   const [notifications, setNotifications] = useState<FoundationInboxItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showIosA2hsPrompt, setShowIosA2hsPrompt] = useState(false);
@@ -119,21 +120,41 @@ export default function FoundationCommandCenter() {
 
   async function loadState() {
     try {
-      const [modeRes, inboxRes] = await Promise.all([
-        fetch("/api/user/mode").then((res) => res.json() as Promise<ModeResponse>),
-        fetch("/api/user/foundation-inbox").then((res) => res.json() as Promise<{ notifications: FoundationInboxItem[]; unreadCount: number }>),
+      const [modeResponse, inboxResponse] = await Promise.all([
+        fetch("/api/user/mode").catch(() => null),
+        fetch("/api/user/foundation-inbox").catch(() => null),
       ]);
 
-      hydrateFoundationState({
-        mode: modeRes.current_mode,
-        progress: modeRes.foundation_progress,
-        profile: modeRes.foundation_profile,
-        override: modeRes.foundation_override,
-      });
+      const fallbackProfile = getFoundationProfile();
 
-      setLanguage(modeRes.foundation_profile.language_pref === "en" ? "en" : "sw");
-      setNotifications(inboxRes.notifications);
-      setUnreadCount(inboxRes.unreadCount);
+      let modeRes: ModeResponse | null = null;
+      if (modeResponse?.ok) {
+        modeRes = await modeResponse.json().catch(() => null) as ModeResponse | null;
+      }
+
+      if (modeRes?.foundation_profile) {
+        hydrateFoundationState({
+          mode: modeRes.current_mode,
+          progress: modeRes.foundation_progress,
+          profile: modeRes.foundation_profile,
+          override: modeRes.foundation_override,
+        });
+        setLanguage(modeRes.foundation_profile.language_pref === "en" ? "en" : "sw");
+      } else {
+        setLanguage(fallbackProfile.languagePref);
+      }
+
+      let inboxRes: { notifications: FoundationInboxItem[]; unreadCount: number } | null = null;
+      if (inboxResponse?.ok) {
+        inboxRes = await inboxResponse.json().catch(() => null) as { notifications: FoundationInboxItem[]; unreadCount: number } | null;
+      }
+      if (!inboxRes) {
+        return;
+      }
+
+      setNotifications(Array.isArray(inboxRes.notifications) ? inboxRes.notifications : []);
+      setUnreadCount(Number.isFinite(inboxRes.unreadCount) ? inboxRes.unreadCount : 0);
+      window.dispatchEvent(new CustomEvent("hirely:unread-count", { detail: { count: Number.isFinite(inboxRes.unreadCount) ? inboxRes.unreadCount : 0 } }));
 
       // Auto-seed welcome notification for brand-new learners
       if (initialLoadRef.current && inboxRes.notifications.length === 0) {
@@ -187,6 +208,10 @@ export default function FoundationCommandCenter() {
       setOpen(true);
       void loadState();
     };
+    const handleToggleInbox = () => {
+      setOpen((prev) => !prev);
+      void loadState();
+    };
     const handleVisibilityRefresh = () => {
       if (document.visibilityState === "visible") {
         void loadState();
@@ -208,6 +233,7 @@ export default function FoundationCommandCenter() {
     window.addEventListener(FOUNDATION_PROFILE_EVENT, syncLocal);
     window.addEventListener(FOUNDATION_INBOX_EVENT, handleInboxRefresh);
     window.addEventListener("foundation:open-inbox", handleOpenInbox);
+    window.addEventListener("foundation:toggle-inbox", handleToggleInbox);
     window.addEventListener("focus", handleInboxRefresh);
     document.addEventListener("visibilitychange", handleVisibilityRefresh);
     syncLocal();
@@ -225,6 +251,7 @@ export default function FoundationCommandCenter() {
       window.removeEventListener(FOUNDATION_PROFILE_EVENT, syncLocal);
       window.removeEventListener(FOUNDATION_INBOX_EVENT, handleInboxRefresh);
       window.removeEventListener("foundation:open-inbox", handleOpenInbox);
+      window.removeEventListener("foundation:toggle-inbox", handleToggleInbox);
       window.removeEventListener("focus", handleInboxRefresh);
       document.removeEventListener("visibilitychange", handleVisibilityRefresh);
     };
@@ -256,33 +283,8 @@ export default function FoundationCommandCenter() {
     router.push(item.href);
   }
 
-  async function toggleLanguage(next: "en" | "sw") {
-    setLanguage(next);
-    setFoundationLanguagePref(next);
-  }
-
   return (
     <div style={styles.shell}>
-      <div style={styles.globalLanguageDock}>
-        <p style={styles.globalLanguageLabel}>{copy.languageLabel}</p>
-        <div style={styles.globalLanguageActions}>
-          <button
-            type="button"
-            style={{ ...styles.globalLanguageBtn, ...(language === "en" ? styles.globalLanguageBtnActive : {}) }}
-            onClick={() => void toggleLanguage("en")}
-          >
-            {copy.english}
-          </button>
-          <button
-            type="button"
-            style={{ ...styles.globalLanguageBtn, ...(language === "sw" ? styles.globalLanguageBtnActive : {}) }}
-            onClick={() => void toggleLanguage("sw")}
-          >
-            {copy.swahili}
-          </button>
-        </div>
-      </div>
-
       {showIosA2hsPrompt && (
         <div style={styles.a2hsPrompt}>
           <p style={styles.a2hsText}>
@@ -296,41 +298,19 @@ export default function FoundationCommandCenter() {
 
       <AnimatePresence>
         {open && (
-          <>
-            <motion.button
-              type="button"
-              aria-label={copy.closeInboxAria}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={styles.scrim}
-              onClick={() => setOpen(false)}
-            />
-            <motion.aside
-              initial={{ opacity: 0, x: 26 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 26 }}
-              transition={{ duration: 0.18 }}
-              style={styles.drawer}
-            >
+          <motion.aside
+            initial={{ opacity: 0, x: 26 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 26 }}
+            transition={{ duration: 0.18 }}
+            style={styles.drawer}
+          >
               <div style={styles.drawerTop}>
-                <p style={styles.drawerTitle}>{copy.drawerTitle}</p>
-                <div style={styles.languagePill}>
-                  <button
-                    type="button"
-                    style={{ ...styles.languageBtn, ...(language === "en" ? styles.languageBtnActive : {}) }}
-                    onClick={() => void toggleLanguage("en")}
-                  >
-                    {copy.english}
-                  </button>
-                  <button
-                    type="button"
-                    style={{ ...styles.languageBtn, ...(language === "sw" ? styles.languageBtnActive : {}) }}
-                    onClick={() => void toggleLanguage("sw")}
-                  >
-                    {copy.swahili}
-                  </button>
+                <div style={styles.drawerTopLeft}>
+                  <p style={styles.drawerTitle}>{copy.drawerTitle}</p>
+                  {unreadCount > 0 && <span style={styles.unreadBadge}>{unreadCount} {copy.unread}</span>}
                 </div>
+                <button type="button" aria-label={copy.closeInboxAria} style={styles.closeButton} onClick={() => setOpen(false)}>×</button>
               </div>
 
               <div style={styles.listHead}>
@@ -371,7 +351,6 @@ export default function FoundationCommandCenter() {
                 />
               </div>
             </motion.aside>
-          </>
         )}
       </AnimatePresence>
     </div>
@@ -382,71 +361,21 @@ const styles: Record<string, CSSProperties> = {
   shell: {
     display: "contents",
   },
-  globalLanguageDock: {
-    position: "fixed",
-    top: "max(12px, env(safe-area-inset-top))",
-    right: 12,
-    zIndex: 42,
-    border: "1px solid rgba(148,163,184,0.28)",
-    borderRadius: 12,
-    background: "rgba(2, 6, 23, 0.86)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
-    boxShadow: "0 10px 26px rgba(0,0,0,0.3)",
-    padding: "0.45rem",
-    display: "grid",
-    gap: 6,
-  },
-  globalLanguageLabel: {
-    margin: 0,
-    color: "#cbd5e1",
-    fontSize: "0.66rem",
-    fontWeight: 700,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase",
-  },
-  globalLanguageActions: {
-    display: "inline-flex",
-    gap: 6,
-  },
-  globalLanguageBtn: {
-    border: "1px solid rgba(148,163,184,0.24)",
-    borderRadius: 8,
-    background: "rgba(15, 23, 42, 0.65)",
-    color: "#cbd5e1",
-    fontSize: "0.72rem",
-    fontWeight: 700,
-    lineHeight: 1,
-    padding: "0.42rem 0.58rem",
-    cursor: "pointer",
-  },
-  globalLanguageBtnActive: {
-    border: "1px solid rgba(16,185,129,0.45)",
-    background: "rgba(16,185,129,0.18)",
-    color: "#d1fae5",
-  },
-  scrim: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0, 0, 0, 0.45)",
-    border: 0,
-    zIndex: 49,
-  },
   drawer: {
     position: "fixed",
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: "min(380px, 100vw)",
-    background: "rgba(26, 26, 26, 0.86)",
-    borderLeftWidth: 1,
-    borderLeftStyle: "solid",
-    borderLeftColor: "#2f2f2f",
+    right: 8,
+    top: "max(60px, calc(env(safe-area-inset-top) + 52px))",
+    bottom: "max(82px, calc(env(safe-area-inset-bottom) + 70px))",
+    width: "min(360px, calc(100vw - 16px))",
+    background: "rgba(15, 23, 42, 0.95)",
+    border: "1px solid rgba(148,163,184,0.24)",
+    borderRadius: 14,
     backdropFilter: "blur(10px)",
     WebkitBackdropFilter: "blur(10px)",
-    zIndex: 50,
+    boxShadow: "0 20px 48px rgba(2, 6, 23, 0.55)",
+    zIndex: 58,
     display: "grid",
-    gridTemplateRows: "auto auto auto 1fr auto",
+    gridTemplateRows: "auto auto 1fr auto",
     gap: 10,
     padding: "0.9rem",
     color: "#e0e0e0",
@@ -457,33 +386,39 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 10,
   },
+  drawerTopLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  },
   drawerTitle: {
     margin: 0,
     fontSize: "0.9rem",
     fontWeight: 700,
     color: "#e0e0e0",
   },
-  languagePill: {
-    display: "inline-flex",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: "#2f2f2f",
-    borderRadius: 4,
-    overflow: "hidden",
-    background: "#1a1a1a",
-  },
-  languageBtn: {
-    border: "none",
-    background: "transparent",
-    color: "#a0a0a0",
-    fontSize: "0.72rem",
+  unreadBadge: {
+    borderRadius: 999,
+    border: "1px solid rgba(245, 158, 11, 0.45)",
+    background: "rgba(245, 158, 11, 0.12)",
+    color: "#fbbf24",
+    fontSize: "0.66rem",
     fontWeight: 700,
-    padding: "0.35rem 0.55rem",
-    cursor: "pointer",
+    padding: "0.16rem 0.45rem",
   },
-  languageBtnActive: {
-    background: "#242424",
-    color: "#e0e0e0",
+  closeButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 999,
+    border: "1px solid rgba(148,163,184,0.24)",
+    background: "rgba(255,255,255,0.04)",
+    color: "#cbd5e1",
+    fontSize: "1rem",
+    lineHeight: 1,
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   categoryTabs: {},
   categoryBtn: {},

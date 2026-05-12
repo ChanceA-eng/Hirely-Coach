@@ -10,8 +10,11 @@ import MobileDrawer from "./MobileDrawer";
 import NotificationItem from "./NotificationItem";
 import type { NotificationRecord } from "@/app/lib/notifications";
 import {
+  FOUNDATION_PROFILE_EVENT,
   getMode,
+  getFoundationLanguagePref,
   setMode,
+  setFoundationLanguagePref,
   getFoundationProgress,
   TOTAL_FOUNDATION_LESSONS,
 } from "../lib/foundationProgress";
@@ -272,6 +275,7 @@ export default function Header() {
   const [coachUnreadCount, setCoachUnreadCount] = useState(0);
   const [coachFeedOpen, setCoachFeedOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [foundationLanguage, setFoundationLanguage] = useState<"en" | "sw">("en");
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 767px)");
@@ -309,6 +313,19 @@ export default function Header() {
     const pct = Math.round((data.completedLessons.length / TOTAL_FOUNDATION_LESSONS) * 100);
     setProgress(Math.max(0, Math.min(100, pct)));
   }, [isFoundation, pathname]);
+
+  useEffect(() => {
+    const syncFoundationLanguage = () => {
+      setFoundationLanguage(getFoundationLanguagePref());
+    };
+    window.addEventListener(FOUNDATION_PROFILE_EVENT, syncFoundationLanguage);
+    return () => window.removeEventListener(FOUNDATION_PROFILE_EVENT, syncFoundationLanguage);
+  }, []);
+
+  function handleFoundationLanguage(next: "en" | "sw") {
+    setFoundationLanguage(next);
+    setFoundationLanguagePref(next);
+  }
 
   useEffect(() => {
     if (!isSignedIn || isFoundation || !isGrowthHubRoute) {
@@ -419,7 +436,7 @@ export default function Header() {
                 className="glass-nav-item foundation-desktop-only"
                 style={{ fontSize: "0.82rem", padding: "6px 14px" }}
               >
-                My Path
+                {foundationLanguage === "sw" ? "Njia" : "My Path"}
               </Link>
               {mode === "coach" && (
                 <Link
@@ -427,7 +444,7 @@ export default function Header() {
                   className="glass-nav-item foundation-desktop-only"
                   style={{ fontSize: "0.82rem", padding: "6px 14px" }}
                 >
-                  GrowthHub
+                  {foundationLanguage === "sw" ? "GrowthHub" : "GrowthHub"}
                 </Link>
               )}
             </>
@@ -449,12 +466,64 @@ export default function Header() {
           <SignedIn>
             {isFoundation ? (
               /* ── FOUNDATION MODE ─────────────────────────────── */
-              <div className="hidden md:flex" style={{ alignItems: "center", gap: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
 
-                {/* Progress bar + percentage */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {/* Language switch in header (desktop + mobile) */}
+                <div style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "0.2rem",
+                  border: "1px solid rgba(148,163,184,0.25)",
+                  borderRadius: 999,
+                  background: "rgba(255,255,255,0.04)",
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => handleFoundationLanguage("en")}
+                    style={{
+                      border: foundationLanguage === "en" ? "1px solid rgba(16,185,129,0.5)" : "1px solid rgba(148,163,184,0.22)",
+                      background: foundationLanguage === "en" ? "rgba(16,185,129,0.16)" : "rgba(15,23,42,0.65)",
+                      color: foundationLanguage === "en" ? "#d1fae5" : "#cbd5e1",
+                      borderRadius: 999,
+                      fontSize: "0.62rem",
+                      fontWeight: 800,
+                      letterSpacing: "0.06em",
+                      padding: "0.3rem 0.42rem",
+                      minWidth: 40,
+                      lineHeight: 1,
+                      cursor: "pointer",
+                    }}
+                    aria-label="Switch Foundation language to English"
+                  >
+                    ENG
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleFoundationLanguage("sw")}
+                    style={{
+                      border: foundationLanguage === "sw" ? "1px solid rgba(16,185,129,0.5)" : "1px solid rgba(148,163,184,0.22)",
+                      background: foundationLanguage === "sw" ? "rgba(16,185,129,0.16)" : "rgba(15,23,42,0.65)",
+                      color: foundationLanguage === "sw" ? "#d1fae5" : "#cbd5e1",
+                      borderRadius: 999,
+                      fontSize: "0.62rem",
+                      fontWeight: 800,
+                      letterSpacing: "0.06em",
+                      padding: "0.3rem 0.42rem",
+                      minWidth: 40,
+                      lineHeight: 1,
+                      cursor: "pointer",
+                    }}
+                    aria-label="Switch Foundation language to Swahili"
+                  >
+                    SWA
+                  </button>
+                </div>
+
+                {/* Progress bar (desktop + mobile) */}
+                <div style={{ alignItems: "center", display: "flex" }}>
                   <div style={{
-                    width: 120,
+                    width: isMobile ? 92 : 132,
                     height: 6,
                     background: "rgba(255,255,255,0.08)",
                     borderRadius: 99,
@@ -467,21 +536,14 @@ export default function Header() {
                       transition: "width 0.35s ease",
                     }} />
                   </div>
-                  <span style={{
-                    fontSize: "0.72rem",
-                    fontWeight: 700,
-                    color: "#d1fae5",
-                    whiteSpace: "nowrap",
-                  }}>
-                    {progress}%
-                  </span>
                 </div>
 
                 {/* Notification bell (opens FoundationCommandCenter drawer) */}
                 <button
                   type="button"
                   aria-label="Open notifications"
-                  onClick={() => window.dispatchEvent(new CustomEvent("foundation:open-inbox"))}
+                  onClick={() => window.dispatchEvent(new CustomEvent("foundation:toggle-inbox"))}
+                  className="hidden md:inline-flex"
                   style={{
                     position: "relative",
                     width: 32,
@@ -491,7 +553,6 @@ export default function Header() {
                     background: "rgba(255,255,255,0.04)",
                     color: "#f59e0b",
                     cursor: "pointer",
-                    display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
                   }}

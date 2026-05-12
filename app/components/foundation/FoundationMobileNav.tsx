@@ -5,9 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import {
+  FOUNDATION_PROFILE_EVENT,
+  getFoundationLanguagePref,
   getMode,
-  getFoundationProgress,
-  TOTAL_FOUNDATION_LESSONS,
 } from "@/app/lib/foundationProgress";
 
 export default function FoundationMobileNav() {
@@ -15,16 +15,16 @@ export default function FoundationMobileNav() {
   const { isSignedIn } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [isCoachUser, setIsCoachUser] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [language, setLanguage] = useState<"en" | "sw">("en");
+
+  const copy = language === "sw"
+    ? { myPath: "Masomo", inbox: "Ujumbe", growthHub: "Ukuaji", notificationsAria: "Taarifa", unreadSuffix: "hazijasomwa" }
+    : { myPath: "My Path", inbox: "Inbox", growthHub: "GrowthHub", notificationsAria: "Notifications", unreadSuffix: "unread" };
 
   useEffect(() => {
     // Load local state immediately
     const localMode = getMode();
     setIsCoachUser(localMode === "coach");
-
-    const fp = getFoundationProgress();
-    const pct = Math.round((fp.completedLessons.length / TOTAL_FOUNDATION_LESSONS) * 100);
-    setProgress(Math.max(0, Math.min(100, pct)));
 
     // Initial unread count fetch
     if (isSignedIn) {
@@ -41,17 +41,14 @@ export default function FoundationMobileNav() {
     }
     window.addEventListener("hirely:unread-count", handleCount);
 
-    // Listen for progress updates
-    function handleProgress() {
-      const fp2 = getFoundationProgress();
-      const pct2 = Math.round((fp2.completedLessons.length / TOTAL_FOUNDATION_LESSONS) * 100);
-      setProgress(Math.max(0, Math.min(100, pct2)));
+    function handleLanguagePref() {
+      setLanguage(getFoundationLanguagePref());
     }
-    window.addEventListener("foundation:progress-updated", handleProgress);
+    window.addEventListener(FOUNDATION_PROFILE_EVENT, handleLanguagePref);
 
     return () => {
       window.removeEventListener("hirely:unread-count", handleCount);
-      window.removeEventListener("foundation:progress-updated", handleProgress);
+      window.removeEventListener(FOUNDATION_PROFILE_EVENT, handleLanguagePref);
     };
   }, [isSignedIn]);
 
@@ -104,71 +101,15 @@ export default function FoundationMobileNav() {
             <path d="M10 20v-5h4v5" />
           </svg>
           <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
-            My Path
+            {copy.myPath}
           </span>
         </Link>
-
-        {/* My Progress */}
-        <button
-          type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent("foundation:open-inbox"))}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            flex: 1,
-            minHeight: 48,
-            gap: 3,
-            color: "#94a3b8",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            borderRadius: 10,
-          }}
-        >
-          <div style={{ position: "relative", width: 22, height: 22 }}>
-            <svg width="22" height="22" viewBox="0 0 22 22" style={{ transform: "rotate(-90deg)" }}>
-              <circle
-                cx="11" cy="11" r="8.5"
-                fill="none"
-                stroke="rgba(255,255,255,0.1)"
-                strokeWidth="2.5"
-              />
-              <circle
-                cx="11" cy="11" r="8.5"
-                fill="none"
-                stroke="#34d399"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 8.5}`}
-                strokeDashoffset={`${2 * Math.PI * 8.5 * (1 - progress / 100)}`}
-              />
-            </svg>
-            <span style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "6px",
-              fontWeight: 800,
-              color: "#d1fae5",
-              lineHeight: 1,
-            }}>
-              {progress}%
-            </span>
-          </div>
-          <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
-            Progress
-          </span>
-        </button>
 
         {/* Notifications */}
         <button
           type="button"
-          aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
-          onClick={() => window.dispatchEvent(new CustomEvent("foundation:open-inbox"))}
+          aria-label={`${copy.notificationsAria}${unreadCount > 0 ? `, ${unreadCount} ${copy.unreadSuffix}` : ""}`}
+          onClick={() => window.dispatchEvent(new CustomEvent("foundation:toggle-inbox"))}
           style={{
             display: "flex",
             flexDirection: "column",
@@ -212,7 +153,7 @@ export default function FoundationMobileNav() {
             )}
           </div>
           <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
-            Inbox
+            {copy.inbox}
           </span>
         </button>
 
@@ -239,7 +180,7 @@ export default function FoundationMobileNav() {
               <path d="M10 20v-6h4v6" />
             </svg>
             <span style={{ fontSize: "9px", fontWeight: 600, letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
-              GrowthHub
+              {copy.growthHub}
             </span>
           </Link>
         )}

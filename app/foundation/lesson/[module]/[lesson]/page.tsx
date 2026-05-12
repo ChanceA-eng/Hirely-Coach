@@ -80,6 +80,25 @@ const LESSON_UI = {
     previous: "Previous",
     skip: "Skip",
     graduate: "Graduate",
+    surveyTitle: "30-Second Survey",
+    surveyIntro: "Before your success animation, tell us how this module felt.",
+    surveyQ1: "1) On a scale of 1-5, how clear were the Swahili instructions?",
+    surveyQ2: "2) Did the pronunciation guide help you speak the words out loud?",
+    surveyQ3: "3) Was there anything confusing on this page?",
+    surveyPlaceholder: "Tell us what felt confusing or type 'No'.",
+    surveyYes: "Yes",
+    surveyNo: "No",
+    submitSurvey: "Submit Survey",
+    saving: "Saving...",
+    surveyRequired: "Please complete all 3 questions before continuing.",
+    surveyFailed: "Could not save your survey right now. Please try again.",
+    moduleComplete: "Module Complete",
+    moduleUnlocked: "Great work. You unlocked the next module.",
+    moduleReadyNow: "is ready now.",
+    startNow: "Start",
+    now: "Now",
+    close: "Close",
+    closeCompletionModal: "Close completion modal",
   },
   sw: {
     loading: "Inapakia somo...",
@@ -94,6 +113,25 @@ const LESSON_UI = {
     previous: "Lililopita",
     skip: "Ruka",
     graduate: "Hitimu",
+    surveyTitle: "Maoni ya Sekunde 30",
+    surveyIntro: "Kabla ya kuona ushindi wako, tuambie kipengele hiki kimekuaje.",
+    surveyQ1: "1) Kwa kiwango cha 1-5, maelekezo ya Kiswahili yalikuwa wazi kiasi gani?",
+    surveyQ2: "2) Mwongozo wa matamshi ulikusaidia kusema maneno kwa sauti?",
+    surveyQ3: "3) Kulikuwa na sehemu yoyote iliyokuwa ngumu kuelewa kwenye ukurasa huu?",
+    surveyPlaceholder: "Andika kilichokuchanganya au andika 'Hapana'.",
+    surveyYes: "Ndio",
+    surveyNo: "Hapana",
+    submitSurvey: "Tuma Dodoso",
+    saving: "Inahifadhi...",
+    surveyRequired: "Tafadhali jibu maswali yote 3 kabla ya kuendelea.",
+    surveyFailed: "Haikuwezekana kuhifadhi dodoso sasa hivi. Jaribu tena.",
+    moduleComplete: "Kipengele Kimekamilika",
+    moduleUnlocked: "Hongera. Umefungua kipengele kinachofuata.",
+    moduleReadyNow: "kiko tayari sasa.",
+    startNow: "Anza",
+    now: "Sasa",
+    close: "Funga",
+    closeCompletionModal: "Funga dirisha la kukamilisha",
   },
 } as const;
 
@@ -116,8 +154,8 @@ export default function LessonPage() {
   const lessonId = String(params?.lesson ?? "1-1");
 
   const [moduleData, setModuleData] = useState<ModuleData | null>(null);
-  const [languagePref, setLanguagePref] = useState<"en" | "sw">(getFoundationLanguagePref());
-  const [showSw, setShowSw] = useState(getFoundationLanguagePref() === "sw");
+  const [languagePref, setLanguagePref] = useState<"en" | "sw">("en");
+  const [showSw, setShowSw] = useState(false);
   const [completionModalOpen, setCompletionModalOpen] = useState(false);
   const [moduleSurveyOpen, setModuleSurveyOpen] = useState(false);
   const [completedModuleForSurvey, setCompletedModuleForSurvey] = useState<number | null>(null);
@@ -133,7 +171,6 @@ export default function LessonPage() {
     const syncLanguage = () => {
       const next = getFoundationLanguagePref();
       setLanguagePref(next);
-      setShowSw(next === "sw");
     };
 
     window.addEventListener(FOUNDATION_PROFILE_EVENT, syncLanguage);
@@ -194,7 +231,7 @@ export default function LessonPage() {
   async function submitModuleSurvey() {
     if (!completedModuleForSurvey) return;
     if (!surveyClarity || !surveyPronunciationHelped || surveyConfusing.trim().length < 2) {
-      setSurveyError("Please complete all 3 questions before continuing.");
+      setSurveyError(copy.surveyRequired);
       return;
     }
 
@@ -232,7 +269,7 @@ export default function LessonPage() {
         router.push("/foundation");
       }
     } catch {
-      setSurveyError("Could not save your survey right now. Please try again.");
+      setSurveyError(copy.surveyFailed);
     } finally {
       setSurveySaving(false);
     }
@@ -320,11 +357,11 @@ export default function LessonPage() {
       {moduleSurveyOpen && (
         <div className="lp-survey-shell" role="dialog" aria-modal="true" aria-labelledby="module-survey-title">
           <div className="lp-survey-card">
-            <p className="lp-completion-eyebrow">30-Second Survey</p>
-            <h2 id="module-survey-title" className="lp-completion-title">Before your success animation, tell us how this module felt.</h2>
+            <p className="lp-completion-eyebrow">{copy.surveyTitle}</p>
+            <h2 id="module-survey-title" className="lp-completion-title">{copy.surveyIntro}</h2>
 
             <div className="lp-survey-block">
-              <p className="lp-survey-label">1) On a scale of 1-5, how clear were the Swahili instructions?</p>
+              <p className="lp-survey-label">{copy.surveyQ1}</p>
               <div className="lp-survey-scale" role="radiogroup" aria-label="Swahili instruction clarity">
                 {[1, 2, 3, 4, 5].map((score) => (
                   <button
@@ -340,33 +377,33 @@ export default function LessonPage() {
             </div>
 
             <div className="lp-survey-block">
-              <p className="lp-survey-label">2) Did the pronunciation guide help you speak the words out loud?</p>
+              <p className="lp-survey-label">{copy.surveyQ2}</p>
               <div className="lp-survey-scale">
                 <button
                   type="button"
                   className={`lp-survey-chip ${surveyPronunciationHelped === "yes" ? "lp-survey-chip--on" : ""}`}
                   onClick={() => setSurveyPronunciationHelped("yes")}
                 >
-                  Yes
+                  {copy.surveyYes}
                 </button>
                 <button
                   type="button"
                   className={`lp-survey-chip ${surveyPronunciationHelped === "no" ? "lp-survey-chip--on" : ""}`}
                   onClick={() => setSurveyPronunciationHelped("no")}
                 >
-                  No
+                  {copy.surveyNo}
                 </button>
               </div>
             </div>
 
             <div className="lp-survey-block">
               <label className="lp-survey-label" htmlFor="module-survey-confusing">
-                3) Was there anything confusing on this page?
+                {copy.surveyQ3}
               </label>
               <textarea
                 id="module-survey-confusing"
                 className="lp-survey-textarea"
-                placeholder="Tell us what felt confusing or type 'No'."
+                placeholder={copy.surveyPlaceholder}
                 value={surveyConfusing}
                 onChange={(event) => setSurveyConfusing(event.target.value)}
               />
@@ -375,7 +412,7 @@ export default function LessonPage() {
             {surveyError && <p className="lp-survey-error">{surveyError}</p>}
 
             <button type="button" className="lp-nav-btn lp-nav-btn--grad" onClick={() => void submitModuleSurvey()} disabled={surveySaving}>
-              {surveySaving ? "Saving..." : "Submit Survey"}
+              {surveySaving ? copy.saving : copy.submitSurvey}
             </button>
           </div>
         </div>
@@ -386,29 +423,29 @@ export default function LessonPage() {
           <button
             type="button"
             className="lp-completion-backdrop"
-            aria-label="Close completion modal"
+            aria-label={copy.closeCompletionModal}
             onClick={() => setCompletionModalOpen(false)}
           />
           <div className="lp-completion-card">
             <button
               type="button"
               className="lp-completion-close"
-              aria-label="Close completion modal"
+              aria-label={copy.closeCompletionModal}
               onClick={() => setCompletionModalOpen(false)}
             >
               ×
             </button>
-            <p className="lp-completion-eyebrow">Module Complete</p>
-            <h2 id="module-complete-title" className="lp-completion-title">Great work. You unlocked the next module.</h2>
+            <p className="lp-completion-eyebrow">{copy.moduleComplete}</p>
+            <h2 id="module-complete-title" className="lp-completion-title">{copy.moduleUnlocked}</h2>
             <p className="lp-completion-copy">
-              Module {moduleNum + 1}, <strong>{nextModule.title}</strong>, is ready now.
+              {copy.moduleLabel} {moduleNum + 1}, <strong>{nextModule.title}</strong>, {copy.moduleReadyNow}
             </p>
             <div className="lp-completion-actions">
               <Link href={`/foundation/lesson/${nextModule.num}/${nextModule.firstLesson}`} className="lp-nav-btn lp-nav-btn--grad">
-                Start {nextModule.title} Now
+                {copy.startNow} {nextModule.title} {copy.now}
               </Link>
               <button type="button" className="lp-nav-btn lp-nav-btn--prev" onClick={() => setCompletionModalOpen(false)}>
-                Close
+                {copy.close}
               </button>
             </div>
           </div>

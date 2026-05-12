@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import FoundationCommandCenter from "./FoundationCommandCenter";
 import {
+  FOUNDATION_PROFILE_EVENT,
   FOUNDATION_PROGRESS_EVENT,
+  getFoundationLanguagePref,
   getFoundationProgress,
   getModuleScore,
   isModuleComplete,
@@ -162,11 +164,46 @@ export default function PathMap() {
   const searchParams = useSearchParams();
   const [progress, setProgress] = useState<FoundationProgress | null>(null);
   const [moduleLocks, setModuleLocks] = useState<Record<number, ModuleLockSummary>>({});
+  const [languagePref, setLanguagePref] = useState<"en" | "sw">("en");
+
+  const copy = languagePref === "sw"
+    ? {
+        eyebrow: "Foundation Mode · Njia yako ya kujifunza",
+        titleDone: "🎓 Foundation Imekamilika!",
+        titleActive: "Safari yako ya umilisi wa masomo",
+        subDone: "Umekamilisha moduli zote 12. Uko tayari kuhitimu.",
+        subActive: "Songa somo kwa somo, fungua kipengele kinachofuata, na uendelee na mwongozo wa Sofia.",
+        module: "Kipengele cha",
+        lessons: "masomo",
+        review: "Pitia",
+        continue: "Endelea →",
+        start: "Anza →",
+        watchVideo: "Tazama Video",
+        completePrevious: "Kamilisha kipengele cha",
+        first: "kwanza",
+      }
+    : {
+        eyebrow: "Foundation Mode · Your Learning Path",
+        titleDone: "🎓 Foundation Complete!",
+        titleActive: "Your Journey to Lesson Mastery",
+        subDone: "You have completed all 12 modules. You are ready to graduate.",
+        subActive: "Move lesson by lesson, unlock the next module, and keep Sofia's lesson guidance close.",
+        module: "Module",
+        lessons: "lessons",
+        review: "Review",
+        continue: "Continue →",
+        start: "Start →",
+        watchVideo: "Watch Video",
+        completePrevious: "Complete Module",
+        first: "first",
+      };
 
   useEffect(() => {
     const syncProgress = () => setProgress(getFoundationProgress());
+    const syncLanguage = () => setLanguagePref(getFoundationLanguagePref());
     syncProgress();
     window.addEventListener(FOUNDATION_PROGRESS_EVENT, syncProgress);
+    window.addEventListener(FOUNDATION_PROFILE_EVENT, syncLanguage);
 
     fetch("/api/foundation/module-locks")
       .then((response) => response.json() as Promise<ModuleLockSummary[]>)
@@ -177,6 +214,7 @@ export default function PathMap() {
 
     return () => {
       window.removeEventListener(FOUNDATION_PROGRESS_EVENT, syncProgress);
+      window.removeEventListener(FOUNDATION_PROFILE_EVENT, syncLanguage);
     };
   }, []);
 
@@ -193,14 +231,12 @@ export default function PathMap() {
       <FoundationCommandCenter />
 
       <div className="pm-header">
-        <p className="pm-eyebrow">Foundation Mode · Your Learning Path</p>
+        <p className="pm-eyebrow">{copy.eyebrow}</p>
         <h1 className="pm-title">
-          {allDone ? "🎓 Foundation Complete!" : "Your Journey to Lesson Mastery"}
+          {allDone ? copy.titleDone : copy.titleActive}
         </h1>
         <p className="pm-sub">
-          {allDone
-            ? "You have completed all 12 modules. You are ready to graduate."
-            : "Move lesson by lesson, unlock the next module, and keep Sofia's lesson guidance close."}
+          {allDone ? copy.subDone : copy.subActive}
         </p>
       </div>
 
@@ -229,19 +265,19 @@ export default function PathMap() {
                   <div className="pm-module-icon">
                     {complete ? "✅" : !unlocked ? "🔒" : mod.icon}
                   </div>
-                  <div className="pm-module-num">Module {mod.num}</div>
+                  <div className="pm-module-num">{copy.module} {mod.num}</div>
                 </div>
 
                 <div className="pm-module-info">
-                  <h3 className="pm-module-title">{mod.title}</h3>
-                  <p className="pm-module-title-sw">{mod.title_sw}</p>
+                  <h3 className="pm-module-title">{languagePref === "sw" ? mod.title_sw : mod.title}</h3>
+                  <p className="pm-module-title-sw">{languagePref === "sw" ? mod.title : mod.title_sw}</p>
                   <p className="pm-module-desc">{mod.description}</p>
                   {unlocked && !complete && (
                     <div className="pm-module-progress">
                       <div className="pm-module-bar">
                         <div className="pm-module-fill" style={{ width: `${lessonPct}%` }} />
                       </div>
-                      <span className="pm-module-pct">{completedLessons}/{mod.totalLessons} lessons</span>
+                      <span className="pm-module-pct">{completedLessons}/{mod.totalLessons} {copy.lessons}</span>
                     </div>
                   )}
                   {complete && score !== null && <p className="pm-module-score">Assessment score: {score}%</p>}
@@ -254,7 +290,7 @@ export default function PathMap() {
                         href={`/foundation/lesson/${mod.num}/${mod.firstLesson}`}
                         className={`pm-btn ${complete ? "pm-btn--review" : "pm-btn--start"}`}
                       >
-                        {complete ? "Review" : completedLessons > 0 ? "Continue →" : "Start →"}
+                        {complete ? copy.review : completedLessons > 0 ? copy.continue : copy.start}
                       </Link>
                       {moduleLocks[mod.num]?.videoUrl && (
                         <button
@@ -262,12 +298,12 @@ export default function PathMap() {
                           className="pm-btn pm-btn--video"
                           onClick={() => router.push(`/foundation/home?video=${mod.num}`)}
                         >
-                          Watch Video
+                          {copy.watchVideo}
                         </button>
                       )}
                     </div>
                   ) : (
-                    <span className="pm-locked-msg">Complete Module {mod.num - 1} first</span>
+                    <span className="pm-locked-msg">{copy.completePrevious} {mod.num - 1} {copy.first}</span>
                   )}
                 </div>
               </div>

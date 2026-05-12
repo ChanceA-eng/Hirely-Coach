@@ -1614,7 +1614,7 @@ function PhoneticCardSection({ lesson, showSwahili, onComplete, moduleNum }: { l
         showSwahili={showSwahili}
       />
       <button className="lr-complete-btn" onClick={markDone}>
-        ✅ Mark as Learned — Next Lesson →
+        {showSwahili ? "✅ Imejifunza — Endelea →" : "✅ Mark as Learned — Next Lesson →"}
       </button>
       <style>{`
         .lr-section { display: flex; flex-direction: column; gap: 1rem; }
@@ -1972,7 +1972,7 @@ function LessonCardSection({ lesson, showSwahili, onComplete, moduleNum }: { les
         </div>
       ))}
 
-      <button className="lr-complete-btn" onClick={markDone}>✅ Got it — Next Lesson →</button>
+      <button className="lr-complete-btn" onClick={markDone}>{showSwahili ? "✅ Nimeelewa — Endelea →" : "✅ Got it — Next Lesson →"}</button>
 
       <style>{`
         .lc-wrap { display: flex; flex-direction: column; gap: 1rem; }

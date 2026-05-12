@@ -233,26 +233,25 @@ export default function HelpPage() {
         {!isSearching && (
           <>
             <div className="hc-section-label">Browse by Topic</div>
-            <div className="hc-cat-grid">
+            <div className="hc-filter-row" role="tablist" aria-label="Help topic filters">
+              <button
+                type="button"
+                className={`hc-filter-chip${activeCategory === null ? " hc-filter-chip--active" : ""}`}
+                onClick={() => setActiveCategory(null)}
+              >
+                All
+              </button>
               {HELP_CATEGORIES.map((cat) => (
                 <button
                   key={cat.id}
                   type="button"
-                  className={`hc-cat-card${activeCategory === cat.id ? " hc-cat-card--active" : ""}`}
+                  className={`hc-filter-chip${activeCategory === cat.id ? " hc-filter-chip--active" : ""}`}
                   onClick={() =>
                     setActiveCategory((prev) => (prev === cat.id ? null : cat.id))
                   }
-                  style={
-                    activeCategory === cat.id
-                      ? { borderColor: `${cat.color}66`, background: `${cat.color}0d` }
-                      : undefined
-                  }
                 >
-                  <span className="hc-cat-icon" style={{ color: cat.color }}>
-                    {cat.icon}
-                  </span>
-                  <span className="hc-cat-name">{cat.label}</span>
-                  <span className="hc-cat-desc">{cat.description}</span>
+                  <span className="hc-filter-dot" style={{ background: cat.color }} />
+                  {cat.label}
                 </button>
               ))}
             </div>

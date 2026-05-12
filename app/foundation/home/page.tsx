@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
+  FOUNDATION_PROFILE_EVENT,
   FOUNDATION_PROGRESS_EVENT,
+  getFoundationLanguagePref,
   TOTAL_MODULE_SEQUENCE,
   type FoundationProgress,
 } from "@/app/lib/foundationProgress";
@@ -14,18 +16,18 @@ import "./page.css";
 
 // ─── Module catalogue (matches PathMap + lesson router) ──────────────────
 const MODULES = [
-  { num: 1,  title: "The Sounds of Success",         title_sw: "Sauti za Mafanikio",               icon: "🔤", color: "#34d399", firstLesson: "1-1",  totalLessons: 26, description: "Phonics, the alphabet, and pronunciation" },
-  { num: 2,  title: "Numbers and Colors",             title_sw: "Namba na Rangi",                    icon: "🔢", color: "#818cf8", firstLesson: "2-1",  totalLessons: 2,  description: "Count confidently and describe colors with visual examples" },
-  { num: 3,  title: "Sound Mastery Lab",              title_sw: "Maabara ya Umilisi wa Sauti",       icon: "🗣", color: "#f59e0b", firstLesson: "3-1",  totalLessons: 4,  description: "Short and long vowels, digraphs, blends, and pronunciation tools" },
-  { num: 4,  title: "Pronouns and Verbs",             title_sw: "Viwakilishi na Vitenzi",            icon: "🧠", color: "#f97316", firstLesson: "4-1",  totalLessons: 10, description: "Build sentence fluency with pronouns, verbs, and guided dialogues" },
-  { num: 5,  title: "Food and Shopping",              title_sw: "Chakula na Ununuzi",                icon: "🛒", color: "#ec4899", firstLesson: "5-1",  totalLessons: 4,  description: "Food, shopping vocabulary, and real-world scenarios" },
-  { num: 6,  title: "The Professional Vocabulary",    title_sw: "Msamiati wa Kitaaluma",             icon: "💼", color: "#f59e0b", firstLesson: "6-1",  totalLessons: 6,  description: "Office language, power verbs, and work communication" },
-  { num: 7,  title: "Conversation Confidence",        title_sw: "Ujasiri wa Mazungumzo",             icon: "🎤", color: "#f472b6", firstLesson: "7-1",  totalLessons: 6,  description: "Dialogues, listening, speaking practice, and module completion" },
-  { num: 8,  title: "Weather and Feelings",           title_sw: "Hali ya Hewa na Hisia",             icon: "🌤️", color: "#06b6d4", firstLesson: "8-1",  totalLessons: 4,  description: "Learn weather vocabulary and how to express emotions" },
-  { num: 9,  title: "Directions and Community",       title_sw: "Maelekezo na Mtaani",               icon: "🗺️", color: "#8b5cf6", firstLesson: "9-1",  totalLessons: 4,  description: "Learn how to ask for and give directions in your community" },
-  { num: 10, title: "Introducing Yourself",           title_sw: "Kujitambulisha",                    icon: "👋", color: "#ec4899", firstLesson: "10-1", totalLessons: 4,  description: "Introduce yourself, your work, and describe what you do" },
-  { num: 11, title: "Interview Essentials",           title_sw: "Misingi ya Mahojiano",              icon: "🎯", color: "#818cf8", firstLesson: "11-1", totalLessons: 7,  description: "Interview vocabulary, dialogues, workplace phrases, and final assessment" },
-  { num: 12, title: "Exit Exam",                      title_sw: "Mtihani wa Kutoka",                 icon: "🏆", color: "#34d399", firstLesson: "12-1", totalLessons: 3,  description: "The final simulation — prove you can hold a real professional conversation." },
+  { num: 1,  title: "The Sounds of Success",         title_sw: "Sauti za Mafanikio",               icon: "🔤", color: "#34d399", firstLesson: "1-1",  totalLessons: 26, description: "Phonics, the alphabet, and pronunciation", description_sw: "Fonetiki, alfabeti, na matamshi sahihi" },
+  { num: 2,  title: "Numbers and Colors",             title_sw: "Namba na Rangi",                    icon: "🔢", color: "#818cf8", firstLesson: "2-1",  totalLessons: 2,  description: "Count confidently and describe colors with visual examples", description_sw: "Hesabu kwa ujasiri na eleza rangi kwa mifano ya kuona" },
+  { num: 3,  title: "Sound Mastery Lab",              title_sw: "Maabara ya Umilisi wa Sauti",       icon: "🗣", color: "#f59e0b", firstLesson: "3-1",  totalLessons: 4,  description: "Short and long vowels, digraphs, blends, and pronunciation tools", description_sw: "Irabu fupi na ndefu, miunganiko ya herufi, na zana za matamshi" },
+  { num: 4,  title: "Pronouns and Verbs",             title_sw: "Viwakilishi na Vitenzi",            icon: "🧠", color: "#f97316", firstLesson: "4-1",  totalLessons: 10, description: "Build sentence fluency with pronouns, verbs, and guided dialogues", description_sw: "Jenga ufasaha wa sentensi kwa viwakilishi, vitenzi, na mazungumzo elekezi" },
+  { num: 5,  title: "Food and Shopping",              title_sw: "Chakula na Ununuzi",                icon: "🛒", color: "#ec4899", firstLesson: "5-1",  totalLessons: 4,  description: "Food, shopping vocabulary, and real-world scenarios", description_sw: "Msamiati wa chakula, ununuzi, na hali halisi za maisha" },
+  { num: 6,  title: "The Professional Vocabulary",    title_sw: "Msamiati wa Kitaaluma",             icon: "💼", color: "#f59e0b", firstLesson: "6-1",  totalLessons: 6,  description: "Office language, power verbs, and work communication", description_sw: "Lugha ya ofisini, vitenzi vya nguvu, na mawasiliano ya kazi" },
+  { num: 7,  title: "Conversation Confidence",        title_sw: "Ujasiri wa Mazungumzo",             icon: "🎤", color: "#f472b6", firstLesson: "7-1",  totalLessons: 6,  description: "Dialogues, listening, speaking practice, and module completion", description_sw: "Mazungumzo, usikilizaji, mazoezi ya kuzungumza, na ukamilishaji wa kipengele" },
+  { num: 8,  title: "Weather and Feelings",           title_sw: "Hali ya Hewa na Hisia",             icon: "🌤️", color: "#06b6d4", firstLesson: "8-1",  totalLessons: 4,  description: "Learn weather vocabulary and how to express emotions", description_sw: "Jifunze msamiati wa hali ya hewa na jinsi ya kueleza hisia" },
+  { num: 9,  title: "Directions and Community",       title_sw: "Maelekezo na Mtaani",               icon: "🗺️", color: "#8b5cf6", firstLesson: "9-1",  totalLessons: 4,  description: "Learn how to ask for and give directions in your community", description_sw: "Jifunze kuuliza na kutoa maelekezo kwenye jamii yako" },
+  { num: 10, title: "Introducing Yourself",           title_sw: "Kujitambulisha",                    icon: "👋", color: "#ec4899", firstLesson: "10-1", totalLessons: 4,  description: "Introduce yourself, your work, and describe what you do", description_sw: "Jitambulishe, eleza kazi yako, na unachofanya" },
+  { num: 11, title: "Interview Essentials",           title_sw: "Misingi ya Mahojiano",              icon: "🎯", color: "#818cf8", firstLesson: "11-1", totalLessons: 7,  description: "Interview vocabulary, dialogues, workplace phrases, and final assessment", description_sw: "Msamiati wa mahojiano, mazungumzo, misemo ya kazini, na tathmini ya mwisho" },
+  { num: 12, title: "Exit Exam",                      title_sw: "Mtihani wa Kutoka",                 icon: "🏆", color: "#34d399", firstLesson: "12-1", totalLessons: 3,  description: "The final simulation — prove you can hold a real professional conversation.", description_sw: "Jaribio la mwisho la mazungumzo ya kitaaluma ya kweli" },
 ] as const;
 
 const AVAILABLE_BADGES = [
@@ -76,6 +78,79 @@ function FoundationHomeContent() {
   const [videoLocks, setVideoLocks] = useState<Record<number, VideoLock>>({});
   const [overrideUnlockedModules, setOverrideUnlockedModules] = useState<number[]>([]);
   const [unlockedBadges, setUnlockedBadges] = useState<typeof AVAILABLE_BADGES[number][]>([]);
+  const [languagePref, setLanguagePref] = useState<"en" | "sw">("en");
+
+  const copy = languagePref === "sw"
+    ? {
+        eyebrow: "Foundation Mode · Njia yako ya kujifunza",
+        titleDone: "🎓 Foundation Imekamilika!",
+        titleActive: "Safari yako ya umilisi wa masomo",
+        subDone: "Umekamilisha moduli zote 12. Uko tayari kuhitimu.",
+        subActive: "Songa somo kwa somo, fungua kipengele kinachofuata, na ujenge ufasaha halisi.",
+        complete: "Imekamilika",
+        timeInvested: "Muda Uliowekwa",
+        currentStreak: "Mfululizo wa Sasa",
+        day: "siku",
+        days: "siku",
+        lessonsDone: "Masomo Uliyokamilisha",
+        learningPath: "Njia ya Kujifunza",
+        module: "Kipengele cha",
+        lessons: "masomo",
+        review: "Pitia",
+        continue: "Endelea →",
+        start: "Anza →",
+        watchVideo: "Tazama Video",
+        completePrevious: "Kamilisha kipengele cha",
+        first: "kwanza",
+        allModules: "Moduli Zote Zimekamilika",
+        readyGraduate: "Uko Tayari Kuhitimu",
+        graduateSub: "Fanya tathmini ya mwisho na Sofia kufungua Hirely Coach na upate beji ya mhitimu pamoja na bonasi ya IP 150.",
+        beginGraduate: "🎓 Anza Tathmini ya Kuhitimu →",
+        achievements: "Mafanikio",
+        certificate: "Cheti cha Foundation",
+        certDone: "Hongera! Moduli zote 12 zimekamilika.",
+        certLeft: "moduli",
+        certUnlock: "zaidi kufungua cheti chako.",
+        downloadCert: "Pakua Cheti",
+        inProgress: "Inaendelea",
+        videoPlayer: "Kicheza Video",
+        pronunciationGuide: "Mwongozo wa Matamshi",
+      }
+    : {
+        eyebrow: "Foundation Mode · Your Learning Path",
+        titleDone: "🎓 Foundation Complete!",
+        titleActive: "Your Journey to Lesson Mastery",
+        subDone: "You have completed all 12 modules. You are ready to graduate.",
+        subActive: "Move lesson by lesson, unlock the next module, and build real fluency.",
+        complete: "Complete",
+        timeInvested: "Time Invested",
+        currentStreak: "Current Streak",
+        day: "day",
+        days: "days",
+        lessonsDone: "Lessons Done",
+        learningPath: "Learning Path",
+        module: "Module",
+        lessons: "lessons",
+        review: "Review",
+        continue: "Continue →",
+        start: "Start →",
+        watchVideo: "Watch Video",
+        completePrevious: "Complete Module",
+        first: "first",
+        allModules: "All Modules Complete",
+        readyGraduate: "You Are Ready to Graduate",
+        graduateSub: "Take the final Foundation Assessment with Sofia to unlock Hirely Coach and earn your Foundation Graduate badge + 150 bonus IP.",
+        beginGraduate: "🎓 Begin Graduation Assessment →",
+        achievements: "Achievements",
+        certificate: "Foundation Certificate",
+        certDone: "Congratulations! All 12 modules complete.",
+        certLeft: "more module",
+        certUnlock: "to unlock your certificate.",
+        downloadCert: "Download Certificate",
+        inProgress: "In Progress",
+        videoPlayer: "Video Player",
+        pronunciationGuide: "Pronunciation Guide",
+      };
 
   // Active video from query param
   const activeVideoNum = Number(searchParams.get("video") ?? 0);
@@ -127,8 +202,15 @@ function FoundationHomeContent() {
     const onProgressChanged = () => {
       void syncProgress();
     };
+    const onProfileChanged = () => {
+      setLanguagePref(getFoundationLanguagePref());
+    };
     window.addEventListener(FOUNDATION_PROGRESS_EVENT, onProgressChanged);
-    return () => window.removeEventListener(FOUNDATION_PROGRESS_EVENT, onProgressChanged);
+    window.addEventListener(FOUNDATION_PROFILE_EVENT, onProfileChanged);
+    return () => {
+      window.removeEventListener(FOUNDATION_PROGRESS_EVENT, onProgressChanged);
+      window.removeEventListener(FOUNDATION_PROFILE_EVENT, onProfileChanged);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -154,14 +236,14 @@ function FoundationHomeContent() {
 
         {/* ── Page header ── */}
         <header className="fp-page-header">
-          <p className="fp-eyebrow">Foundation Mode · Your Learning Path</p>
+          <p className="fp-eyebrow">{copy.eyebrow}</p>
           <h1 className="fp-page-title">
-            {allDone ? "🎓 Foundation Complete!" : "Your Journey to Lesson Mastery"}
+            {allDone ? copy.titleDone : copy.titleActive}
           </h1>
           <p className="fp-page-sub">
             {allDone
-              ? "You have completed all 12 modules. You are ready to graduate."
-              : `Move lesson by lesson, unlock the next module, and build real fluency.`}
+              ? copy.subDone
+              : copy.subActive}
           </p>
         </header>
 
@@ -185,7 +267,7 @@ function FoundationHomeContent() {
             </svg>
             <div className="fp-ring-text">
               <span className="fp-ring-pct">{progressPct}%</span>
-              <span className="fp-ring-label">Complete</span>
+              <span className="fp-ring-label">{copy.complete}</span>
             </div>
           </div>
 
@@ -193,21 +275,21 @@ function FoundationHomeContent() {
             <div className="fp-pill">
               <span className="fp-pill-icon">⏱️</span>
               <div>
-                <p className="fp-pill-label">Time Invested</p>
+                <p className="fp-pill-label">{copy.timeInvested}</p>
                 <p className="fp-pill-value">{hoursInvested} hrs</p>
               </div>
             </div>
             <div className="fp-pill">
               <span className="fp-pill-icon">🔥</span>
               <div>
-                <p className="fp-pill-label">Current Streak</p>
-                <p className="fp-pill-value">{streak} {streak === 1 ? "day" : "days"}</p>
+                <p className="fp-pill-label">{copy.currentStreak}</p>
+                <p className="fp-pill-value">{streak} {streak === 1 ? copy.day : copy.days}</p>
               </div>
             </div>
             <div className="fp-pill">
               <span className="fp-pill-icon">📚</span>
               <div>
-                <p className="fp-pill-label">Lessons Done</p>
+                <p className="fp-pill-label">{copy.lessonsDone}</p>
                 <p className="fp-pill-value">{progress.completedLessons.length}</p>
               </div>
             </div>
@@ -216,7 +298,7 @@ function FoundationHomeContent() {
 
         {/* ── Module Path ── */}
         <section className="fp-section">
-          <h2 className="fp-section-title">Learning Path</h2>
+          <h2 className="fp-section-title">{copy.learningPath}</h2>
           <div className="fp-path">
             {MODULES.map((mod) => {
               const complete = completedModulesArr.includes(mod.num);
@@ -244,16 +326,16 @@ function FoundationHomeContent() {
                       <div className="fp-mod-icon">
                         {complete ? "✅" : !unlocked ? "🔒" : mod.icon}
                       </div>
-                      <div className="fp-mod-num">Module {mod.num}</div>
+                      <div className="fp-mod-num">{copy.module} {mod.num}</div>
                     </div>
 
                     <div className="fp-mod-info">
-                      <h3 className="fp-mod-title">{mod.title}</h3>
-                      <p className="fp-mod-title-sw">{mod.title_sw}</p>
+                      <h3 className="fp-mod-title">{languagePref === "sw" ? mod.title_sw : mod.title}</h3>
+                      <p className="fp-mod-title-sw">{languagePref === "sw" ? mod.title : mod.title_sw}</p>
                     </div>
                   </div>
 
-                  <p className="fp-mod-desc">{mod.description}</p>
+                  <p className="fp-mod-desc">{languagePref === "sw" ? mod.description_sw : mod.description}</p>
 
                   {unlocked && !complete && (
                     <div className="fp-mod-progress">
@@ -263,7 +345,7 @@ function FoundationHomeContent() {
                           style={{ width: `${lessonPct}%`, background: mod.color }}
                         />
                       </div>
-                      <span className="fp-mod-pct">{doneLessons}/{mod.totalLessons} lessons</span>
+                      <span className="fp-mod-pct">{doneLessons}/{mod.totalLessons} {copy.lessons}</span>
                     </div>
                   )}
 
@@ -273,7 +355,7 @@ function FoundationHomeContent() {
                         <div className="fp-mod-fill" style={{ width: "100%", background: mod.color }} />
                       </div>
                       <span className="fp-mod-pct" style={{ color: mod.color }}>
-                        {mod.totalLessons}/{mod.totalLessons} lessons ✓{score !== null ? ` · ${score}%` : ""}
+                        {mod.totalLessons}/{mod.totalLessons} {copy.lessons} ✓{score !== null ? ` · ${score}%` : ""}
                       </span>
                     </div>
                   )}
@@ -294,7 +376,7 @@ function FoundationHomeContent() {
                                 }
                           }
                         >
-                          {complete ? "Review" : doneLessons > 0 ? "Continue →" : "Start →"}
+                          {complete ? copy.review : doneLessons > 0 ? copy.continue : copy.start}
                         </Link>
                         {hasVideo && (
                           <button
@@ -302,12 +384,12 @@ function FoundationHomeContent() {
                             className="fp-btn fp-btn--video"
                             onClick={() => router.push(`${pathname}?video=${mod.num}`)}
                           >
-                            Watch Video
+                            {copy.watchVideo}
                           </button>
                         )}
                       </div>
                     ) : (
-                      <span className="fp-locked-msg">Complete Module {mod.num - 1} first</span>
+                      <span className="fp-locked-msg">{copy.completePrevious} {mod.num - 1} {copy.first}</span>
                     )}
                   </div>
                 </div>
@@ -319,21 +401,18 @@ function FoundationHomeContent() {
         {/* ── Graduate CTA ── */}
         {allDone && (
           <section className="fp-graduate glass-card">
-            <p className="fp-graduate-eyebrow">All Modules Complete</p>
-            <h2 className="fp-graduate-title">You Are Ready to Graduate</h2>
-            <p className="fp-graduate-sub">
-              Take the final Foundation Assessment with Sofia to unlock Hirely Coach and earn your{" "}
-              <strong>Foundation Graduate badge</strong> + <strong>150 bonus IP</strong>.
-            </p>
+            <p className="fp-graduate-eyebrow">{copy.allModules}</p>
+            <h2 className="fp-graduate-title">{copy.readyGraduate}</h2>
+            <p className="fp-graduate-sub">{copy.graduateSub}</p>
             <Link href="/foundation/graduate" className="fp-graduate-btn">
-              🎓 Begin Graduation Assessment →
+              {copy.beginGraduate}
             </Link>
           </section>
         )}
 
         {/* ── Achievements ── */}
         <section className="fp-section">
-          <h2 className="fp-section-title">Achievements</h2>
+          <h2 className="fp-section-title">{copy.achievements}</h2>
           <div className="fp-badges">
             {AVAILABLE_BADGES.map((badge) => {
               const earned = unlockedBadges.some((b) => b.id === badge.id);
@@ -358,11 +437,13 @@ function FoundationHomeContent() {
             <div className="fp-cert-left">
               <span className="fp-cert-icon">📜</span>
               <div>
-                <h3 className="fp-cert-title">Foundation Certificate</h3>
+                <h3 className="fp-cert-title">{copy.certificate}</h3>
                 <p className="fp-cert-desc">
                   {allDone
-                    ? "Congratulations! All 12 modules complete."
-                    : `${totalModules - doneCount} more module${totalModules - doneCount !== 1 ? "s" : ""} to unlock your certificate.`}
+                    ? copy.certDone
+                    : languagePref === "sw"
+                      ? `${totalModules - doneCount} ${copy.certLeft} ${copy.certUnlock}`
+                      : `${totalModules - doneCount} ${copy.certLeft}${totalModules - doneCount !== 1 ? "s" : ""} ${copy.certUnlock}`}
                 </p>
               </div>
             </div>
@@ -370,7 +451,7 @@ function FoundationHomeContent() {
               className={`fp-cert-btn ${allDone ? "fp-cert-btn--active" : ""}`}
               disabled={!allDone}
             >
-              {allDone ? "Download Certificate" : "In Progress"}
+              {allDone ? copy.downloadCert : copy.inProgress}
             </button>
           </div>
         </section>
@@ -389,8 +470,8 @@ function FoundationHomeContent() {
           <div className="fp-video-card glass-card">
             <div className="fp-video-head">
               <div>
-                <p className="fp-eyebrow">Video Player</p>
-                <h2 className="fp-video-title">Module {activeVideoNum} Pronunciation Guide</h2>
+                <p className="fp-eyebrow">{copy.videoPlayer}</p>
+                <h2 className="fp-video-title">{copy.module} {activeVideoNum} {copy.pronunciationGuide}</h2>
               </div>
               <button type="button" className="fp-video-close" onClick={() => router.replace(pathname)}>
                 ✕
